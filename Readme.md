@@ -11,11 +11,8 @@ Requirements:
 5. cpplint (pip3 install cpplint)
 
 Instructions to run: 
-1. Download all the files quickanalysis.py, roster.py and anomaly.py into the same directory
-2. Run quickanalysis.py using the command (python3 quickanalysis.py) to get a quick overview into the zybooklog 
-3. You should see a new folder output created and quickanalysis.csv saved
-4. Run roster.py using the command (python3 roster.py) and then enter the path to the zybook log file
-5. You should see a new file roster.csv created in the output folder 
+1. Run the command "Python3 main.py"
+2. Choose from any of the options and press enter 
 
 
 Things to note: 
