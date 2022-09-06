@@ -20,14 +20,18 @@ def anomalyScore(zip_location): # Function to calculate the anomaly score
     # Add to the hashmap Styleanomaly in case you need new anomaly to be detected
     Styleanomaly = {
         'Pointers': {0:1, 1:0.9, 2:1, 3:r'(\(+)?((int)|(char)|(string)|(void)|(bool)|(float)|(double)){1}(\)+)?(\s+)?\*{1,2}(\s+)?[a-zA-Z]+(\s+)?(\=)?.*\;$', 4:0},
-        'Infinite_loop': {0:0, 1:0.9, 2:1, 3:r'(?i)(while(\s+)?\((true|1)\))|(for(\s+)?\(;;\))', 4:0},
+        'Infinite_loop': {0:0, 1:0.9, 2:1, 3:r'(while(\s+)?\((true|1)\))|(for(\s+)?\(;;\))', 4:0},
         'Atypical Includes': {0:1, 1:0.1, 2:1, 3:r'#(\s+)?include(\s+)?<((iomanip)|(algorithm)|(cstdlib)|(utility)|(limits)|(cmath))>', 4:0},
         'Atypical Keywords': {0:1, 1:0.3, 2:1, 3:r'((break(\s+)?;)|(switch(\s+)?\(.*\)(\s+)?{)|(continue(\s+)?;)|(sizeof\(.*\))|(case\s+([a-zA-Z0-9]+(\s+)?:)))', 4:0},
         'Array Accesses': {0:1, 1:0.9, 2:1, 3:r'([a-zA-Z0-9]+\[.*\])', 4:0},
         'Namespace Std': {0:1, 1:0.1, 2:1, 3:r'(std::)', 4:0},
         'Brace Styling': {0:1, 1:0.1, 2:1, 3:r'^((\s+)?{)', 4:0},
         'Escaped Newline': {0:1, 1:0.1, 2:1, 3:r'(\\n)', 4:0},
-        'User-Defined Functions': {0:1, 1:0.8, 2:1, 3:r'^(((unsigned|signed|long|short)\s)?\S{3,}\s+\S+\(.*\))'}
+        'User-Defined Functions': {0:1, 1:0.8, 2:1, 3:r'^(((unsigned|signed|long|short)\s)?\S{3,}\s+\S+\(.*\))', 4:0},
+        'Ternary Operator': {0:1, 1:0.2, 2:1, 3:r'(.+\s+\?\s+.+\s+:\s+.+)', 4:0},
+        'Command-Line Arguments': {0:1, 1:0.8, 2:1, 3:r'(int argc, (char\s?\*\s?argv\[\]|char\s?\*\*\s?argv|char\s?\*\[\]\s?argv))', 4:0},
+        'Nulls': {0:1, 1:0.4, 2:1, 3:r'(?i)(nullptr|null|\\0)', 4:0},
+        'Scope Operator': {0:1, 1:0.25, 2:1, 3:r'(\S+::\S+)', 4:0}
     }
 
     code = download_url(zip_location, 'output/code.zip')
@@ -49,7 +53,7 @@ def anomalyScore(zip_location): # Function to calculate the anomaly score
         line = str(line, 'UTF-8')
         submission_code += line
 
-        # Checks for while(1), while(true), while(True)
+        # Checks for while(1), while(true)
         if Styleanomaly['Infinite_loop'][2] != 0: #Check if the anomaly is turned on 
             if re.search(Styleanomaly['Infinite_loop'][3], line):
                 if Styleanomaly['Infinite_loop'][0] == 0 and Styleanomaly['Infinite_loop'][4] == 0: #Count instances and counted instances
@@ -139,13 +143,57 @@ def anomalyScore(zip_location): # Function to calculate the anomaly score
 
         # Checks for user-defined functions like `int add(int a)`, excludes `int main()`
         if Styleanomaly['User-Defined Functions'][2] != 0: #Check if the anomaly is turned on 
-            if re.search(Styleanomaly['User-Defined Functions'][3], line) and not line.__contains__("main"):
+            if re.search(Styleanomaly['User-Defined Functions'][3], line) and not line.__contains__("main()"):
                 if Styleanomaly['User-Defined Functions'][0] == 0 and Styleanomaly['User-Defined Functions'][4] == 0: #Count instances and counted instances
                     anomaly_score += Styleanomaly['User-Defined Functions'][1]
                     Styleanomaly['User-Defined Functions'][4] += 1
                     anamolies_found += 1
                 if Styleanomaly['User-Defined Functions'][0] == 1:
                     anomaly_score += Styleanomaly['User-Defined Functions'][1]
+                    anamolies_found += 1
+
+        # Checks for statements like `x == y ? True : False`
+        if Styleanomaly['Ternary Operator'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Ternary Operator'][3], line):
+                if Styleanomaly['Ternary Operator'][0] == 0 and Styleanomaly['Ternary Operator'][4] == 0: #Count instances and counted instances
+                    anomaly_score += Styleanomaly['Ternary Operator'][1]
+                    Styleanomaly['Ternary Operator'][4] += 1
+                    anamolies_found += 1
+                if Styleanomaly['Ternary Operator'][0] == 1:
+                    anomaly_score += Styleanomaly['Ternary Operator'][1]
+                    anamolies_found += 1
+
+        # Checks for statements like `int main(int argc, char *argv[])`
+        if Styleanomaly['Command-Line Arguments'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Command-Line Arguments'][3], line):
+                if Styleanomaly['Command-Line Arguments'][0] == 0 and Styleanomaly['Command-Line Arguments'][4] == 0: #Count instances and counted instances
+                    anomaly_score += Styleanomaly['Command-Line Arguments'][1]
+                    Styleanomaly['Command-Line Arguments'][4] += 1
+                    anamolies_found += 1
+                if Styleanomaly['Command-Line Arguments'][0] == 1:
+                    anomaly_score += Styleanomaly['Command-Line Arguments'][1]
+                    anamolies_found += 1
+
+        # Checks for use of null, i.e. `null`, `nullptr`, or `\0`
+        if Styleanomaly['Nulls'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Nulls'][3], line):
+                if Styleanomaly['Nulls'][0] == 0 and Styleanomaly['Nulls'][4] == 0: #Count instances and counted instances
+                    anomaly_score += Styleanomaly['Nulls'][1]
+                    Styleanomaly['Nulls'][4] += 1
+                    anamolies_found += 1
+                if Styleanomaly['Nulls'][0] == 1:
+                    anomaly_score += Styleanomaly['Nulls'][1]
+                    anamolies_found += 1
+
+        # Checks for use of scope operator, i.e. `x::y`, excluding `string::npos` and not double-counting the Namespace Std check
+        if Styleanomaly['Scope Operator'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Scope Operator'][3], line) and not line.__contains__("string::npos") and not line.__contains__("std::"):
+                if Styleanomaly['Scope Operator'][0] == 0 and Styleanomaly['Scope Operator'][4] == 0: #Count instances and counted instances
+                    anomaly_score += Styleanomaly['Scope Operator'][1]
+                    Styleanomaly['Scope Operator'][4] += 1
+                    anamolies_found += 1
+                if Styleanomaly['Scope Operator'][0] == 1:
+                    anomaly_score += Styleanomaly['Scope Operator'][1]
                     anamolies_found += 1
             
     # print(submission_code)
