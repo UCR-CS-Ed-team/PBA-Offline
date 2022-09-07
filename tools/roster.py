@@ -13,6 +13,7 @@ def get_valid_date_time(t):
         except ValueError:
             pass
     raise ValueError('Cannot recognize datetime format: ' + t)
+
 def time_to_minutes_seconds(time_list): # Converts time to minutes and seconds (ex: 1m 30s) ignores anything over the 10 minute interval
     time_spent_by_user = 0
     fmt = '%Y-%m-%d %H:%M:%S'
@@ -44,25 +45,8 @@ def add_total_time(total_time, lab_time): # Adds time to calculate total time sp
     total_time = td_split[1] +'m '+ td_split[2].split('.')[0] + 's'
     return total_time
 
-def write(summary_roster, csv_columns):
-    # Writing the output to the csv file 
-    try:
-        csv_file = 'output/roster.csv'
-        with open(csv_file, 'w') as f1:
-            writer = csv.DictWriter(f1, fieldnames=csv_columns)
-            writer.writeheader()
-            for user_id in summary_roster.keys():
-                writer.writerow(summary_roster[user_id])
-    except IOError:
-        print('IO Error')
-
-def roster(dataframe):
+def roster(dataframe, data):
     df = dataframe
-    # Below are the column titles for our output csv file
-    # Required fields: User ID, Last Name, First Name, Email, Role, Time Spent(total), Total Runs, Total Score, 
-    # Total Develops, Total Submits, Total Pivots, Feat: start date, Feat: End date, Feat: Work type, Feat: # submits,
-    # Feat: Time spent, Feat: Suspicious, Labx: time spent, Labx: #runs, Labx: %score, Labx: #devs, Labx: #subs, 
-    # anomaly Score
 
     # Identify unique labs 
     unique_lab_ids = set()
@@ -91,12 +75,6 @@ def roster(dataframe):
     total_submits = 0
     total_pivots = 0
 
-    # Below are the column titles for out output csv
-    csv_columns = ['User ID', 'Last Name', 'First Name', 'Email', 'Role', 'Time Spent(total)', 'Total Runs', 'Total Score',
-            'Total Develops','Total Submits','Total Pivots','Feat: Start date','Feat: End date','Feat: Work type','Feat: # Submits',
-            'Feat: Time spent','Feat: Suspicious', '# of Anamolies','anomaly Score', 'User Code', 'Style Errors']
-
-
     for selected_index in selected_labs: # Iterating through the lab selected
         selected_lab_id = labs_list[int(selected_index)-1] 
         lab_df = df[df['content_resource_id'] == selected_lab_id].reset_index() # Dataframe for that particular lab
@@ -105,10 +83,6 @@ def roster(dataframe):
         lab_name = lab_df['caption'][0]
         print(lab_name)
         section = str(lab_df['content_section'][0])
-
-        # If you want to add more columns to the output csv, add it to the below list
-        add_csv_columns = ['Lab'+section+'Time spent','Lab'+section+'# runs','Lab'+section+'% score','Lab'+section+'# devs','Lab'+section+'# subs']
-        csv_columns.extend(add_csv_columns)
 
         for unique_id in user_id:   # Iterating through each user id in that lab
             user_df = lab_df[lab_df['user_id'] == unique_id] # Creating a seperate dataframe for that user in that lab
@@ -133,7 +107,13 @@ def roster(dataframe):
                 max_score = user_df['score'].max()
             else:
                 zip_location = user_df['zip_location'].iloc[-1]
-            anomaly_score, user_code, anamolies_found, stylechecker = anomalyScore(zip_location)
+            max_score = 0
+            code = ''
+            for sub in data[user_id][float(section)]:
+                if sub.max_score > max_score:
+                    max_score = sub.max_score
+                    code = sub.code
+            anomaly_score, user_code, anamolies_found, stylechecker = anomalyScore(code)
             # print(anomaly_score)
             time_list = [] # Contains timestamps for that user 
             for time in user_df['date_submitted']:
@@ -160,25 +140,25 @@ def roster(dataframe):
                     'Feat: Time spent': 'x',
                     'Feat: Suspicious': 'x',
                     'Lab'+section+'Time spent': time_spent_by_user,
-                    'Lab'+section+'# runs': num_of_runs,
-                    'Lab'+section+'% score': max_score,
-                    'Lab'+section+'# devs': num_of_devs,
-                    'Lab'+section+'# subs': num_of_submits,
+                    'Lab'+section+' # of runs': num_of_runs,
+                    'Lab'+section+' % score': max_score,
+                    'Lab'+section+' # of devs': num_of_devs,
+                    'Lab'+section+'# of subs': num_of_submits,
                     'anomaly Score': anomaly_score,
                     '# of Anamolies': anamolies_found,
                     'User Code': user_code,
                     'Style Errors': stylechecker
                 }
             else:   # Appending to the existing entries for that user. So we wont have to iterate through the whole user dataframe again
-                summary_roster[user_id]['Lab'+section+'Time spent'] = time_spent_by_user
-                summary_roster[user_id]['Lab'+section+'# runs'] = num_of_runs
-                summary_roster[user_id]['Lab'+section+'% score'] = max_score
-                summary_roster[user_id]['Lab'+section+'# devs'] = num_of_devs
-                summary_roster[user_id]['Lab'+section+'# subs'] = num_of_submits
+                summary_roster[user_id]['Lab'+section+' Time spent'] = time_spent_by_user
+                summary_roster[user_id]['Lab'+section+' # of runs'] = num_of_runs
+                summary_roster[user_id]['Lab'+section+' % score'] = max_score
+                summary_roster[user_id]['Lab'+section+' # of devs'] = num_of_devs
+                summary_roster[user_id]['Lab'+section+' # of subs'] = num_of_submits
                 summary_roster[user_id]['Time Spent(total)'] = add_total_time(summary_roster[user_id]['Time Spent(total)'], 
                 summary_roster[user_id]['Lab'+section+'Time spent'])
                 summary_roster[user_id]['Total Runs'] += summary_roster[user_id]['Lab'+section+'# runs']
                 summary_roster[user_id]['Total Score'] += summary_roster[user_id]['Lab'+section+'% score']
                 summary_roster[user_id]['Total Develops'] += summary_roster[user_id]['Lab'+section+'# devs']
                 summary_roster[user_id]['Total Submits'] += summary_roster[user_id]['Lab'+section+'# subs']
-    write(summary_roster, csv_columns)
+    return summary_roster

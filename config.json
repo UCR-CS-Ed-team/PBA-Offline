@@ -1,0 +1,93 @@
+{   
+    "Styleanomaly" :  {
+        "Pointers": {
+            "count_instances":1, 
+            "points":0.9, 
+            "status":1, 
+            "regex":r'(\(+)?((int)|(char)|(string)|(void)|(bool)|(float)|(double)){1}(\)+)?(\s+)?\*{1,2}(\s+)?[a-zA-Z]+(\s+)?(\=)?.*\;$', 
+            "counted_instances":0
+        },
+        "Infinite_loop": {
+            "count_instances":0, 
+            "points":0.9, 
+            "status":1, 
+            "regex":r'(while(\s+)?\((true|1)\))|(for(\s+)?\(;;\))', 
+            "counted_instances":0
+        },
+        "Atypical Includes": {
+            "count_instances":1, 
+            "points":0.1, "status":1, 
+            "regex":r'#(\s+)?include(\s+)?<((iomanip)|(algorithm)|(cstdlib)|(utility)|(limits)|(cmath))>', 
+            "counted_instances":0},
+        "Atypical Keywords": {
+            "count_instances":1, 
+            "points":0.3, 
+            "status":1, 
+            "regex":r'((break(\s+)?;)|(switch(\s+)?\(.*\)(\s+)?{)|(continue(\s+)?;)|(sizeof\(.*\))|(case\s+([a-zA-Z0-9]+(\s+)?:)))', 
+                "counted_instances":0
+            },
+        "Array Accesses": {
+            "count_instances":1, 
+            "points":0.9, 
+            "status":1, 
+            "regex":r'([a-zA-Z0-9]+\[.*\])', 
+            "counted_instances":0
+        },
+        "Namespace Std": {
+            "count_instances":1, 
+            "points":0.1, 
+            "status":1, 
+            "regex":r'(std::)', 
+            "counted_instances":0
+        },
+        "Brace Styling": {
+            "count_instances":1, 
+            "points":0.1, 
+            "status":1, 
+            "regex":r'^((\s+)?{)', 
+                "counted_instances":0
+            },
+        "Escaped Newline": {
+            "count_instances":1, 
+            "points":0.1, 
+            "status":1, 
+            "regex":r'(\\n)', 
+            "counted_instances":0
+        },
+        "User-Defined Functions": {
+            "count_instances":1, 
+            "points":0.8, 
+            "status":1, 
+            "regex":r'^(((unsigned|signed|long|short)\s)?\S{3,}\s+\S+\(.*\))', 
+            "counted_instances":0
+        },
+        "Ternary Operator": {
+            "count_instances":1, 
+            "points":0.2, 
+            "status":1, 
+            "regex":r'(.+\s+\?\s+.+\s+:\s+.+)', 
+            "counted_instances":0
+        },
+        "Command-Line Arguments": {
+            "count_instances":1, 
+            "points":0.8, 
+            "status":1, 
+            "regex":r'(int argc, (char\s?\*\s?argv\[\]|char\s?\*\*\s?argv|char\s?\*\[\]\s?argv))', 
+            "counted_instances":0
+        },
+        "Nulls": {
+            "count_instances":1, 
+            "points":0."counted_instances", 
+            "status":1, 
+            "regex":r'(?i)(nullptr|null|\\0)', 
+            "counted_instances":0
+        },
+        "Scope Operator": {
+            "count_instances":1, 
+            "points":0.25, 
+            "status":1, 
+            "regex":r'(\S+::\S+)', 
+            "counted_instances":0
+        }
+    }
+}

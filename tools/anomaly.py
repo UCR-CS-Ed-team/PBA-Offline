@@ -1,20 +1,9 @@
 import pandas as pd
-import requests 
 from zipfile import ZipFile
 import re
-import os 
-from io import BytesIO
 from tools.stylechecker import stylechecker
 
-def download_url(url, save_path, chunk_size=128): # Function to down the zip from the url 
-    r = requests.get(url, stream=True)
-    # with open(save_path, 'wb') as fd:
-    #     for chunk in r.iter_content(chunk_size=chunk_size):
-    #         fd.write(chunk)
-    zipfile = ZipFile(BytesIO(r.content))
-    return zipfile.open('main.cpp')
-
-def anomalyScore(zip_location): # Function to calculate the anomaly score
+def anomalyScore(code): # Function to calculate the anomaly score
     # Below is the format for the anomaly in question
     # [Count_instances, Points/instance, anomaly on/off, regex, whether its used for once (used for !count instances)]
     # Add to the hashmap Styleanomaly in case you need new anomaly to be detected
@@ -34,24 +23,12 @@ def anomalyScore(zip_location): # Function to calculate the anomaly score
         'Scope Operator': {0:1, 1:0.25, 2:1, 3:r'(\S+::\S+)', 4:0}
     }
 
-    code = download_url(zip_location, 'output/code.zip')
-    # print(code.readlines())
-
-    # with ZipFile('output/code.zip', 'r') as zipObj: # Extracts the downloaded zip
-    #     zipObj.extractall('output/')
-    # os.remove('output/code.zip')    # Removes the downloaded zip
-    
-    # code = open('output/main.cpp', 'r') # Reads all the lines into code variable
-    # os.remove('output/main.cpp')    # Removes the extracted cpp file
-
-    submission_code = ''    # Used to return the user code to roster.py
+    submission_code = code    # Used to return the user code to roster.py
 
     anomaly_score = 0   # Initial anomaly Score
     anamolies_found = 0 # Counts the number of anamolies found 
 
-    for line in code.readlines():   # Reading through lines in the code and checking for each anomaly
-        line = str(line, 'UTF-8')
-        submission_code += line
+    for line in code.splitlines():   # Reading through lines in the code and checking for each anomaly
 
         # Checks for while(1), while(true)
         if Styleanomaly['Infinite_loop'][2] != 0: #Check if the anomaly is turned on 
@@ -199,7 +176,3 @@ def anomalyScore(zip_location): # Function to calculate the anomaly score
     # print(submission_code)
     style_anamolies = stylechecker(submission_code)
     return anomaly_score, submission_code, anamolies_found, style_anamolies
-
-# def anomalyScore(zip_location):
-#     download_url(zip_location, 'output/code.zip')
-#     return 0,'hello',0

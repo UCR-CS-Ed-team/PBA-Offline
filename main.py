@@ -1,5 +1,4 @@
 import datetime
-import email
 import pandas as pd
 from tools.roster import roster
 from tools.quickanalysis import quick_analysis
@@ -12,6 +11,7 @@ from tools import incdev
 import os
 import csv
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def get_valid_datetime(timestamp):
     # print(timestamp)
@@ -85,27 +85,51 @@ def get_code(url):
     except ConnectionError:
         return (url, "Max retries met, cannot retrieve student code submission")
 
+def write(summary_roster):
+    # # Writing the output to the csv file 
+    csv_columns = []
+    for id in summary_roster:
+        for column in summary_roster[id]:
+            csv_columns.append(column)
+        break             
+    try:
+        csv_file = 'output/roster.csv'
+        with open(csv_file, 'w') as f1:
+            writer = csv.DictWriter(f1, fieldnames=csv_columns)
+            writer.writeheader()
+            for user_id in summary_roster.keys():
+                writer.writerow(summary_roster[user_id])
+    except IOError:
+        print('IO Error')
+
 if __name__ == '__main__':
     # Read File into a pandas dataframe
-    file_path = input('Enter path to the file including file name: ')
+    # file_path = input('Enter path to the file including file name: ')
     # Below is the static file path if you want to work on the same file
-    # file_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile2.csv'
+    file_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile.csv'
     filename = os.path.basename(file_path)
     f = open(file_path, 'r')
     logfile = pd.read_csv(file_path)
     logfile = logfile[logfile.role == 'Student']
-    # roster(logfile)
+    urls = logfile.zip_location.to_list()
+    # print(len(urls))
+    threads = []
+    with ThreadPoolExecutor() as executor:
+        for url in urls:
+            threads.append(executor.submit(get_code, url))
+        student_code = []
+        for task in as_completed(threads):
+            student_code.append(task.result())
+    # Now join the student code submission results back to the dataframe
+    df = pd.DataFrame(student_code, columns = ['zip_location', 'student_code'])
+    logfile = pd.merge(left=logfile, right=df, on=['zip_location'])
     data = {}
-    # quick_analysis(dataframe)
-    i = 0
     for row in logfile.itertuples():
-        # print(i)
         if row.user_id not in data:
             data[int(row.user_id)] = {}
         if row.content_section not in data[row.user_id]:
-            # data[row.user_id][row.content_section] = {}
             data[row.user_id][row.content_section] = []
-        url, result = get_code(row.zip_location)
+        # url, result = get_code(row.zip_location)
         sub = Submission(
             student_id = row.user_id,
             crid = row.content_resource_id,
@@ -119,43 +143,11 @@ if __name__ == '__main__':
             lab_id = row.content_section,
             submission_id = row.zip_location.split('/')[-1],
             type = row.submission,
-            code = result,
+            code = row.student_code,
             sub_time = get_valid_datetime(row.date_submitted),
             anomaly_dict=None
         )
         data[row.user_id][row.content_section].append(sub)
-        # i += 1
-    # print(data)
-
-    # TODO2: trying to implement fords stuff 
-    # column_names = ["zybook_code", "content_resource_id", "content_section","caption", "user_id", "first_name", "last_name", 
-    # "email", "class_section", "role", "date_submitted", "zip_location", "submission", "score", 
-    # "max_score", "result", "query_info", "submission_id", "student_submission"]
-    # df =  pd.DataFrame(columns = column_names)
-    # for i in data:
-    #     zybook_code = "anbdijbew"
-    #     content_section = 1.2
-    #     caption = data[i][1.2][0].caption
-    #     user_id = i
-    #     first_name = data[i][1.2][0].first_name
-    #     last_name = data[i][1.2][0].last_name
-    #     email1 = data[i][1.2][0].email
-    #     class_section = '1'
-    #     role = "student"
-    #     date_submitted = data[i][1.2][0].sub_time
-    #     zip_location = data[i][1.2][0].zip_location
-    #     submission = 1
-    #     score = 10
-    #     max_score = 10
-    #     result = ""
-    #     query_info = "something"
-    #     submission_id = "qnoiqwndoqwdq"
-    #     student_submission = data[i][1.2][0]
-    #     df.append(zybook_code,content_section,caption,user_id,first_name,last_name,email1,class_section,role,date_submitted,
-    #     zip_location,submission,score,max_score,result,query_info,submission_id,student_submission)
-
-    # Todo1: Seperating Anomaly from roster and having it as a standalone of its own 
-    # Todo2: Integrating fords Anomaly detection code, so we don't have to reengineer stuff
     while(1):
         print(" 1. Quick Analysis \n 2. Roster \n 3. Anomaly \n 4. Incremental Development Analysis \n 5. Quit \n 6. Fords anomaly")
         inp = int(input())
@@ -163,30 +155,24 @@ if __name__ == '__main__':
         if inp == 1:
             quick_analysis(logfile)
         elif inp == 2:
-            roster(logfile)
+            summary_roster = roster(logfile, data)
         elif inp == 3:
             print('Tool not available, Work in progress')
         elif inp == 4:
              # Generate nested dict of IncDev results
             output = incdev.run(data)
-            # Create output directory if it doesn't already exist
-            try:
-                os.mkdir('output')
-            except Exception:
-                pass
-            # Write IncDev results to csv
-            with open(os.path.join('output', 'output_' + filename), 'w', newline='') as file:
-                writer = csv.writer(file)
-                writer.writerow(['User ID', 'Lab ID', 'IncDev Score', 'IncDev Trail', 'LOC Trail', 'Time Trail'])
-                for user_id in output:
-                    uid = user_id
-                    for lab_id in output[user_id]:
-                        lid = lab_id
-                        score = output[user_id][lab_id]['incdev_score']
-                        score_trail = output[user_id][lab_id]['incdev_score_trail']
-                        loc_trail = output[user_id][lab_id]['loc_trail']
-                        time_trail = output[user_id][lab_id]['time_trail']
-                    writer.writerow([uid, lid, score, score_trail, loc_trail, time_trail])
+            for user_id in output:
+                for lab_id in output[user_id]:
+                    lid = str(lab_id)
+                    score = output[user_id][lab_id]['incdev_score']
+                    score_trail = output[user_id][lab_id]['incdev_score_trail']
+                    loc_trail = output[user_id][lab_id]['loc_trail']
+                    time_trail = output[user_id][lab_id]['time_trail']
+                    if user_id in summary_roster:
+                        summary_roster[user_id][lid + ' incdev_score'] = score
+                        summary_roster[user_id][lid + ' incdev_score_trail'] = score_trail
+                        summary_roster[user_id][lid + ' loc_trail'] = loc_trail
+                        summary_roster[user_id][lid + ' time_trail'] = time_trail
         elif inp == 5:
             break
         elif inp == 6:
@@ -194,4 +180,7 @@ if __name__ == '__main__':
             # x = compute_anomalies(data[27496988400][1.2][0])
             # print(x)
         else:
-            continue
+            print("Please select a valid option")
+        write(summary_roster)
+
+    
