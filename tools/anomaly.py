@@ -20,13 +20,15 @@ def anomalyScore(code): # Function to calculate the anomaly score
         'Ternary Operator': {0:1, 1:0.2, 2:1, 3:r'(.+\s+\?\s+.+\s+:\s+.+)', 4:0},
         'Command-Line Arguments': {0:1, 1:0.8, 2:1, 3:r'(int argc, (char\s?\*\s?argv\[\]|char\s?\*\*\s?argv|char\s?\*\[\]\s?argv))', 4:0},
         'Nulls': {0:1, 1:0.4, 2:1, 3:r'(?i)(nullptr|null|\\0)', 4:0},
-        'Scope Operator': {0:1, 1:0.25, 2:1, 3:r'(\S+::\S+)', 4:0}
+        'Scope Operator': {0:1, 1:0.25, 2:1, 3:r'(\S+::\S+)', 4:0},
+        'Line Spacing': {0:1, 1:0.1, 2:1, 3:r'(^\S+)', 4:0}
     }
 
     submission_code = code    # Used to return the user code to roster.py
 
     anomaly_score = 0   # Initial anomaly Score
     anamolies_found = 0 # Counts the number of anamolies found 
+    in_main = False     # Tracks whether the line is inside main()
 
     for line in code.splitlines():   # Reading through lines in the code and checking for each anomaly
 
@@ -171,6 +173,24 @@ def anomalyScore(code): # Function to calculate the anomaly score
                     anamolies_found += 1
                 if Styleanomaly['Scope Operator'][0] == 1:
                     anomaly_score += Styleanomaly['Scope Operator'][1]
+                    anamolies_found += 1
+
+        # "Line Spacing" should only check lines inside main()
+        if line.__contains__("int main"):
+            in_main = True
+        elif re.search(r'(^}(\s+)?$)', line): # Closing brace
+            in_main = False
+
+        # Checks for non-indented lines inside main(), up to the first non-indented closing brace
+        # FIXME: Improve this to include all code within main()
+        if Styleanomaly['Line Spacing'][2] != 0 and in_main and not line.__contains__("int main"): #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Line Spacing'][3], line) and not re.search(r'(^{(\s+)?$)', line):    #Don't count single opening brace
+                if Styleanomaly['Line Spacing'][0] == 0 and Styleanomaly['Line Spacing'][4] == 0: #Count instances and counted instances
+                    anomaly_score += Styleanomaly['Line Spacing'][1]
+                    Styleanomaly['Line Spacing'][4] += 1
+                    anamolies_found += 1
+                if Styleanomaly['Line Spacing'][0] == 1:
+                    anomaly_score += Styleanomaly['Line Spacing'][1]
                     anamolies_found += 1
             
     # print(submission_code)
