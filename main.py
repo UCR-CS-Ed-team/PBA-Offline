@@ -169,7 +169,6 @@ if __name__ == '__main__':
     logfile = logfile[logfile.role == 'Student']
     urls = logfile.zip_location.to_list()
     selected_labs = get_selected_labs(logfile)
-    print(type(selected_labs[0]))
     data = {}
     final_roster = {}
     
