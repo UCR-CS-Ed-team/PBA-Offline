@@ -1,0 +1,41 @@
+User ID,Last Name,First Name,Email,Role,1.2  Style score,1.2  Style output,1.2 Student code,1.3  Style score,1.3  Style output,1.3 Student code
+27496988400,Aboukhalil,Lawrence,labou003@ucr.edu,Student,1,"output/code.cpp:15:  Lines should be <= 100 characters long  [whitespace/line_length] [2]
+Done processing output/code.cpp
+Total errors found: 1","#include <iostream>
+using namespace std;
+
+int main() {
+   string firstName;
+   string genericLocation;
+   int wholeNumber;
+   string pluralNoun;
+   
+   /* Type your code here. */
+   cin >> firstName;
+   cin >> genericLocation;
+   cin >> wholeNumber;
+   cin >> pluralNoun;
+   cout << firstName << "" went to "" << genericLocation << "" to buy "" << wholeNumber << "" different types of "" << pluralNoun << ""."" << endl;
+
+   return 0;
+}",,,
+27595952700,Abrego,Marvin,mabre003@ucr.edu,Student,,,,1,"output/code.cpp:15:  Lines should be <= 100 characters long  [whitespace/line_length] [2]
+Done processing output/code.cpp
+Total errors found: 1","#include <iostream>
+using namespace std;
+
+int main() {
+   string firstName;
+   string genericLocation;
+   int wholeNumber;
+   string pluralNoun;
+   
+   /* Type your code here. */
+   cin >> firstName;
+   cin >> genericLocation;
+   cin >> wholeNumber;
+   cin >> pluralNoun;
+   cout << firstName << "" went to "" << genericLocation << "" to buy "" << wholeNumber << "" different types of "" << pluralNoun << ""."" << endl;
+
+   return 0;
+}"

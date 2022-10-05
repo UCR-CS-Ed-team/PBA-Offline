@@ -1,0 +1,54 @@
+Lab 1.3 anomaly score,First Name,1.2 Student code,Lab 1.2 anomaly score,Lab 1.3 anomalies found,User ID,Role,1.3 Student code,Lab 1.2 anomalies found,Last Name,Email
+,Lawrence,"#include <iostream>
+using namespace std;
+
+int main() {
+   string firstName;
+   string genericLocation;
+   int wholeNumber;
+   string pluralNoun;
+   
+   /* Type your code here. */
+   cin >> firstName;
+   cin >> genericLocation;
+   cin >> wholeNumber;
+   cin >> pluralNoun;
+   cout << firstName << "" went to "" << genericLocation << "" to buy "" << wholeNumber << "" different types of "" << pluralNoun << ""."" << endl;
+
+   return 0;
+}",0,,27496988400,Student,,0,Aboukhalil,labou003@ucr.edu
+0,Marvin,"#include <iostream>
+using namespace std;
+
+int main() {
+   string firstName;
+   string genericLocation;
+   int wholeNumber;
+   string pluralNoun;
+   
+   /* Type your code here. */
+   cin >> firstName;
+   cin >> genericLocation;
+   cin >> wholeNumber;
+   cin >> pluralNoun;
+   cout << firstName << "" went to "" << genericLocation << "" to buy "" << wholeNumber << "" different types of "" << pluralNoun << ""."" << endl;
+
+   return 0;
+}",0,0,27595952700,Student,"#include <iostream>
+using namespace std;
+
+int main() {
+   string firstName;
+   string genericLocation;
+   int wholeNumber;
+   string pluralNoun;
+   
+   /* Type your code here. */
+   cin >> firstName;
+   cin >> genericLocation;
+   cin >> wholeNumber;
+   cin >> pluralNoun;
+   cout << firstName << "" went to "" << genericLocation << "" to buy "" << wholeNumber << "" different types of "" << pluralNoun << ""."" << endl;
+
+   return 0;
+}",0,Abrego,mabre003@ucr.edu
