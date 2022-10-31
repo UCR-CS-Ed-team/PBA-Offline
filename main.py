@@ -162,8 +162,9 @@ if __name__ == '__main__':
     # Read File into a pandas dataframe
     # file_path = input('Enter path to the file including file name: ')
     # Below is the static file path if you want to work on the same file
-    file_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile1.csv'
+    # file_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile1.csv'
     # file_path = '/Users/abhinavreddy/Desktop/Standalone_tools/zylab_log-runs-UCRCS010AWinter2021_CH1.csv'
+    file_path = '/Users/abhinavreddy/Desktop/logfiles/logfile.csv'
     filename = os.path.basename(file_path)
     logfile = pd.read_csv(file_path)
     logfile = logfile[logfile.role == 'Student']

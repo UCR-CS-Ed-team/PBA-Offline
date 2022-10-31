@@ -1,0 +1,10 @@
+__pycache__ 
+
+standalone_env
+
+downloads/*
+!downloads/.gitkeep
+
+output/*
+!output/.gitkeep
+

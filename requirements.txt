@@ -1,0 +1,14 @@
+certifi==2022.5.18.1
+charset-normalizer==2.0.12
+cpplint==1.6.0
+DateTime==4.4
+idna==3.3
+numpy==1.22.4
+pandas==1.4.2
+Pygments==2.13.0
+python-dateutil==2.8.2
+pytz==2022.1
+requests==2.28.0
+six==1.16.0
+urllib3==1.26.9
+zope.interface==5.4.0
