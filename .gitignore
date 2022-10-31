@@ -1,2 +1,8 @@
-standalone_env/
+standalone_env
 __pycache__
+
+downloads/*
+!downloads/.gitkeep
+
+output/*
+output/.gitkeep
