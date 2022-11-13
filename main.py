@@ -109,7 +109,7 @@ def get_selected_labs(logfile):
 
 def write_output_to_csv(final_roster):
     # # Writing the output to the csv file 
-    now = str(datetime.now())
+    date = str(datetime.now().date())
     csv_columns = []
     for id in final_roster:
         for column in final_roster[id]:
@@ -117,14 +117,14 @@ def write_output_to_csv(final_roster):
             if column not in csv_columns:
                 csv_columns.append(column)          
     try:
-        csv_file = 'output/roster'+ now + '.csv'
-        with open(csv_file, 'w') as f1:
+        csv_file = 'output/roster_' + date + '.csv'
+        with open(csv_file, 'w', newline='') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for user_id in final_roster.keys():
                 writer.writerow(final_roster[user_id])
-    except IOError:
-        print('IO Error')
+    except IOError as err:
+        print(err)
 
 def create_data_structure(logfile):
     data = {}
@@ -136,19 +136,19 @@ def create_data_structure(logfile):
         # url, result = get_code(row.zip_location)
         sub = Submission(
             student_id = row.user_id,
-            crid = row.content_resource_id,
+            crid = row.lab_id,
             caption = row.caption,
             first_name = row.first_name,
             last_name = row.last_name,
             email = row.email,
             zip_location = row.zip_location,
-            submission = row.submission,
+            submission = row.is_submission,
             max_score = row.max_score,
             lab_id = row.content_section,
             submission_id = row.zip_location.split('/')[-1],
-            type = row.submission,
+            type = row.is_submission,
             code = row.student_code,
-            sub_time = get_valid_datetime(row.date_submitted),
+            sub_time = get_valid_datetime(row._11), # "date_submitted(US/Pacific)" can't be parsed by dataframe b/c of '/'
             anomaly_dict=None
         )
         data[row.user_id][row.content_section].append(sub)
