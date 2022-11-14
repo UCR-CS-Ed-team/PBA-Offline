@@ -174,12 +174,19 @@ def stylechecker(data, selected_labs):
                     file.write(code)
                 command = 'cpplint '+ cpplint_file
                 output1 = subprocess.getoutput(command)
+                final_output = ""
                 style_score = 0
                 if output1 != 'Done processing ' + cpplint_file:
                     lines = output1.splitlines()
+                    for line in lines:
+                        if line.startswith(cpplint_file):
+                            line = line.split(":")
+                            # print(line)
+                            line = "Line " + line[1] + ": " + line[2] + "\n"
+                        final_output += line 
                     style_score = lines[-1].split(':')[1].strip()
                 os.remove(cpplint_file)
-                output[user_id] = { lab : [style_score, output1, code]}
+                output[user_id] = { lab : [style_score, final_output, code]}
     return output
 
 
@@ -187,7 +194,7 @@ def stylechecker(data, selected_labs):
 #           Control          #
 ##############################
 if use_standalone:
-    logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile.csv'
+    logfile_path = "C:/Users/abhin/Desktop/PBA/PBA-Django/sample log files/logfile1.csv"
     logfile = pd.read_csv(logfile_path)
     logfile = logfile[logfile.role == 'Student']
     selected_labs = get_selected_labs(logfile)

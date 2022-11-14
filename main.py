@@ -1,7 +1,6 @@
 import datetime
 import pandas as pd
 from urllib3 import Retry
-from requests.adapters import HTTPAdapter
 from tools.anomaly import anomaly
 from tools.roster import roster
 from tools.quickanalysis import quick_analysis
@@ -136,19 +135,19 @@ def create_data_structure(logfile):
         # url, result = get_code(row.zip_location)
         sub = Submission(
             student_id = row.user_id,
-            crid = row.lab_id,
+            crid = row.content_resource_id,
             caption = row.caption,
             first_name = row.first_name,
             last_name = row.last_name,
             email = row.email,
             zip_location = row.zip_location,
-            submission = row.is_submission,
-            max_score = row.max_score,
+            submission = row.submission,
+            max_score = row.score,
             lab_id = row.content_section,
-            submission_id = row.zip_location.split('/')[-1],
-            type = row.is_submission,
+            submission_id = row.zip_location.split('/')[-1].strip('.zip'),
+            type = row.submission,
             code = row.student_code,
-            sub_time = get_valid_datetime(row._11), # "date_submitted(US/Pacific)" can't be parsed by dataframe b/c of '/'
+            sub_time = get_valid_datetime(row.date_submitted),
             anomaly_dict=None
         )
         data[row.user_id][row.content_section].append(sub)
@@ -162,7 +161,7 @@ if __name__ == '__main__':
     # Read File into a pandas dataframe
     # file_path = input('Enter path to the file including file name: ')
     # Below is the static file path if you want to work on the same file
-    file_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile1.csv'
+    file_path = "C:/Users/abhin/Desktop/PBA/PBA-Django/sample log files/logfile1.csv"
     # file_path = '/Users/abhinavreddy/Desktop/Standalone_tools/zylab_log-runs-UCRCS010AWinter2021_CH1.csv'
     filename = os.path.basename(file_path)
     logfile = pd.read_csv(file_path)

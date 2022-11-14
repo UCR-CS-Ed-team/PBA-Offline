@@ -1,6 +1,6 @@
 *.pyc  
 *~  
-standalone_env
+env
 __pycache__
 
 downloads/*
