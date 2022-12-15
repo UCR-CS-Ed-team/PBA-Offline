@@ -3,6 +3,9 @@ from datetime import datetime,timedelta
 import csv
 
 def get_valid_datetime(timestamp):
+    '''
+    There are lots of different datetime formats, this function accounts for those and returns the timestamp
+    '''
     t = timestamp
     for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%Y %H:%M:%S','%m/%d/%y %H:%M'):
         try:
@@ -28,6 +31,27 @@ def write(summary):
         print('IO Error')
 
 def quick_analysis(dataframe):
+    '''
+    Input:
+    ------
+        Accepts the logfile dataframe as an input 
+    
+    Output:
+    -------
+        Returns a structure containing all the averages 
+
+        summary = {
+            'section': 1.2,
+            'name': 'LAB: Input: Mad Lib',
+            'number_of_students': 289,
+            'time_spent': '05m 26s',
+            'num_of_runs': 7,
+            'score': 100,
+            'develops': 5,
+            'num_of_submits': 2,
+        }
+    '''
+    
     df = dataframe
     summary = {}
     unique_lab_ids = set()

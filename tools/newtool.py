@@ -20,6 +20,9 @@ class Not200Exception(Exception):
     pass
 
 def get_valid_datetime(timestamp):
+    '''
+    There are lots of different datetime formats, this function accounts for those and returns the timestamp
+    '''
     t = timestamp
     for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%Y %H:%M:%S','%m/%d/%y %H:%M'):
         try:
@@ -29,6 +32,9 @@ def get_valid_datetime(timestamp):
     raise ValueError('Cannot recognize datetime format: ' + t)
 
 def download_code_helper(url):
+    '''
+    Actual code which downloads the students code run using requests library
+    '''
     # Define our retry strategy for all HTTP requests
     retry_strategy = Retry(
         total=3,
@@ -65,6 +71,11 @@ def download_code_helper(url):
         return (url, result)
 
 def download_code(logfile):
+    '''
+    Iterates through the zybooks logfile dataframe and appends a new column "student_code" to the dataframe and return it 
+
+    Note: This is the fastest way to download code submissions of all students at this time. We tried AsyncIO but it turned out to be slower than multithreading
+    '''
     urls = logfile.zip_location.to_list()
     threads = []
     with ThreadPoolExecutor() as executor:
@@ -81,29 +92,29 @@ def download_code(logfile):
     return logfile
 
 def get_selected_labs(logfile):
+    '''
+    Function to get selected labs from the user entered input
+    '''
     lab_ids = logfile.content_section.unique()
     # Select the labs you want a roster for 
     print('Select the indexes you want a roster for seperated by a space: (Ex: 1 or 1 2 3 or 2 3)')
     labs_list = []
-    i = 0
-    print(i,'  select all labs')
-    i += 1
+    i = 1
     for lab_id in lab_ids:
         print(i,' ', lab_id, logfile.query('content_section =='+ str(lab_id))['caption'].iloc[0])
         labs_list.append(lab_id)
         i += 1
     selected_options = input()
+    selected_lab_index = selected_options.split(' ')
     selected_labs = []
-    if selected_options.split()[0] == '0':
-        for lab in labs_list:
-            selected_labs.append(lab)
-    else:
-        selected_lab_index = selected_options.split()
-        for selected_lab in selected_lab_index:
-            selected_labs.append(labs_list[int(selected_lab)-1])
+    for selected_lab in selected_lab_index:
+        selected_labs.append(labs_list[int(selected_lab)-1])
     return selected_labs
 
 def write_output_to_csv(final_roster):
+    '''
+    This function writes our dataframe into a csv output file
+    '''
     # # Writing the output to the csv file 
     now = str(datetime.now())
     csv_columns = []

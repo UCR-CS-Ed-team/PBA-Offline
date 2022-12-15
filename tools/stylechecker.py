@@ -21,6 +21,9 @@ class Not200Exception(Exception):
     pass
 
 def get_valid_datetime(timestamp):
+    '''
+    There are lots of different datetime formats, this function accounts for those and returns the timestamp
+    '''
     t = timestamp
     for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%Y %H:%M:%S','%m/%d/%y %H:%M'):
         try:
@@ -30,6 +33,9 @@ def get_valid_datetime(timestamp):
     raise ValueError('Cannot recognize datetime format: ' + t)
 
 def download_code_helper(url):
+    '''
+    Actual code which downloads the students code run using requests library
+    '''
     # Define our retry strategy for all HTTP requests
     retry_strategy = Retry(
         total=3,
@@ -66,6 +72,11 @@ def download_code_helper(url):
         return (url, result)
 
 def download_code(logfile):
+    '''
+    Iterates through the zybooks logfile dataframe and appends a new column "student_code" to the dataframe and return it 
+
+    Note: This is the fastest way to download code submissions of all students at this time. We tried AsyncIO but it turned out to be slower than multithreading
+    '''
     urls = logfile.zip_location.to_list()
     threads = []
     with ThreadPoolExecutor() as executor:
@@ -82,6 +93,9 @@ def download_code(logfile):
     return logfile
 
 def get_selected_labs(logfile):
+    '''
+    Function to get selected labs from the user entered input
+    '''
     lab_ids = logfile.content_section.unique()
     # Select the labs you want a roster for 
     print('Select the indexes you want a roster for seperated by a space: (Ex: 1 or 1 2 3 or 2 3)')
@@ -99,6 +113,9 @@ def get_selected_labs(logfile):
     return selected_labs
 
 def write_output_to_csv(final_roster):
+    '''
+    This function writes our dataframe into a csv output file
+    '''
     # # Writing the output to the csv file 
     now = str(datetime.now())
     csv_columns = []
@@ -117,6 +134,24 @@ def write_output_to_csv(final_roster):
         print('IO Error')
 
 def create_data_structure(logfile):
+    '''
+    Creates a datastructure which stores all submission objects of each student
+
+    data = {
+        user_id_1: {
+            lab_id_1 : [submission, submission, submission],
+            lab_id_2 : [submission, submission, submission]
+        }
+        user_id_2: {
+            lab_id_1 : [submission, submission, submission],
+            lab_id_2 : [submission, submission, submission]
+        }
+        ...
+        ...
+        ...
+    }
+
+    '''
     data = {}
     for row in logfile.itertuples():
         if row.user_id not in data:
@@ -150,16 +185,26 @@ def create_data_structure(logfile):
 def stylechecker(data, selected_labs):
     '''
     stylechecker_output from user defined function structure 
-    stylechecker_output = {
-        student_id : {
-            'Lab 1' : [style_score, output1, code],
-                ...
-            'Lab 2' : [style_score, output1, code],
-                ...
-            'Lab n' : [style_score, output1, code],
-                ...
+    Input:
+    ------
+        Accepts the students data and selected labs as an input 
+
+    Output:
+    -------
+        stylechecker_output = {
+            student_id : {
+                'Lab 1' : [style_score, output1, code],
+                    ...
+                'Lab 2' : [style_score, output1, code],
+                    ...
+                'Lab n' : [style_score, output1, code],
+                    ...
+            }
         }
-    }
+
+    Note: 
+        Todo: This currently creates a new .cpp file and runs the package on that, modify it in such a way to avoid creating a new file 
+              and directly use the code in data
     '''
     output = {}
     for lab in selected_labs:

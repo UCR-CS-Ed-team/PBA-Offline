@@ -112,6 +112,7 @@ def write_output_to_csv(final_roster):
             writer.writeheader()
             for user_id in final_roster.keys():
                 writer.writerow(final_roster[user_id])
+        print(f"Result stored at {csv_file}")
     except IOError:
         print('IO Error')
 
@@ -338,10 +339,12 @@ def anomaly(data, selected_labs): # Function to calculate the anomaly score
 #           Control          #
 ##############################
 if use_standalone:
-    logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile.csv'
+    logfile_path = input("Enter the path to the logfile: ")
+    # logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile.csv'
     logfile = pd.read_csv(logfile_path)
     logfile = logfile[logfile.role == 'Student']
     selected_labs = get_selected_labs(logfile)
+    print("Results stored at /Users/abhinavreddy/Desktop/Standalone apps v4/output/roster2022-12-07 12:54:19.720942.csv")
     logfile = download_code(logfile)
     data = create_data_structure(logfile)
     final_roster = {}

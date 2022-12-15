@@ -24,6 +24,9 @@ class Not200Exception(Exception):
     pass
 
 def get_valid_datetime(timestamp):
+    '''
+    There are lots of different datetime formats, this function accounts for those and returns the timestamp
+    '''
     t = timestamp
     for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%Y %H:%M:%S','%m/%d/%y %H:%M'):
         try:
@@ -33,6 +36,9 @@ def get_valid_datetime(timestamp):
     raise ValueError('Cannot recognize datetime format: ' + t)
 
 def download_code_helper(url):
+    '''
+    Actual code which downloads the students code run using requests library
+    '''
     # Define our retry strategy for all HTTP requests
     retry_strategy = Retry(
         total=3,
@@ -69,6 +75,11 @@ def download_code_helper(url):
         return (url, result)
 
 def download_code(logfile):
+    '''
+    Iterates through the zybooks logfile dataframe and appends a new column "student_code" to the dataframe and return it 
+
+    Note: This is the fastest way to download code submissions of all students at this time. We tried AsyncIO but it turned out to be slower than multithreading
+    '''
     urls = logfile.zip_location.to_list()
     threads = []
     with ThreadPoolExecutor() as executor:
@@ -85,6 +96,9 @@ def download_code(logfile):
     return logfile
 
 def get_selected_labs(logfile):
+    '''
+    Function to get selected labs from the user entered input
+    '''
     lab_ids = logfile.content_section.unique()
     # Select the labs you want a roster for 
     print('Select the indexes you want a roster for seperated by a space: (Ex: 1 or 1 2 3 or 2 3)')
@@ -108,6 +122,9 @@ def get_selected_labs(logfile):
     return selected_labs
 
 def write_output_to_csv(final_roster):
+    '''
+    This function writes our dataframe into a csv output file
+    '''
     # # Writing the output to the csv file 
     now = str(datetime.now())
     csv_columns = []
@@ -127,6 +144,24 @@ def write_output_to_csv(final_roster):
         print('IO Error')
 
 def create_data_structure(logfile):
+    '''
+    Creates a datastructure which stores all submission objects of each student
+
+    data = {
+        user_id_1: {
+            lab_id_1 : [submission, submission, submission],
+            lab_id_2 : [submission, submission, submission]
+        }
+        user_id_2: {
+            lab_id_1 : [submission, submission, submission],
+            lab_id_2 : [submission, submission, submission]
+        }
+        ...
+        ...
+        ...
+    }
+
+    '''
     data = {}
     for row in logfile.itertuples():
         if row.user_id not in data:
@@ -160,11 +195,11 @@ def create_data_structure(logfile):
 ##############################
 if __name__ == '__main__':
     # Read File into a pandas dataframe
-    # file_path = input('Enter path to the file including file name: ')
+    file_path = input('Enter path to the file including file name: ')
     # Below is the static file path if you want to work on the same file
     # file_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile1.csv'
     # file_path = '/Users/abhinavreddy/Desktop/Standalone_tools/zylab_log-runs-UCRCS010AWinter2021_CH1.csv'
-    file_path = '/Users/abhinavreddy/Desktop/logfiles/logfile.csv'
+    # file_path = '/Users/abhinavreddy/Desktop/logfiles/logfile.csv'
     filename = os.path.basename(file_path)
     logfile = pd.read_csv(file_path)
     logfile = logfile[logfile.role == 'Student']
