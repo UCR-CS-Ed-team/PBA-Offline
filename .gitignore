@@ -1,10 +1,14 @@
 *.pyc  
 *~  
-standalone_env
+
+# add your virtual environment name below to ignore files from there 
+pbaofflineenv
 __pycache__
 
+# ignoring all files from the downloads folder except .gitkeep
 downloads/*
 !downloads/.gitkeep
 
+# ignoring all files from the output folder except .gitkeep
 output/*
 output/.gitkeep
