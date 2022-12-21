@@ -3,8 +3,11 @@ import pandas as pd
 from datetime import datetime,timedelta
 import csv
 import math
+import os
+import tkinter as tk
+from tkinter import filedialog
 
-use_standalone = False
+use_standalone = True
 
 ##############################
 #       Helper Functions     #
@@ -35,14 +38,14 @@ def write_output_to_csv(final_roster):
             csv_columns.append(column)
         break             
     try:
-        csv_file = '../output/roster'+ now + '.csv'
+        csv_file = 'output/roster.csv'
         with open(csv_file, 'w') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for user_id in final_roster.keys():
                 writer.writerow(final_roster[user_id])
-    except IOError:
-        print('IO Error')
+    except IOError as err:
+        print(err)
 
 def get_valid_date_time(t):
     '''
@@ -264,9 +267,19 @@ def roster(dataframe, selected_labs):
 #           Control          #
 ##############################
 if use_standalone:
-    logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile.csv'
-    logfile = pd.read_csv(logfile_path)
+    #file_path = '/Users/ashleypang/Documents/GitHub/Frank_Vahid_Tools/PBA---Offline/logfile_multilab.csv'
+    file_path = filedialog.askopenfilename()
+    folder_path = os.path.split(file_path)[0]
+    file_name = os.path.basename(file_path).split('/')[-1]
+    logfile = pd.read_csv(file_path)
     logfile = logfile[logfile.role == 'Student']
+    
+    # Update column names if necessary
+    # Enables support for log files from learn.zybooks.com and Mode
+    logfile.columns = logfile.columns.str.replace('\(US/Pacific\)', '', regex=True)
+    logfile.columns = logfile.columns.str.replace('is_submission', 'submission')
+    logfile.columns = logfile.columns.str.replace('content_resource_id', 'lab_id')
+
     selected_labs = get_selected_labs(logfile)
     final_roster = roster(logfile, selected_labs)
     write_output_to_csv(final_roster)
