@@ -7,10 +7,12 @@ from datetime import datetime
 import csv
 import io
 from urllib3 import Retry
-from tools.submission import Submission
+from submission import Submission
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import tkinter as tk
+from tkinter import filedialog
 
-use_standalone = False
+use_standalone = True
 
 ##############################
 #       Helper Functions     #
@@ -40,7 +42,7 @@ def download_code_helper(url):
     session.mount('https://', adapter)
     session.mount('http://', adapter)
     file_name = url.split('/')[-1].strip('.zip')
-    path = '../downloads/' + file_name +'.cpp'
+    path = 'downloads/' + file_name +'.cpp'
     if not os.path.isfile(path):
         # print('downloading')
         try:
@@ -99,25 +101,26 @@ def get_selected_labs(logfile):
 
 def write_output_to_csv(final_roster):
     # # Writing the output to the csv file 
-    now = str(datetime.now())
+    # now = str(datetime.now())
     csv_columns = []
     for id in final_roster:
         for column in final_roster[id]:
             csv_columns.append(column)
         break             
     try:
-        csv_file = '../output/roster'+ now + '.csv'
+        csv_file = 'output/anomaly.csv'
         with open(csv_file, 'w') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for user_id in final_roster.keys():
                 writer.writerow(final_roster[user_id])
         print(f"Result stored at {csv_file}")
-    except IOError:
-        print('IO Error')
+    except IOError as err:
+        print(err)
 
 def create_data_structure(logfile):
     data = {}
+
     for row in logfile.itertuples():
         if row.user_id not in data:
             data[int(row.user_id)] = {}
@@ -126,7 +129,7 @@ def create_data_structure(logfile):
         # url, result = get_code(row.zip_location)
         sub = Submission(
             student_id = row.user_id,
-            crid = row.content_resource_id,
+            crid = row.lab_id,
             caption = row.caption,
             first_name = row.first_name,
             last_name = row.last_name,
@@ -517,14 +520,25 @@ def anomaly(data, selected_labs): # Function to calculate the anomaly score
 #           Control          #
 ##############################
 if use_standalone:
-    logfile_path = input("Enter the path to the logfile: ")
+    # logfile_path = input("Enter the path to the logfile: ")
     # logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile.csv'
-    logfile = pd.read_csv(logfile_path)
+    file_path = filedialog.askopenfilename()
+    folder_path = os.path.split(file_path)[0]
+    file_name = os.path.basename(file_path).split('/')[-1]
+    logfile = pd.read_csv(file_path)
     logfile = logfile[logfile.role == 'Student']
+
+    # Update column names if necessary
+    # Enables support for log files from learn.zybooks.com and Mode
+    logfile.columns = logfile.columns.str.replace('\(US/Pacific\)', '', regex=True)
+    logfile.columns = logfile.columns.str.replace('is_submission', 'submission')
+    logfile.columns = logfile.columns.str.replace('content_resource_id', 'lab_id')
+
     selected_labs = get_selected_labs(logfile)
-    print("Results stored at /Users/abhinavreddy/Desktop/Standalone apps v4/output/roster2022-12-07 12:54:19.720942.csv")
+    print("Processing " + file_name)
     logfile = download_code(logfile)
     data = create_data_structure(logfile)
+
     final_roster = {}
     anomaly_detection_output = anomaly(data, selected_labs)
     for user_id in anomaly_detection_output:
@@ -533,8 +547,8 @@ if use_standalone:
             anomaly_score = anomaly_detection_output[user_id][lab][1]
             if user_id in final_roster:
                 final_roster[user_id]['Lab ' + str(lab) + ' anomalies found'] = anomalies_found
-                final_roster[user_id]['Lab ' + str(lab) + 'anomaly score'] = anomaly_score
-                final_roster[user_id][str(lab) + ' Student code'] = anomaly_detection_output[user_id][lab][2]
+                final_roster[user_id]['Lab ' + str(lab) + ' anomaly score'] = anomaly_score
+                final_roster[user_id]['Lab ' + str(lab) + ' student code'] = anomaly_detection_output[user_id][lab][2]
             else:
                 final_roster[user_id] = {
                     'User ID': user_id,
@@ -542,8 +556,8 @@ if use_standalone:
                     'First Name': data[user_id][lab][0].first_name[0],
                     'Email': data[user_id][lab][0].email[0],
                     'Role': 'Student',
-                    'anomalies found' : anomalies_found,
-                    'anomaly score' : anomaly_score,
-                    str(lab) + ' Student code' : anomaly_detection_output[user_id][lab][2]
+                    'Lab ' + str(lab) + ' anomalies found' : anomalies_found,
+                    'Lab ' + str(lab) + ' anomaly score' : anomaly_score,
+                    'Lab ' + str(lab) + ' student code' : anomaly_detection_output[user_id][lab][2]
                 }
     write_output_to_csv(final_roster)
