@@ -55,10 +55,10 @@ def quick_analysis(dataframe):
     df = dataframe
     summary = {}
     unique_lab_ids = set()
-    for lab_id in df['content_resource_id']:
+    for lab_id in df['lab_id']:
         unique_lab_ids.add(lab_id)
     for lab_id in unique_lab_ids:   # This is going to be similar to the roster.py, better start with that file
-        lab = df[df['content_resource_id'] == lab_id].reset_index()
+        lab = df[df['lab_id'] == lab_id].reset_index()
         name = lab['caption'][0]
         user_id = lab['user_id']
         section = lab['content_section'][0]

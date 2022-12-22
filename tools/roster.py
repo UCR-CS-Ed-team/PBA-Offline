@@ -7,7 +7,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-use_standalone = True
+use_standalone = False
 
 ##############################
 #       Helper Functions     #

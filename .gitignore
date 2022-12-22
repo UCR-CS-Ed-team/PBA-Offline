@@ -3,6 +3,7 @@
 
 # add your virtual environment name below to ignore files from there 
 pbaofflineenv
+env
 __pycache__
 
 # ignoring all files from the downloads folder except .gitkeep

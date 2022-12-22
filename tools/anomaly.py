@@ -7,12 +7,12 @@ from datetime import datetime
 import csv
 import io
 from urllib3 import Retry
-from submission import Submission
+from tools.submission import Submission
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import tkinter as tk
 from tkinter import filedialog
 
-use_standalone = True
+use_standalone = False
 
 ##############################
 #       Helper Functions     #

@@ -15,6 +15,8 @@ import os
 import csv
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import tkinter as tk
+from tkinter import filedialog
 
 ##############################
 #       Helper Functions     #
@@ -126,7 +128,7 @@ def write_output_to_csv(final_roster):
     This function writes our dataframe into a csv output file
     '''
     # # Writing the output to the csv file 
-    now = str(datetime.now())
+    # now = str(datetime.now())
     csv_columns = []
     for id in final_roster:
         for column in final_roster[id]:
@@ -134,14 +136,14 @@ def write_output_to_csv(final_roster):
             if column not in csv_columns:
                 csv_columns.append(column)          
     try:
-        csv_file = 'output/roster'+ now + '.csv'
-        with open(csv_file, 'w') as f1:
+        csv_file = 'output/roster.csv'
+        with open(csv_file, 'w', newline = '') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for user_id in final_roster.keys():
                 writer.writerow(final_roster[user_id])
-    except IOError:
-        print('IO Error')
+    except IOError as err:
+        print(err)
 
 def create_data_structure(logfile):
     '''
@@ -171,7 +173,7 @@ def create_data_structure(logfile):
         # url, result = get_code(row.zip_location)
         sub = Submission(
             student_id = row.user_id,
-            crid = row.content_resource_id,
+            crid = row.lab_id,
             caption = row.caption,
             first_name = row.first_name,
             last_name = row.last_name,
@@ -195,12 +197,9 @@ def create_data_structure(logfile):
 ##############################
 if __name__ == '__main__':
     # Read File into a pandas dataframe
-    file_path = input('Enter path to the file including file name: ')
-    # Below is the static file path if you want to work on the same file
-    # file_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile1.csv'
-    # file_path = '/Users/abhinavreddy/Desktop/Standalone_tools/zylab_log-runs-UCRCS010AWinter2021_CH1.csv'
-    # file_path = '/Users/abhinavreddy/Desktop/logfiles/logfile.csv'
-    filename = os.path.basename(file_path)
+    file_path = filedialog.askopenfilename()
+    folder_path = os.path.split(file_path)[0]
+    filename = os.path.basename(file_path).split('/')[-1]
     logfile = pd.read_csv(file_path)
     logfile = logfile[logfile.role == 'Student']
     urls = logfile.zip_location.to_list()
@@ -209,29 +208,28 @@ if __name__ == '__main__':
     final_roster = {}
     
     while(1):
-        print(" 1. Quick Analysis (average by lab) \n 2. Basic statisics (roster) \n 3. Anomalies (regex) \n 4. Coding Trails \n 5. Style anomalies (cpp lint) \n 6. Quit")
+        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Quit")
         inp = input()
         final_roster = {}
-        # print(list(inp.split(' '))
         input_list = inp.split(' ')
-        # print(input_list)
         for i in input_list:
             inp = int(i)
 
+            # Quick analysis for every lab
             if inp == 1:
                 quick_analysis(logfile)
             
+            # Roster for selected labs
             elif inp == 2:
                 final_roster = roster(logfile, selected_labs)
 
+            # Anomalies for selected labs
             elif inp == 3:
                 if data == {}:
                     logfile = download_code(logfile)
                     data = create_data_structure(logfile)
                 anomaly_detection_output = anomaly(data, selected_labs)
                 for user_id in anomaly_detection_output:
-                    # print(anomaly_detection_output[user_id])
-                    # break
                     for lab in anomaly_detection_output[user_id]:
                         anomalies_found = anomaly_detection_output[user_id][lab][0]
                         anomaly_score = anomaly_detection_output[user_id][lab][1]
@@ -250,8 +248,8 @@ if __name__ == '__main__':
                                 'Lab ' + str(lab) + ' anomaly score' : anomaly_score,
                                 str(lab) + ' Student code' : anomaly_detection_output[user_id][lab][2]
                             }
-                # print(final_roster)
             
+            # Inc. development coding trails for all labs
             elif inp == 4:
                 if data == {}:
                     logfile = download_code(logfile)
@@ -286,6 +284,7 @@ if __name__ == '__main__':
                                 str(lab_id) + ' Student code' : code
                             }
             
+            # Style anomalies for selected labs using cpplint
             elif inp == 5:
                 if data == {}:
                     logfile = download_code(logfile)
