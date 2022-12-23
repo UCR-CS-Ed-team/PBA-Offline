@@ -136,7 +136,7 @@ def create_data_structure(logfile):
             email = row.email,
             zip_location = row.zip_location,
             submission = row.submission,
-            max_score = row.max_score,
+            max_score = row.score,
             lab_id = row.content_section,
             submission_id = row.zip_location.split('/')[-1],
             type = row.submission,
@@ -499,21 +499,22 @@ def get_anomaly_score(code):
 
 def anomaly(data, selected_labs): # Function to calculate the anomaly score
     output = {}
-    # print(data)
-    # print(selected_labs)
     for lab in selected_labs:
         for user_id in data:
+
             if user_id not in output:
                 output[user_id] = {}
+
             if lab in data[user_id]:
                 max_score = 0
+                code = data[user_id][lab][-1].code  # Choose a default submission
                 for sub in data[user_id][lab]:
                     if sub.max_score > max_score:
                         max_score = sub.max_score
                         code = sub.code
+
                 anomalies_found, anomaly_score = get_anomaly_score(code)
                 output[user_id][lab] = [anomalies_found, anomaly_score, code]
-    # print(output)
     return output
 
 ##############################

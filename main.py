@@ -170,7 +170,6 @@ def create_data_structure(logfile):
             data[int(row.user_id)] = {}
         if row.content_section not in data[row.user_id]:
             data[row.user_id][row.content_section] = []
-        # url, result = get_code(row.zip_location)
         sub = Submission(
             student_id = row.user_id,
             crid = row.lab_id,
@@ -179,13 +178,13 @@ def create_data_structure(logfile):
             last_name = row.last_name,
             email = row.email,
             zip_location = row.zip_location,
-            submission = row.submission,
-            max_score = row.max_score,
+            submission = row.is_submission,
+            max_score = row.score,
             lab_id = row.content_section,
             submission_id = row.zip_location.split('/')[-1],
-            type = row.submission,
+            type = row.is_submission,
             code = row.student_code,
-            sub_time = get_valid_datetime(row.date_submitted),
+            sub_time = get_valid_datetime(row._11),
             anomaly_dict=None
         )
         data[row.user_id][row.content_section].append(sub)
@@ -198,6 +197,7 @@ def create_data_structure(logfile):
 if __name__ == '__main__':
     # Read File into a pandas dataframe
     file_path = filedialog.askopenfilename()
+    # file_path = r""
     folder_path = os.path.split(file_path)[0]
     filename = os.path.basename(file_path).split('/')[-1]
     logfile = pd.read_csv(file_path)
