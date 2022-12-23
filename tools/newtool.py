@@ -7,7 +7,7 @@ from datetime import datetime
 import csv
 import io
 from urllib3 import Retry
-from tools.submission import Submission
+from submission import Submission
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 use_standalone = True

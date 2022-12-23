@@ -109,7 +109,7 @@ def write_output_to_csv(final_roster):
         break             
     try:
         csv_file = 'output/anomaly.csv'
-        with open(csv_file, 'w') as f1:
+        with open(csv_file, 'w', newline='') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for user_id in final_roster.keys():

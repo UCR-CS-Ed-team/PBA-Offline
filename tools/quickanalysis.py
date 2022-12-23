@@ -19,7 +19,7 @@ def write(summary):
     try:
         csv_file = 'output/quickanalysis.csv'
         csv_columns = ['section', 'name', 'number_of_students', 'time_spent', 'num_of_runs', 'score', 'develops', 'num_of_submits', 'pivots']
-        with open(csv_file, 'w') as f1:
+        with open(csv_file, 'w', newline='') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for lab_id in summary.keys():

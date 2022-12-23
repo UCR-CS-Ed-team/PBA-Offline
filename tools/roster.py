@@ -39,7 +39,7 @@ def write_output_to_csv(final_roster):
         break             
     try:
         csv_file = 'output/roster.csv'
-        with open(csv_file, 'w') as f1:
+        with open(csv_file, 'w', newline='') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for user_id in final_roster.keys():
@@ -231,9 +231,7 @@ def roster(dataframe, selected_labs):
                     'Lab'+section+' Time spent': time_spent_by_user,
                     'Lab'+section+' # of runs': num_of_runs,
                     'Lab'+section+' % score': max_score,
-                    'Lab'+section+' # of devs': num_of_devs,
-                    'Lab'+section+' # of subs': num_of_submits
-                    # 'Lab'+section+' User Code': code,
+                    'Lab'+section+' # of devs': num_of_devs
                 }
             else:   # Appending to the existing entries for that user. So we wont have to iterate through the whole user dataframe again
                 summary_roster[user_id]['Lab'+section+' Points per minute'] = ppm_normalized
