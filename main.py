@@ -208,7 +208,7 @@ if __name__ == '__main__':
     final_roster = {}
     
     while(1):
-        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Quit")
+        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Automatic anomaly detection (selected labs) \n 7. Quit")
         inp = input()
         final_roster = {}
         input_list = inp.split(' ')
@@ -228,7 +228,7 @@ if __name__ == '__main__':
                 if data == {}:
                     logfile = download_code(logfile)
                     data = create_data_structure(logfile)
-                anomaly_detection_output = anomaly(data, selected_labs)
+                anomaly_detection_output = anomaly(data, selected_labs, 0)
                 for user_id in anomaly_detection_output:
                     for lab in anomaly_detection_output[user_id]:
                         anomalies_found = anomaly_detection_output[user_id][lab][0]
@@ -308,7 +308,27 @@ if __name__ == '__main__':
                                 str(lab_id) + ' Student code' : stylechecker_output[user_id][lab_id][2]
                             }
             
+            # Automatic anomaly detection for selected labs
             elif inp == 6:
+                if data == {}:
+                    logfile = download_code(logfile)
+                    data = create_data_structure(logfile)
+                anomaly_detection_output = anomaly(data, selected_labs, 1)
+                for user_id in anomaly_detection_output:
+                    for lab in anomaly_detection_output[user_id]:
+                        anomalies_found = anomaly_detection_output[user_id][lab][0]
+                        if user_id not in final_roster:
+                            final_roster[user_id] = {
+                                'User ID': user_id,
+                                'Last Name': data[user_id][lab][0].last_name[0],
+                                'First Name': data[user_id][lab][0].first_name[0],
+                                'Email': data[user_id][lab][0].email[0],
+                                'Role': 'Student'
+                            }
+                        for anomaly in anomalies_found:
+                            final_roster[user_id][f"Lab {str(lab)} {anomaly}"] = anomalies_found[anomaly]
+
+            elif inp == 7:
                 exit(0)
             
             else:

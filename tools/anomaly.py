@@ -200,7 +200,7 @@ LEFT_BRACE_REGEX = r"({)"
 RIGHT_BRACE_REGEX = r"(})"
 FORWARD_DEC_REGEX = r"(^(?:(?:unsigned|signed|long|short)\s)?(?:int|char|string|void|bool|float|double)\s\w+\(.*\);)"
 
-def get_anomaly_score(code):
+def get_anomaly_score(code, auto=0):
     # Below is the format for the anomaly in question
     # [Count_instances, points/instance, anomaly on/off, regex, count of instances, instance cap (-1 for no cap)]
     # Add to the hashmap Styleanomaly in case you need new anomaly to be detected
@@ -238,6 +238,11 @@ def get_anomaly_score(code):
     leftBraceCount = 0          # Count of left braces for Line Spacing anomaly
     rightBraceCount = 0         # Count of right braces for Line Spacing anomaly
     openingBrace = False        # Indicates if `line` is the opening brace for the function on its own line
+
+    # For automatic anomaly detection, enable every anomaly
+    if auto == 1:
+        for anomaly in Styleanomaly:
+            Styleanomaly[anomaly][2] = 1
 
     lines = code.splitlines()
     for i, line in enumerate(lines):   # Reading through lines in the code and checking for each anomaly
@@ -495,9 +500,15 @@ def get_anomaly_score(code):
                     Styleanomaly['zyBooks Set Precision'][4] += 1
                     anomalies_found += 1
 
+    # For automatic anomaly detection, return *which* anomalies were found
+    if auto == 1:
+        anomalies_found = {}
+        for anomaly in Styleanomaly:
+            anomalies_found[anomaly] = Styleanomaly[anomaly][4]
+            
     return anomalies_found, anomaly_score
 
-def anomaly(data, selected_labs): # Function to calculate the anomaly score
+def anomaly(data, selected_labs, auto=0): # Function to calculate the anomaly score
     output = {}
     for lab in selected_labs:
         for user_id in data:
@@ -513,7 +524,7 @@ def anomaly(data, selected_labs): # Function to calculate the anomaly score
                         max_score = sub.max_score
                         code = sub.code
 
-                anomalies_found, anomaly_score = get_anomaly_score(code)
+                anomalies_found, anomaly_score = get_anomaly_score(code, auto)
                 output[user_id][lab] = [anomalies_found, anomaly_score, code]
     return output
 
