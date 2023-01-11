@@ -353,7 +353,7 @@ if __name__ == '__main__':
                         anomaly_count = num_users_per_anomaly[anomaly][lab]
                         total_users = len(data)
                         # If a clear majority uses an "anomaly", it's not anomalous
-                        if anomaly_count/total_users >= 0.7:
+                        if anomaly_count/total_users >= 0.8:
                             final_roster['Status'][f"Lab {str(lab)} {anomaly}"] = 'No'
                         else:
                             final_roster['Status'][f"Lab {str(lab)} {anomaly}"] = 'Yes'

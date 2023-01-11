@@ -446,8 +446,9 @@ def get_anomaly_score(code, auto=0):
                     Styleanomaly['Vector Name Spacing'][4] += 1
                     anomalies_found += 1
                     
-        if Styleanomaly['Spaceless Operator'][2] != 0: #Check if the anomaly is turned on 
-            if re.search(Styleanomaly['Spaceless Operator'][3], line) and not line.__contains__("#include"):
+        if Styleanomaly['Spaceless Operator'][2] != 0: #Check if the anomaly is turned on
+            match = re.search(Styleanomaly['Spaceless Operator'][3], line)
+            if match and "#include" not in line and "vector<" not in match.group():
                 if Styleanomaly['Spaceless Operator'][0] == 1 or (Styleanomaly['Spaceless Operator'][0] == 0 and Styleanomaly['Spaceless Operator'][4] == 0):
                     # Score for this anomaly is capped to Styleanomaly[x][5] instances
                     if (Styleanomaly['Spaceless Operator'][5] <= -1) or (Styleanomaly['Spaceless Operator'][5] > -1 and (Styleanomaly['Spaceless Operator'][4] < Styleanomaly['Spaceless Operator'][5])):
