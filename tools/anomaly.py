@@ -193,6 +193,8 @@ ACCESS_AND_INCREMENT_REGEX = r"""
 	"""
 AUTO_REGEX = r"(auto\s\w+)"
 SET_PRECISION_REGEX = r"cout(?:\s+)?<<(?:\s+)?setprecision\(.+\)(?:\s+)?<<(?:\s+)?fixed"
+RANGED_BASED_LOOP_REGEX = r"(for\s*\(\s*\w+\s+\w+\s+:\s+\w+\s*\))"
+ITERATOR_FUNCTIONS_REGEX = r"(\w+\.(?:begin|end)\(\))"
 
 # Helper regular expressions
 INT_MAIN_REGEX = r"int main(?:\s+)?\(.*\)"
@@ -229,7 +231,9 @@ def get_anomaly_score(code, auto=0):
         'Main Void': {0:1, 1:0.5, 2:1, 3:MAIN_VOID_REGEX, 4:0, 5:-1},
         'Access And Increment': {0:1, 1:0.2, 2:1, 3:ACCESS_AND_INCREMENT_REGEX, 4:0, 5:-1},
         'Auto': {0:1, 1:0.3, 2:1, 3:AUTO_REGEX, 4:0, 5:-1},
-        'zyBooks Set Precision': {0:1, 1:0.2, 2:1, 3:SET_PRECISION_REGEX, 4:0, 5:-1}
+        'zyBooks Set Precision': {0:1, 1:0.2, 2:1, 3:SET_PRECISION_REGEX, 4:0, 5:-1},
+        'Ranged-Based for Loop': {0:1, 1:0.6, 2:1, 3:RANGED_BASED_LOOP_REGEX, 4:0, 5:-1},
+        'Iterator Functions': {0:1, 1:0.3, 2:1, 3:ITERATOR_FUNCTIONS_REGEX, 4:0, 5:-1}
     }
     
     anomaly_score = 0           # Initial anomaly Score
@@ -499,6 +503,24 @@ def get_anomaly_score(code, auto=0):
                     if (Styleanomaly['zyBooks Set Precision'][5] <= -1) or (Styleanomaly['zyBooks Set Precision'][5] > -1 and (Styleanomaly['zyBooks Set Precision'][4] < Styleanomaly['zyBooks Set Precision'][5])):
                         anomaly_score += Styleanomaly['zyBooks Set Precision'][1]
                     Styleanomaly['zyBooks Set Precision'][4] += 1
+                    anomalies_found += 1
+
+        if Styleanomaly['Ranged-Based for Loop'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Ranged-Based for Loop'][3], line):
+                if Styleanomaly['Ranged-Based for Loop'][0] == 1 or (Styleanomaly['Ranged-Based for Loop'][0] == 0 and Styleanomaly['Ranged-Based for Loop'][4] == 0):
+                    # Score for this anomaly is capped to Styleanomaly[x][5] instances
+                    if (Styleanomaly['Ranged-Based for Loop'][5] <= -1) or (Styleanomaly['Ranged-Based for Loop'][5] > -1 and (Styleanomaly['Ranged-Based for Loop'][4] < Styleanomaly['Ranged-Based for Loop'][5])):
+                        anomaly_score += Styleanomaly['Ranged-Based for Loop'][1]
+                    Styleanomaly['Ranged-Based for Loop'][4] += 1
+                    anomalies_found += 1
+
+        if Styleanomaly['Iterator Functions'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Iterator Functions'][3], line):
+                if Styleanomaly['Iterator Functions'][0] == 1 or (Styleanomaly['Iterator Functions'][0] == 0 and Styleanomaly['Iterator Functions'][4] == 0):
+                    # Score for this anomaly is capped to Styleanomaly[x][5] instances
+                    if (Styleanomaly['Iterator Functions'][5] <= -1) or (Styleanomaly['Iterator Functions'][5] > -1 and (Styleanomaly['Iterator Functions'][4] < Styleanomaly['Iterator Functions'][5])):
+                        anomaly_score += Styleanomaly['Iterator Functions'][1]
+                    Styleanomaly['Iterator Functions'][4] += 1
                     anomalies_found += 1
 
     # For automatic anomaly detection, return *which* anomalies were found
