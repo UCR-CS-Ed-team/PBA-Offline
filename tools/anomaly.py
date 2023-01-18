@@ -218,7 +218,7 @@ def get_anomaly_score(code, auto=0):
         'Namespace Std': {0:1, 1:0.1, 2:1, 3:NAMESPACE_STD_REGEX, 4:0, 5:-1},
         'Brace Styling': {0:1, 1:0.1, 2:1, 3:BRACE_STYLING_REGEX, 4:0, 5:-1},
         'Escaped Newline': {0:1, 1:0.1, 2:1, 3:ESCAPED_NEWLINE_REGEX, 4:0, 5:-1},
-        'User-Defined Functions': {0:1, 1:0.8, 2:1, 3:USER_DEFINED_FUNCTIONS_REGEX, 4:0, 5:-1},
+        'User-Defined Functions': {0:1, 1:0.8, 2:0, 3:USER_DEFINED_FUNCTIONS_REGEX, 4:0, 5:-1},
         'Ternary Operator': {0:1, 1:0.2, 2:1, 3:TERNARY_OPERATOR_REGEX, 4:0, 5:-1},
         'Command-Line Arguments': {0:1, 1:0.8, 2:1, 3:COMMAND_LINE_ARGUMENTS_REGEX, 4:0, 5:-1},
         'Nulls': {0:1, 1:0.4, 2:1, 3:NULLS_REGEX, 4:0, 5:-1},
@@ -554,6 +554,33 @@ def get_anomaly_score(code, auto=0):
                     if (Styleanomaly['Iterator Functions'][5] <= -1) or (Styleanomaly['Iterator Functions'][5] > -1 and (Styleanomaly['Iterator Functions'][4] < Styleanomaly['Iterator Functions'][5])):
                         anomaly_score += Styleanomaly['Iterator Functions'][1]
                     Styleanomaly['Iterator Functions'][4] += 1
+                    anomalies_found += 1
+
+        if Styleanomaly['Max Min Macros'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Max Min Macros'][3], line):
+                if Styleanomaly['Max Min Macros'][0] == 1 or (Styleanomaly['Max Min Macros'][0] == 0 and Styleanomaly['Max Min Macros'][4] == 0):
+                    # Score for this anomaly is capped to Styleanomaly[x][5] instances
+                    if (Styleanomaly['Max Min Macros'][5] <= -1) or (Styleanomaly['Max Min Macros'][5] > -1 and (Styleanomaly['Max Min Macros'][4] < Styleanomaly['Max Min Macros'][5])):
+                        anomaly_score += Styleanomaly['Max Min Macros'][1]
+                    Styleanomaly['Max Min Macros'][4] += 1
+                    anomalies_found += 1
+
+        if Styleanomaly['Swap Function'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Swap Function'][3], line):
+                if Styleanomaly['Swap Function'][0] == 1 or (Styleanomaly['Swap Function'][0] == 0 and Styleanomaly['Swap Function'][4] == 0):
+                    # Score for this anomaly is capped to Styleanomaly[x][5] instances
+                    if (Styleanomaly['Swap Function'][5] <= -1) or (Styleanomaly['Swap Function'][5] > -1 and (Styleanomaly['Swap Function'][4] < Styleanomaly['Swap Function'][5])):
+                        anomaly_score += Styleanomaly['Swap Function'][1]
+                    Styleanomaly['Swap Function'][4] += 1
+                    anomalies_found += 1
+
+        if Styleanomaly['Cin Inside While'][2] != 0: #Check if the anomaly is turned on 
+            if re.search(Styleanomaly['Cin Inside While'][3], line):
+                if Styleanomaly['Cin Inside While'][0] == 1 or (Styleanomaly['Cin Inside While'][0] == 0 and Styleanomaly['Cin Inside While'][4] == 0):
+                    # Score for this anomaly is capped to Styleanomaly[x][5] instances
+                    if (Styleanomaly['Cin Inside While'][5] <= -1) or (Styleanomaly['Cin Inside While'][5] > -1 and (Styleanomaly['Cin Inside While'][4] < Styleanomaly['Cin Inside While'][5])):
+                        anomaly_score += Styleanomaly['Cin Inside While'][1]
+                    Styleanomaly['Cin Inside While'][4] += 1
                     anomalies_found += 1
 
     # For automatic anomaly detection, return *which* anomalies were found
