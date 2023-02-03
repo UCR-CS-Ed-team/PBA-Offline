@@ -123,7 +123,7 @@ def get_selected_labs(logfile):
             selected_labs.append(labs_list[int(selected_lab)-1])
     return selected_labs
 
-def write_output_to_csv(final_roster):
+def write_output_to_csv(final_roster, file_name='roster.csv'):
     '''
     This function writes our dataframe into a csv output file
     '''
@@ -136,7 +136,7 @@ def write_output_to_csv(final_roster):
             if column not in csv_columns:
                 csv_columns.append(column)          
     try:
-        csv_file = 'output/roster.csv'
+        csv_file = f'output/{file_name}'
         with open(csv_file, 'w', newline = '') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
@@ -170,7 +170,6 @@ def create_data_structure(logfile):
             data[int(row.user_id)] = {}
         if row.content_section not in data[row.user_id]:
             data[row.user_id][row.content_section] = []
-        # url, result = get_code(row.zip_location)
         sub = Submission(
             student_id = row.user_id,
             crid = row.lab_id,
@@ -179,13 +178,13 @@ def create_data_structure(logfile):
             last_name = row.last_name,
             email = row.email,
             zip_location = row.zip_location,
-            submission = row.submission,
-            max_score = row.max_score,
+            submission = row.is_submission,
+            max_score = row.score,
             lab_id = row.content_section,
             submission_id = row.zip_location.split('/')[-1],
-            type = row.submission,
+            type = row.is_submission,
             code = row.student_code,
-            sub_time = get_valid_datetime(row.date_submitted),
+            sub_time = get_valid_datetime(row._11),
             anomaly_dict=None
         )
         data[row.user_id][row.content_section].append(sub)
@@ -198,6 +197,7 @@ def create_data_structure(logfile):
 if __name__ == '__main__':
     # Read File into a pandas dataframe
     file_path = filedialog.askopenfilename()
+    # file_path = r""
     folder_path = os.path.split(file_path)[0]
     filename = os.path.basename(file_path).split('/')[-1]
     logfile = pd.read_csv(file_path)
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     final_roster = {}
     
     while(1):
-        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Quit")
+        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Automatic anomaly detection (selected labs) \n 7. Quit")
         inp = input()
         final_roster = {}
         input_list = inp.split(' ')
@@ -228,7 +228,7 @@ if __name__ == '__main__':
                 if data == {}:
                     logfile = download_code(logfile)
                     data = create_data_structure(logfile)
-                anomaly_detection_output = anomaly(data, selected_labs)
+                anomaly_detection_output = anomaly(data, selected_labs, 0)
                 for user_id in anomaly_detection_output:
                     for lab in anomaly_detection_output[user_id]:
                         anomalies_found = anomaly_detection_output[user_id][lab][0]
@@ -308,7 +308,60 @@ if __name__ == '__main__':
                                 str(lab_id) + ' Student code' : stylechecker_output[user_id][lab_id][2]
                             }
             
+            # Automatic anomaly detection for selected labs
             elif inp == 6:
+
+                final_roster = {}   # Reset roster, fixme later
+                if data == {}:
+                    logfile = download_code(logfile)
+                    data = create_data_structure(logfile)
+                # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
+                anomaly_detection_output = anomaly(data, selected_labs, 1)
+
+                # Populate anomaly counts for every user, for each lab
+                for user_id in anomaly_detection_output:
+                    if user_id not in final_roster:
+                        final_roster[user_id] = { 'User ID': user_id }  # Populate column of user IDs
+                    for lab in anomaly_detection_output[user_id]:
+                        # Instance count of every anomaly for [user_id][lab]
+                        anomalies_found = anomaly_detection_output[user_id][lab][0]
+                        # Create a column for each anomaly with the anomaly's count
+                        for anomaly in anomalies_found:
+                            final_roster[user_id][f"Lab {str(lab)} {anomaly}"] = anomalies_found[anomaly]
+
+                # Count of users that use each anomaly, per-lab
+                num_users_per_anomaly = {}
+                for anomaly in anomalies_found:
+                    num_users_per_anomaly[anomaly] = {}
+
+                # Count the *number of students* that used each anomaly, per-lab
+                for user_id in final_roster:
+                    for lab in anomaly_detection_output[user_id]:
+                        for anomaly in num_users_per_anomaly:
+                            # Need to consider anomalies from every lab
+                            if lab not in num_users_per_anomaly[anomaly]:
+                                num_users_per_anomaly[anomaly][lab] = 0
+                            anomaly_count = final_roster[user_id][f"Lab {str(lab)} {anomaly}"]
+                            if anomaly_count > 0:
+                                num_users_per_anomaly[anomaly][lab] += 1
+
+                # Append a row at bottom for "totals"
+                final_roster['Status'] = {}
+                final_roster['Status']['User ID'] = 'Is Anomaly?'
+                for anomaly in num_users_per_anomaly:
+                    for lab in num_users_per_anomaly[anomaly]:
+                        anomaly_count = num_users_per_anomaly[anomaly][lab]
+                        total_users = len(data)
+                        # If a clear majority uses an "anomaly", it's not anomalous
+                        if anomaly_count/total_users >= 0.8:
+                            final_roster['Status'][f"Lab {str(lab)} {anomaly}"] = 'No'
+                        else:
+                            final_roster['Status'][f"Lab {str(lab)} {anomaly}"] = 'Yes'
+
+                # Outputs to its own file for now
+                write_output_to_csv(final_roster, 'anomaly_counts.csv')
+
+            elif inp == 7:
                 exit(0)
             
             else:
@@ -316,5 +369,4 @@ if __name__ == '__main__':
         
         if len(final_roster) != 0:
             write_output_to_csv(final_roster)
-
     

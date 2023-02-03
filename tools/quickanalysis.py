@@ -77,7 +77,7 @@ def quick_analysis(dataframe):
             max_score = 0
             time_spent_by_user = 0
             time_list = []
-            for time in user_df['date_submitted']:
+            for time in user_df['date_submitted(US/Pacific)']:
                 time_list.append(time)
             # print(time_list)
             # fmt = '%Y-%m-%d %H:%M:%S'
@@ -94,7 +94,7 @@ def quick_analysis(dataframe):
                 if not pd.isna(score):
                     # print(type(score))
                     max_score = max(score, max_score)
-            for submission in user_df['submission']:
+            for submission in user_df['is_submission']:
                 if submission == 1:
                     num_of_submits += 1
             total_score += max_score
