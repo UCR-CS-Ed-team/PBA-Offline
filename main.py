@@ -7,6 +7,7 @@ from tools.roster import roster
 from tools.quickanalysis import quick_analysis
 from tools.submission import Submission
 from tools.stylechecker import stylechecker
+from tools.hardcoding import hardcoding_analysis
 import requests
 import zipfile
 import io
@@ -17,6 +18,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import tkinter as tk
 from tkinter import filedialog
+import json
 
 ##############################
 #       Helper Functions     #
@@ -190,6 +192,20 @@ def create_data_structure(logfile):
         data[row.user_id][row.content_section].append(sub)
     return data
 
+def get_testcases(logfile):
+    # Pick first submission in logfile
+    for row in logfile.itertuples():
+        if row.result:
+            first_submission = row
+            break
+
+    # Save output of each test case
+    testcases = set()
+    result = json.loads(first_submission.result)
+    for test in result['config']['test_bench']:
+        testcases.add(test['options']['output'].rstrip())
+
+    return testcases
 
 ##############################
 #           Control          #
@@ -310,7 +326,6 @@ if __name__ == '__main__':
             
             # Automatic anomaly detection for selected labs
             elif inp == 6:
-
                 final_roster = {}   # Reset roster, fixme later
                 if data == {}:
                     logfile = download_code(logfile)
@@ -364,6 +379,13 @@ if __name__ == '__main__':
             elif inp == 7:
                 exit(0)
             
+            elif inp == 8:
+                if data == {}:
+                    logfile = download_code(logfile)
+                    data = create_data_structure(logfile)
+                testcases = get_testcases(logfile)
+                hardcoding_results = hardcoding_analysis(data, selected_labs, testcases)
+
             else:
                 print("Please select a valid option")
         
