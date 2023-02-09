@@ -203,7 +203,9 @@ def get_testcases(logfile):
     testcases = set()
     result = json.loads(first_submission.result)
     for test in result['config']['test_bench']:
-        testcases.add(test['options']['output'].rstrip())
+        if test.get('options') and test['options'].get('output'):
+            testcases.add(test['options']['output'].strip())
+            print(f"Output testcase: {test['options']['output'].strip()}")
 
     return testcases
 
@@ -224,7 +226,7 @@ if __name__ == '__main__':
     final_roster = {}
     
     while(1):
-        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Automatic anomaly detection (selected labs) \n 7. Quit")
+        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Automatic anomaly detection (selected labs) \n 7. Quit \n 8. Hardcoding detection")
         inp = input()
         final_roster = {}
         input_list = inp.split(' ')
@@ -385,6 +387,23 @@ if __name__ == '__main__':
                     data = create_data_structure(logfile)
                 testcases = get_testcases(logfile)
                 hardcoding_results = hardcoding_analysis(data, selected_labs, testcases)
+                for user_id in hardcoding_results:
+                    for lab in hardcoding_results[user_id]:
+                        hardcoding_score = hardcoding_results[user_id][lab][0]
+                        student_code = hardcoding_results[user_id][lab][1]
+                        if user_id in final_roster:
+                            final_roster[user_id]['Lab ' + str(lab) + ' hardcoding score'] = hardcoding_score
+                            final_roster[user_id][str(lab) + ' Student code'] = student_code
+                        else:
+                            final_roster[user_id] = {
+                                'User ID': user_id,
+                                'Last Name': data[user_id][lab][0].last_name[0],
+                                'First Name': data[user_id][lab][0].first_name[0],
+                                'Email': data[user_id][lab][0].email[0],
+                                'Role': 'Student',
+                                'Lab ' + str(lab) + ' hardcoding score' : hardcoding_score,
+                                str(lab) + ' Student code' : student_code
+                            }
 
             else:
                 print("Please select a valid option")

@@ -6,8 +6,9 @@ import requests
 from datetime import datetime
 import csv
 import io
+import re
 from urllib3 import Retry
-from submission import Submission
+from tools.submission import Submission
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 use_standalone = False
@@ -185,8 +186,16 @@ def create_data_structure(logfile):
 #       User Functions       #
 ##############################
 
-def get_hardcoding_score(code):
-    return 1
+IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*[\"\']?[^\"\']*[\"\']?\s*\))"
+
+def get_hardcoding_score(code, testcases):
+    lines = code.splitlines()
+    for i, line in enumerate(lines):
+        if re.search(IF_WITH_LITERAL_REGEX, line):
+            if "cout" in lines[i+1] and any(testcase in lines[i+1] for testcase in testcases):
+                print(f"Hardcoding detected: {line}")
+                return 1
+    return 0
 
 def hardcoding_analysis(data, selected_labs, testcases):
     output = {}
@@ -204,8 +213,8 @@ def hardcoding_analysis(data, selected_labs, testcases):
                         max_score = sub.max_score
                         code = sub.code
 
-                # temp = get_hardcoding_score(code)
-                # output[user_id][lab] = [anomalies_found, anomaly_score, code]
+                hardcode_score = get_hardcoding_score(code, testcases)
+                output[user_id][lab] = [hardcode_score, code]
     return output
 
 def newtool(data, selected_labs):
