@@ -190,11 +190,16 @@ IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*[\"\']?[^\"\']*[\"\']?\s*\))"
 
 def get_hardcoding_score(code, testcases):
     lines = code.splitlines()
+
+    # Remove lines that are empty or are only a left brace
+    lines = [line for line in lines if line.strip() not in ('', '{')]
+
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
             if "cout" in lines[i+1] and any(testcase in lines[i+1] for testcase in testcases):
-                print(f"Hardcoding detected: {line}")
+                print(f"Hardcoding detected: {line} \n {lines[i+1]}")
                 return 1
+
     return 0
 
 def hardcoding_analysis(data, selected_labs, testcases):

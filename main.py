@@ -203,6 +203,7 @@ def get_testcases(logfile):
     testcases = set()
     result = json.loads(first_submission.result)
     for test in result['config']['test_bench']:
+        # Check that the entry has the ['options']['output'] fields
         if test.get('options') and test['options'].get('output'):
             testcases.add(test['options']['output'].strip())
             print(f"Output testcase: {test['options']['output'].strip()}")
@@ -224,9 +225,18 @@ if __name__ == '__main__':
     selected_labs = get_selected_labs(logfile)
     data = {}
     final_roster = {}
-    
+    prompt = (
+        '1. Quick Analysis (averages for all labs) \n'
+        '2. Basic statisics (roster for selected labs) \n'
+        '3. Anomalies (selected labs) \n'
+        '4. Coding Trails (all labs) \n'
+        '6. Automatic anomaly detection (selected labs) \n'
+        '7. Hardcoding detection (selected labs) \n'
+        '8. Quit \n'
+    )
+
     while(1):
-        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Automatic anomaly detection (selected labs) \n 7. Quit \n 8. Hardcoding detection")
+        print(prompt)
         inp = input()
         final_roster = {}
         input_list = inp.split(' ')
@@ -377,11 +387,9 @@ if __name__ == '__main__':
 
                 # Outputs to its own file for now
                 write_output_to_csv(final_roster, 'anomaly_counts.csv')
-
-            elif inp == 7:
-                exit(0)
             
-            elif inp == 8:
+            # Hardcode detection for selected labs
+            elif inp == 7:
                 if data == {}:
                     logfile = download_code(logfile)
                     data = create_data_structure(logfile)
@@ -404,6 +412,9 @@ if __name__ == '__main__':
                                 'Lab ' + str(lab) + ' hardcoding score' : hardcoding_score,
                                 str(lab) + ' Student code' : student_code
                             }
+
+            elif inp == 8:
+                exit(0)
 
             else:
                 print("Please select a valid option")
