@@ -186,7 +186,7 @@ def create_data_structure(logfile):
 #       User Functions       #
 ##############################
 
-IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*[\"\']?[^\"\']*[\"\']?\s*\))"
+IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))"
 
 def get_hardcoding_score(code, testcases):
     lines = code.splitlines()
@@ -196,8 +196,10 @@ def get_hardcoding_score(code, testcases):
 
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
-            if "cout" in lines[i+1] and any(testcase in lines[i+1] for testcase in testcases):
-                print(f"Hardcoding detected: {line} \n {lines[i+1]}")
+            cout_on_next_line = "cout" in lines[i+1] and any(testcase in lines[i+1] for testcase in testcases)
+            cout_on_same_line = "cout" in line and any(testcase in line for testcase in testcases)
+            if cout_on_next_line or cout_on_same_line:
+                print(f"\n Hardcoding detected: \n {line} \n {lines[i+1]}")
                 return 1
 
     return 0
