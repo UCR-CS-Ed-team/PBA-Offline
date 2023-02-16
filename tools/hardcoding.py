@@ -196,8 +196,11 @@ def get_hardcoding_score(code, testcases):
 
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
-            cout_on_next_line = "cout" in lines[i+1] and any(testcase in lines[i+1] for testcase in testcases)
-            cout_on_same_line = "cout" in line and any(testcase in line for testcase in testcases)
+            # Ensure the testcase occurs after "cout" in the line
+            cout_index = lines[i+1].find("cout")
+            cout_on_next_line = (cout_index != -1) and any(lines[i+1].find(testcase) > cout_index for testcase in testcases)
+            cout_index = line.find("cout")
+            cout_on_same_line = (cout_index != -1) and any(line.find(testcase) > cout_index for testcase in testcases)
             if cout_on_next_line or cout_on_same_line:
                 print(f"\n Hardcoding detected: \n {line} \n {lines[i+1]}")
                 return 1

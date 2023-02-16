@@ -226,7 +226,7 @@ if __name__ == '__main__':
     data = {}
     final_roster = {}
     prompt = (
-        '1. Quick Analysis (averages for all labs) \n'
+        '\n1. Quick Analysis (averages for all labs) \n'
         '2. Basic statisics (roster for selected labs) \n'
         '3. Anomalies (selected labs) \n'
         '4. Coding Trails (all labs) \n'
