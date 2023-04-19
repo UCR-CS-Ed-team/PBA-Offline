@@ -13,3 +13,6 @@ downloads/*
 # ignoring all files from the output folder except .gitkeep
 output/*
 output/.gitkeep
+
+# ignore VS Code config files
+.vscode
