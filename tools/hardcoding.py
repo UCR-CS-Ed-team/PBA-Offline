@@ -188,7 +188,7 @@ def create_data_structure(logfile):
 
 IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))"
 
-def get_hardcoding_score(code, testcases):
+def get_hardcoding_score(code, output_testcases, input_testcases):
     lines = code.splitlines()
 
     # Remove lines that are empty or are only a left brace
@@ -196,18 +196,20 @@ def get_hardcoding_score(code, testcases):
 
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
-            # Ensure the testcase occurs after "cout" in the line
-            cout_index = lines[i+1].find("cout")
-            cout_on_next_line = (cout_index != -1) and any(lines[i+1].find(testcase) > cout_index for testcase in testcases)
-            cout_index = line.find("cout")
-            cout_on_same_line = (cout_index != -1) and any(line.find(testcase) > cout_index for testcase in testcases)
-            if cout_on_next_line or cout_on_same_line:
-                print(f"\n Hardcoding detected: \n {line} \n {lines[i+1]}")
-                return 1
+            # Ensure the "if" statement checks for an input testcase
+            if any(input_testcase in line for input_testcase in input_testcases):
+                # Ensure the output testcase occurs after "cout" in the line
+                cout_index = lines[i+1].find("cout")
+                cout_on_next_line = (cout_index != -1) and any(lines[i+1].find(testcase) > cout_index for testcase in output_testcases)
+                cout_index = line.find("cout")
+                cout_on_same_line = (cout_index != -1) and any(line.find(testcase) > cout_index for testcase in output_testcases)
+                if cout_on_next_line or cout_on_same_line:
+                    print(f"\n Hardcoding detected: \n {line} \n {lines[i+1]}") # DEBUGGING
+                    return 1
 
     return 0
 
-def hardcoding_analysis(data, selected_labs, testcases):
+def hardcoding_analysis(data, selected_labs, output_testcases, input_testcases):
     output = {}
     for lab in selected_labs:
         for user_id in data:
@@ -223,7 +225,7 @@ def hardcoding_analysis(data, selected_labs, testcases):
                         max_score = sub.max_score
                         code = sub.code
 
-                hardcode_score = get_hardcoding_score(code, testcases)
+                hardcode_score = get_hardcoding_score(code, output_testcases, input_testcases)
                 output[user_id][lab] = [hardcode_score, code]
     return output
 

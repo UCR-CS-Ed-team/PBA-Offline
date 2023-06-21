@@ -199,16 +199,22 @@ def get_testcases(logfile):
             first_submission = row
             break
 
-    # Save output of each test case
-    testcases = set()
+    output_testcases = set()
+    input_testcases = set()
     result = json.loads(first_submission.result)
-    for test in result['config']['test_bench']:
-        # Check that the entry has the ['options']['output'] fields
-        if test.get('options') and test['options'].get('output'):
-            testcases.add(test['options']['output'].strip())
-            print(f"Output testcase: {test['options']['output'].strip()}")
 
-    return testcases
+    # Save input for each test case
+    for test in result['config']['test_bench']:
+        # Check that the entry has the ['options'] fields
+        if test.get('options'):
+            if test['options'].get('output'):
+                output_testcases.add(test['options']['output'].strip())
+                print(f"Output testcase: {test['options']['output'].strip()}")  # DEBUGGING
+            if test['options'].get('input'):
+                input_testcases.add(test['options']['input'.strip()])
+                print(f"Input testcase: {test['options']['input'].strip()}")  # DEBUGGING
+
+    return output_testcases, input_testcases
 
 ##############################
 #           Control          #
@@ -393,8 +399,8 @@ if __name__ == '__main__':
                 if data == {}:
                     logfile = download_code(logfile)
                     data = create_data_structure(logfile)
-                testcases = get_testcases(logfile)
-                hardcoding_results = hardcoding_analysis(data, selected_labs, testcases)
+                output_testcases, input_testcases = get_testcases(logfile)
+                hardcoding_results = hardcoding_analysis(data, selected_labs, output_testcases, input_testcases)
                 for user_id in hardcoding_results:
                     for lab in hardcoding_results[user_id]:
                         hardcoding_score = hardcoding_results[user_id][lab][0]
