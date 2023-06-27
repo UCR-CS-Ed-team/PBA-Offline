@@ -189,6 +189,7 @@ def create_data_structure(logfile):
 IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))"
 
 def get_hardcoding_score(code, output_testcases, input_testcases):
+    is_hardcoded = False
     lines = code.splitlines()
 
     # Remove lines that are empty or are only a left brace
@@ -196,20 +197,22 @@ def get_hardcoding_score(code, output_testcases, input_testcases):
 
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
-            for testcase in input_testcases:
+            for in_testcase in input_testcases:
                 # Ensure the output testcase occurs after "cout" in the line
                 cout_index = lines[i+1].find("cout")
-                cout_on_next_line = (cout_index != -1) and any(lines[i+1].find(testcase) > cout_index for testcase in output_testcases)
+                output_on_next_line = (cout_index != -1) and any(lines[i+1].find(out_testcase) > cout_index for out_testcase in output_testcases)
                 cout_index = line.find("cout")
-                cout_on_same_line = (cout_index != -1) and any(line.find(testcase) > cout_index for testcase in output_testcases)
+                output_on_same_line = (cout_index != -1) and any(line.find(out_testcase) > cout_index for out_testcase in output_testcases)
 
                 # Flag for hardcoding if both of these are true:
                 # - Student checks for the input to a testcase as a literal
                 # - Student outputs the output for a testcase as a literal
-                if (testcase in line or testcase.split()[0] in line) and (cout_on_next_line or cout_on_same_line):
-                    print(f"\n Hardcoding detected: \n {line} \n {lines[i+1]}") # DEBUGGING
-                    return 1
+                if (in_testcase in line or in_testcase.split()[0] in line) and (output_on_next_line or output_on_same_line):
+                    print(f"\n Hardcoding detected with testcase {in_testcase}: \n {line} \n {lines[i+1]}") # DEBUGGING
+                    is_hardcoded = True
 
+    if is_hardcoded:
+        return 1
     return 0
 
 def hardcoding_analysis(data, selected_labs, output_testcases, input_testcases):

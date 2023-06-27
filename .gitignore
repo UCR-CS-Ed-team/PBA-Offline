@@ -16,3 +16,6 @@ output/.gitkeep
 
 # ignore VS Code config files
 .vscode
+
+hardcode-testing.py
+input.txt
