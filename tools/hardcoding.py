@@ -188,6 +188,30 @@ def create_data_structure(logfile):
 
 IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))"
 
+def check_soln_for_testcase(solution_code, testcase):
+    lines = solution_code.splitlines()
+
+    # Remove lines that are empty or are only a left brace
+    lines = [line for line in lines if line.strip() not in ('', '{')]
+
+    for i, line in enumerate(lines):
+        if re.search(IF_WITH_LITERAL_REGEX, line):
+            input = testcase[0]
+            output = testcase[1]
+
+            # Ensure the output testcase occurs after "cout" in the line
+            cout_index = line.find('cout')
+            output_on_same_line = (cout_index != -1) and (line.find(output) > cout_index)
+            cout_index = lines[i+1].find('cout')
+            output_on_next_line = (cout_index != -1) and (lines[i+1].find(output) > cout_index)
+
+            if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
+                print(f"Solution has hardcoding with input {input} and output {output}!")   # DEBUGGING
+                return True
+            
+    return False
+
+
 def get_hardcoding_score(code, testcases, solution_code):
     is_hardcoded = False
     lines = code.splitlines()
@@ -197,19 +221,24 @@ def get_hardcoding_score(code, testcases, solution_code):
 
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
-            for in_testcase in input_testcases:
+            for testcase in testcases:
+                input = testcase[0]
+                output = testcase[1]
+
                 # Ensure the output testcase occurs after "cout" in the line
-                cout_index = lines[i+1].find("cout")
-                output_on_next_line = (cout_index != -1) and any(lines[i+1].find(out_testcase) > cout_index for out_testcase in output_testcases)
-                cout_index = line.find("cout")
-                output_on_same_line = (cout_index != -1) and any(line.find(out_testcase) > cout_index for out_testcase in output_testcases)
+                cout_index = line.find('cout')
+                output_on_same_line = (cout_index != -1) and (line.find(output) > cout_index)
+                cout_index = lines[i+1].find('cout')
+                output_on_next_line = (cout_index != -1) and (lines[i+1].find(output) > cout_index)
 
                 # Flag for hardcoding if both of these are true:
                 # - Student checks for the input to a testcase as a literal
                 # - Student outputs the output for a testcase as a literal
-                if (in_testcase in line or in_testcase.split()[0] in line) and (output_on_next_line or output_on_same_line):
-                    print(f"\n Hardcoding detected with testcase {in_testcase}: \n {line} \n {lines[i+1]}") # DEBUGGING
-                    is_hardcoded = True
+                if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
+                    testcase_in_soln = check_soln_for_testcase(solution_code, testcase)
+                    if not testcase_in_soln:
+                        print(f"\n Hardcoding detected with input {input} and output {output}: \n {line} \n {lines[i+1]}") # DEBUGGING
+                        is_hardcoded = True
 
     if is_hardcoded:
         return 1
