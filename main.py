@@ -214,21 +214,35 @@ def get_testcases(logfile):
                 input_testcases.add(test['options']['input'.strip()])
                 print(f"Input testcase: {test['options']['input'].strip()}")  # DEBUGGING
 
-    return output_testcases, input_testcases
+    return (output_testcases, input_testcases)
+
+def get_solution(logfile):
+    solution = logfile[logfile['user_id'] == -1]
+    solution = solution.head(1) # Ensure there's only one row
+    if solution.empty():
+        return None
+    return solution
 
 ##############################
 #           Control          #
 ##############################
 if __name__ == '__main__':
-    # Read File into a pandas dataframe
+    # Read logfile into a Pandas DataFrame
     file_path = filedialog.askopenfilename()
-    # file_path = r""
     folder_path = os.path.split(file_path)[0]
     filename = os.path.basename(file_path).split('/')[-1]
     logfile = pd.read_csv(file_path)
+
+    # Download the logfile's solution code
+    solution = logfile[logfile.user_id == -1].head(1)
+    solution_url = solution['zip_location'].values[0]
+    solution_code = download_code_helper(solution_url)[1]
+
+    # Save student submission URLs and selected labs
     logfile = logfile[logfile.role == 'Student']
     urls = logfile.zip_location.to_list()
     selected_labs = get_selected_labs(logfile)
+
     data = {}
     final_roster = {}
     prompt = (
@@ -399,8 +413,12 @@ if __name__ == '__main__':
                 if data == {}:
                     logfile = download_code(logfile)
                     data = create_data_structure(logfile)
-                output_testcases, input_testcases = get_testcases(logfile)
-                hardcoding_results = hardcoding_analysis(data, selected_labs, output_testcases, input_testcases)
+
+                # Tuple of testcases: (output, input)
+                testcases = get_testcases(logfile)
+                solution = get_solution(logfile)
+
+                hardcoding_results = hardcoding_analysis(data, selected_labs, testcases)
                 for user_id in hardcoding_results:
                     for lab in hardcoding_results[user_id]:
                         hardcoding_score = hardcoding_results[user_id][lab][0]
