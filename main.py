@@ -193,9 +193,9 @@ def create_data_structure(logfile):
     return data
 
 def get_testcases(logfile):
-    # Pick first submission in logfile
+    # Pick first student submission in logfile
     for row in logfile.itertuples():
-        if row.result:
+        if row.result and row.user_id != -1:
             first_submission = row
             break
 
