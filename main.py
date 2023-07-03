@@ -199,22 +199,23 @@ def get_testcases(logfile):
             first_submission = row
             break
 
-    output_testcases = set()
-    input_testcases = set()
+    testcases = set()
     result = json.loads(first_submission.result)
 
     # Save input for each test case
     for test in result['config']['test_bench']:
         # Check that the entry has the ['options'] fields
         if test.get('options'):
-            if test['options'].get('output'):
-                output_testcases.add(test['options']['output'].strip())
-                print(f"Output testcase: {test['options']['output'].strip()}")  # DEBUGGING
-            if test['options'].get('input'):
-                input_testcases.add(test['options']['input'.strip()])
-                print(f"Input testcase: {test['options']['input'].strip()}")  # DEBUGGING
+            # Save input/output for each test case
+            if test['options'].get('input') and test['options'].get('output'):
+                input = test['options']['input'].strip()
+                output = test['options']['output'].strip()
+                testcases.add((input, output))
+                print()                                 # DEBUGGING
+                print(f"Input testcase: {input}")       # DEBUGGING
+                print(f"Output testcase: {output}")     # DEBUGGING
 
-    return (output_testcases, input_testcases)
+    return testcases
 
 ##############################
 #           Control          #
@@ -413,7 +414,7 @@ if __name__ == '__main__':
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile)
 
-                hardcoding_results = hardcoding_analysis(data, selected_labs, testcases)
+                hardcoding_results = hardcoding_analysis(data, selected_labs, testcases, solution_code)
                 for user_id in hardcoding_results:
                     for lab in hardcoding_results[user_id]:
                         hardcoding_score = hardcoding_results[user_id][lab][0]

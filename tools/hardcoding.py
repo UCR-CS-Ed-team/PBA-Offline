@@ -188,7 +188,7 @@ def create_data_structure(logfile):
 
 IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))"
 
-def get_hardcoding_score(code, output_testcases, input_testcases):
+def get_hardcoding_score(code, testcases, solution_code):
     is_hardcoded = False
     lines = code.splitlines()
 
@@ -215,7 +215,7 @@ def get_hardcoding_score(code, output_testcases, input_testcases):
         return 1
     return 0
 
-def hardcoding_analysis(data, selected_labs, output_testcases, input_testcases):
+def hardcoding_analysis(data, selected_labs, testcases, solution_code):
     output = {}
     for lab in selected_labs:
         for user_id in data:
@@ -231,7 +231,7 @@ def hardcoding_analysis(data, selected_labs, output_testcases, input_testcases):
                         max_score = sub.max_score
                         code = sub.code
 
-                hardcode_score = get_hardcoding_score(code, output_testcases, input_testcases)
+                hardcode_score = get_hardcoding_score(code, testcases, solution_code)
                 output[user_id][lab] = [hardcode_score, code]
     return output
 
