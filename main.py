@@ -216,13 +216,6 @@ def get_testcases(logfile):
 
     return (output_testcases, input_testcases)
 
-def get_solution(logfile):
-    solution = logfile[logfile['user_id'] == -1]
-    solution = solution.head(1) # Ensure there's only one row
-    if solution.empty():
-        return None
-    return solution
-
 ##############################
 #           Control          #
 ##############################
@@ -235,8 +228,11 @@ if __name__ == '__main__':
 
     # Download the logfile's solution code
     solution = logfile[logfile.user_id == -1].head(1)
-    solution_url = solution['zip_location'].values[0]
-    solution_code = download_code_helper(solution_url)[1]
+    if solution.empty:
+        solution_code = None
+    else:
+        solution_url = solution['zip_location'].values[0]
+        solution_code = download_code_helper(solution_url)[1]
 
     # Save student submission URLs and selected labs
     logfile = logfile[logfile.role == 'Student']
@@ -416,7 +412,6 @@ if __name__ == '__main__':
 
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile)
-                solution = get_solution(logfile)
 
                 hardcoding_results = hardcoding_analysis(data, selected_labs, testcases)
                 for user_id in hardcoding_results:
