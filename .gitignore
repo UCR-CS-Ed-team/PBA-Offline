@@ -19,3 +19,5 @@ output/.gitkeep
 
 hardcode-testing.py
 input.txt
+solution.cpp
+submission.cpp

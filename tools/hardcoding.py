@@ -188,7 +188,17 @@ def create_data_structure(logfile):
 
 IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))"
 
-def check_soln_for_testcase(solution_code, testcase):
+def check_soln_for_testcase(solution_code: str, testcase: tuple) -> bool:
+    """
+    Checks if the given solution code contains hardcoding for a specific testcase.
+
+    Args:
+        solution_code (str): The solution code to be checked.
+        testcase (tuple): A tuple representing the input and expected output of the testcase.
+
+    Returns:
+        bool: True if the solution code contains hardcoding for the testcase, False otherwise.
+    """
     lines = solution_code.splitlines()
 
     # Remove lines that are empty or are only a left brace
@@ -205,14 +215,28 @@ def check_soln_for_testcase(solution_code, testcase):
             cout_index = lines[i+1].find('cout')
             output_on_next_line = (cout_index != -1) and (lines[i+1].find(output) > cout_index)
 
-            if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
-                print(f"Solution has hardcoding with input {input} and output {output}!")   # DEBUGGING
+            if (input in line) and (output_on_same_line or output_on_next_line):
+                print(f"\nSolution has hardcoding with input '{input}' and output '{output}'!")   # DEBUGGING
                 return True
             
     return False
 
+def get_hardcoding_score(code: str, testcases: set, solution_code: str) -> int:
+    """
+    Returns a score indicating whether student code used hardcoding, based on a logfile's testcases and solution.
 
-def get_hardcoding_score(code, testcases, solution_code):
+    Args:
+        code (str): The student code to be evaluated.
+        testcases (set[tuple[str, str]]): List of testcases, each represented by a tuple of expected input and output.
+        solution_code (str): The solution code for comparison.
+
+    Returns:
+        int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
+
+    Raises:
+        None
+
+    """
     is_hardcoded = False
     lines = code.splitlines()
 
@@ -237,7 +261,7 @@ def get_hardcoding_score(code, testcases, solution_code):
                 if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
                     testcase_in_soln = check_soln_for_testcase(solution_code, testcase)
                     if not testcase_in_soln:
-                        print(f"\n Hardcoding detected with input {input} and output {output}: \n {line} \n {lines[i+1]}") # DEBUGGING
+                        print(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
                         is_hardcoded = True
 
     if is_hardcoded:
