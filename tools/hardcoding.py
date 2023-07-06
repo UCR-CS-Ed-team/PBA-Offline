@@ -221,6 +221,35 @@ def check_soln_for_testcase(solution_code: str, testcase: tuple) -> bool:
             
     return False
 
+def check_testcase_in_code(code: str, testcase: tuple) -> int:
+    """
+    Checks whether a testcase is found within a string.
+    Returns 1 if the testcase is found, else 0.
+    """
+    lines = code.splitlines()
+
+    # Remove lines that are empty or are only a left brace
+    lines = [line for line in lines if line.strip() not in ('', '{')]
+
+    # Search every line for an 'if' comparing to a literal
+    for i, line in enumerate(lines):
+        if re.search(IF_WITH_LITERAL_REGEX, line):
+            input = testcase[0]
+            output = testcase[1]
+
+            # Ensure the output testcase occurs after "cout" in the line
+            cout_index = line.find('cout')
+            output_on_same_line = (cout_index != -1) and (line.find(output) > cout_index)
+            cout_index = lines[i+1].find('cout')
+            output_on_next_line = (cout_index != -1) and (lines[i+1].find(output) > cout_index)
+
+            # Flag for hardcoding if both of these are true:
+            # - Student checks for the input to a testcase as a literal
+            # - Student outputs the output for a testcase as a literal
+            if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
+                return 1
+    return 0
+
 def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) -> int:
     """
     Returns a score indicating whether student code used hardcoding, based on a logfile's testcases and solution.
