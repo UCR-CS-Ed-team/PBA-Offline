@@ -296,6 +296,8 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
 
 def hardcoding_analysis(data, selected_labs, testcases, solution_code):
     output = {}
+    testcase_counts = {testcase: 0 for testcase in testcases}
+
     for lab in selected_labs:
         for user_id in data:
 
@@ -310,8 +312,16 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                         max_score = sub.max_score
                         code = sub.code
 
-                hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
-                output[user_id][lab] = [hardcode_score, code]
+                # Track num times students hardcode testcases
+                for testcase in testcases:
+                    hardcode_score = check_testcase_in_code(code, testcase)
+                    output[user_id][lab] = [hardcode_score, code, testcase]
+                    testcase_counts[testcase] += hardcode_score
+
+                # Work in progress
+                if solution_code:
+                    hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
+                    output[user_id][lab] = [hardcode_score, code]
     return output
 
 def newtool(data, selected_labs):
