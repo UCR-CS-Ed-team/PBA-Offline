@@ -227,7 +227,7 @@ if __name__ == '__main__':
     filename = os.path.basename(file_path).split('/')[-1]
     logfile = pd.read_csv(file_path)
 
-    # Download the logfile's solution code
+    # Locate solution in logfile and download its code
     solution = logfile[logfile.user_id == -1].head(1)
     if solution.empty:
         solution_code = None

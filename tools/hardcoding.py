@@ -221,7 +221,7 @@ def check_soln_for_testcase(solution_code: str, testcase: tuple) -> bool:
             
     return False
 
-def get_hardcoding_score(code: str, testcases: set, solution_code: str) -> int:
+def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) -> int:
     """
     Returns a score indicating whether student code used hardcoding, based on a logfile's testcases and solution.
 
@@ -232,10 +232,6 @@ def get_hardcoding_score(code: str, testcases: set, solution_code: str) -> int:
 
     Returns:
         int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
-
-    Raises:
-        None
-
     """
     is_hardcoded = False
     lines = code.splitlines()
@@ -243,6 +239,7 @@ def get_hardcoding_score(code: str, testcases: set, solution_code: str) -> int:
     # Remove lines that are empty or are only a left brace
     lines = [line for line in lines if line.strip() not in ('', '{')]
 
+    # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
             for testcase in testcases:
@@ -284,7 +281,7 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                         max_score = sub.max_score
                         code = sub.code
 
-                hardcode_score = get_hardcoding_score(code, testcases, solution_code)
+                hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
                 output[user_id][lab] = [hardcode_score, code]
     return output
 
