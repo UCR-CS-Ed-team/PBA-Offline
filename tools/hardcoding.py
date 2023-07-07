@@ -296,7 +296,9 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
 
 def hardcoding_analysis(data, selected_labs, testcases, solution_code):
     output = {}
-    testcase_counts = {testcase: 0 for testcase in testcases}
+    testcase_use_counts = {testcase: 0 for testcase in testcases}
+    TESTCASE_USE_THRESHOLD = 0.6
+    NUM_STUDENTS = len(data)
 
     for lab in selected_labs:
         for user_id in data:
@@ -312,16 +314,32 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                         max_score = sub.max_score
                         code = sub.code
 
-                # Track num times students hardcode testcases
-                for testcase in testcases:
-                    hardcode_score = check_testcase_in_code(code, testcase)
-                    output[user_id][lab] = [hardcode_score, code, testcase]
-                    testcase_counts[testcase] += hardcode_score
-
-                # Work in progress
-                if solution_code:
+                if solution_code is None:
+                    output[user_id][lab] = [0, code, set()]
+                    # Track num times students hardcode testcases
+                    for testcase in testcases:
+                        hardcode_score = check_testcase_in_code(code, testcase)
+                        output[user_id][lab][0] = hardcode_score
+                        if hardcode_score > 0:
+                            output[user_id][lab][2].add(testcase)
+                            testcase_use_counts[testcase] += 1
+                else:
                     hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
                     output[user_id][lab] = [hardcode_score, code]
+        
+        # Don't count the testcases that most students hardcoded
+        if solution_code is None:
+            for user_id in data:
+                for testcase in testcases:
+                    hardcoded_testcases = output[user_id][lab][2]
+                    hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
+                    if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
+                        print(f"Most students hardcoded testcase {testcase}, removing from student {user_id}...")   # DEBUGGING
+                        output[user_id][lab][2].remove(testcase)
+                        if len(output[user_id][lab][2]) == 0:
+                            print(f"Student {user_id}'s hardcoding score went from {output[user_id][lab][0]} to 0!")    # DEBUGGING
+                            output[user_id][lab][0] = 0
+
     return output
 
 def newtool(data, selected_labs):
