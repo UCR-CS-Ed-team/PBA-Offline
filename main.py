@@ -39,6 +39,15 @@ def get_valid_datetime(timestamp):
             pass
     raise ValueError('Cannot recognize datetime format: ' + t)
 
+def download_solution(logfile):
+    ''' Return solution code in a logfile, if present '''
+    solution = logfile[logfile.user_id == -1].head(1)
+    if not solution.empty:
+        solution_url = solution['zip_location'].values[0]
+        solution_code = download_code_helper(solution_url)[1]
+        return solution_code
+    return None
+
 def download_code_helper(url):
     '''
     Actual code which downloads the students code run using requests library
@@ -228,12 +237,7 @@ if __name__ == '__main__':
     logfile = pd.read_csv(file_path)
 
     # Locate solution in logfile and download its code
-    solution = logfile[logfile.user_id == -1].head(1)
-    if solution.empty:
-        solution_code = None
-    else:
-        solution_url = solution['zip_location'].values[0]
-        solution_code = download_code_helper(solution_url)[1]
+    solution = download_solution(logfile)
 
     # Save student submission URLs and selected labs
     logfile = logfile[logfile.role == 'Student']

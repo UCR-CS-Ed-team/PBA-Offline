@@ -247,6 +247,7 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
             # - Student checks for the input to a testcase as a literal
             # - Student outputs the output for a testcase as a literal
             if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
+                print(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
                 return 1
     return 0
 
@@ -263,32 +264,13 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
         int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
     """
     is_hardcoded = False
-    lines = code.splitlines()
 
-    # Remove lines that are empty or are only a left brace
-    lines = [line for line in lines if line.strip() not in ('', '{')]
-
-    # Search every line for an 'if' comparing to a literal
-    for i, line in enumerate(lines):
-        if re.search(IF_WITH_LITERAL_REGEX, line):
-            for testcase in testcases:
-                input = testcase[0]
-                output = testcase[1]
-
-                # Ensure the output testcase occurs after "cout" in the line
-                cout_index = line.find('cout')
-                output_on_same_line = (cout_index != -1) and (line.find(output) > cout_index)
-                cout_index = lines[i+1].find('cout')
-                output_on_next_line = (cout_index != -1) and (lines[i+1].find(output) > cout_index)
-
-                # Flag for hardcoding if both of these are true:
-                # - Student checks for the input to a testcase as a literal
-                # - Student outputs the output for a testcase as a literal
-                if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
-                    testcase_in_soln = check_soln_for_testcase(solution_code, testcase)
-                    if not testcase_in_soln:
-                        print(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
-                        is_hardcoded = True
+    for testcase in testcases:
+        testcase_in_code = check_testcase_in_code(code, testcase)
+        testcase_in_soln = check_soln_for_testcase(solution_code, testcase)
+        if testcase_in_code and not testcase_in_soln:
+            print(f"is_hardcoded is True for testcase {testcase}.")
+            is_hardcoded = True
 
     if is_hardcoded:
         return 1
@@ -336,7 +318,7 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                     if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
                         print(f"Most students hardcoded testcase {testcase}, removing from student {user_id}...")   # DEBUGGING
                         output[user_id][lab][2].remove(testcase)
-                        if len(output[user_id][lab][2]) == 0:
+                        if len(output[user_id][lab][2]) <= 0:
                             print(f"Student {user_id}'s hardcoding score went from {output[user_id][lab][0]} to 0!")    # DEBUGGING
                             output[user_id][lab][0] = 0
 
