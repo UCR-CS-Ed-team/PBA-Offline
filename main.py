@@ -19,6 +19,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import tkinter as tk
 from tkinter import filedialog
 import json
+from tqdm import tqdm
+from random import random
 
 ##############################
 #       Helper Functions     #
@@ -100,10 +102,12 @@ def download_code(logfile):
             threads.append(executor.submit(download_code_helper, url))
         student_code = []
         i = 0
-        for task in as_completed(threads):
-            # print(i)
-            student_code.append(task.result())
-            i += 1
+        with tqdm(total=len(threads)) as pbar:
+            for task in as_completed(threads):
+                # print(i)
+                student_code.append(task.result())
+                i += 1
+                pbar.update(1)
     df = pd.DataFrame(student_code, columns = ['zip_location', 'student_code'])
     logfile = pd.merge(left=logfile, right=df, on=['zip_location'])
     return logfile
@@ -237,7 +241,7 @@ if __name__ == '__main__':
     logfile = pd.read_csv(file_path)
 
     # Locate solution in logfile and download its code
-    solution = download_solution(logfile)
+    solution_code = download_solution(logfile)
 
     # Save student submission URLs and selected labs
     logfile = logfile[logfile.role == 'Student']
@@ -255,6 +259,8 @@ if __name__ == '__main__':
         '7. Hardcoding detection (selected labs) \n'
         '8. Quit \n'
     )
+
+    hardcode_example = '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n   vector<int> userInput;\n   int minVal = 0;\n   unsigned int i;\n   \n   for(i = 0; i < userInput.size(); ++i) {\n      cin >> userInput.at(i);\n   }\n   \n   for(i = 0; i < userInput.size(); ++i) {\n      cout << userInput.at(i) << " ";\n   }\n   \n   cout << endl;\n      \n   \n   /*string x;\n   getline(cin, x);*/\n   \n   /*if(x == "5 10 5 3 21 2"){\n      cout << "2 3" << endl;\n   }\n   if(x == "4 1 2 31 15"){\n      cout << "1 2" << endl;\n   }\n   if(x == "5 1 8 91 23 7"){\n      cout << "1 7" << endl;\n   }*/\n   \n\n   return 0;\n}\n'
 
     while(1):
         print(prompt)
@@ -414,6 +420,13 @@ if __name__ == '__main__':
                 if data == {}:
                     logfile = download_code(logfile)
                     data = create_data_structure(logfile)
+
+                # TESTING, set code to hardcoding example
+                for user_id, labs in data.items():
+                    for lab, subs in labs.items():
+                        for sub in subs:
+                            if random() <= 0.2:
+                                sub.code = hardcode_example
 
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile)

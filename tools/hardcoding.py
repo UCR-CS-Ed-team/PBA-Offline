@@ -247,7 +247,7 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
             # - Student checks for the input to a testcase as a literal
             # - Student outputs the output for a testcase as a literal
             if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
-                print(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
+                # print(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
                 return 1
     return 0
 
@@ -308,6 +308,11 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                 else:
                     hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
                     output[user_id][lab] = [hardcode_score, code]
+
+        # DEBUGGING
+        for testcase in testcases:
+            hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
+            print(f"Count for testcase {testcase}: {testcase_use_counts[testcase]} / {NUM_STUDENTS} ({hardcoding_percentage:.2f}%)")
         
         # Don't count the testcases that most students hardcoded
         if solution_code is None:
@@ -315,11 +320,12 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                 for testcase in testcases:
                     hardcoded_testcases = output[user_id][lab][2]
                     hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
+                    # print(f"({testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}%) hardcoded testcase {testcase}...")
                     if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
-                        print(f"Most students hardcoded testcase {testcase}, removing from student {user_id}...")   # DEBUGGING
+                        # print(f"Most students ({testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}%) hardcoded testcase {testcase}, removing from student {user_id}...")   # DEBUGGING
                         output[user_id][lab][2].remove(testcase)
                         if len(output[user_id][lab][2]) <= 0:
-                            print(f"Student {user_id}'s hardcoding score went from {output[user_id][lab][0]} to 0!")    # DEBUGGING
+                            # print(f"Student {user_id}'s hardcoding score went from {output[user_id][lab][0]} to 0!")    # DEBUGGING
                             output[user_id][lab][0] = 0
 
     return output
