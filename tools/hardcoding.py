@@ -243,10 +243,9 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
             cout_index = lines[i+1].find('cout')
             output_on_next_line = (cout_index != -1) and (lines[i+1].find(output) > cout_index)
 
-            # Flag for hardcoding if both of these are true:
-            # - Student checks for the input to a testcase as a literal
-            # - Student outputs the output for a testcase as a literal
-            if (input in line or input.split()[0] in line) and (output_on_same_line or output_on_next_line):
+            input_hardcoded = input in line or any(word in line for word in input.split())
+            output_hardcoded = output_on_same_line or output_on_next_line
+            if input_hardcoded and output_hardcoded:
                 # print(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
                 return 1
     return 0

@@ -260,6 +260,7 @@ if __name__ == '__main__':
         '8. Quit \n'
     )
 
+    # TESTING
     hardcode_example = '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n   vector<int> userInput;\n   int minVal = 0;\n   unsigned int i;\n   \n   for(i = 0; i < userInput.size(); ++i) {\n      cin >> userInput.at(i);\n   }\n   \n   for(i = 0; i < userInput.size(); ++i) {\n      cout << userInput.at(i) << " ";\n   }\n   \n   cout << endl;\n      \n   \n   /*string x;\n   getline(cin, x);*/\n   \n   /*if(x == "5 10 5 3 21 2"){\n      cout << "2 3" << endl;\n   }\n   if(x == "4 1 2 31 15"){\n      cout << "1 2" << endl;\n   }\n   if(x == "5 1 8 91 23 7"){\n      cout << "1 7" << endl;\n   }*/\n   \n\n   return 0;\n}\n'
 
     while(1):
