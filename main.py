@@ -21,6 +21,15 @@ from tkinter import filedialog
 import json
 from tqdm import tqdm
 from random import random
+import logging
+
+# DEBUGGING
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(name)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 ##############################
 #       Helper Functions     #

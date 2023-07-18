@@ -7,11 +7,20 @@ from datetime import datetime
 import csv
 import io
 import re
+import logging
 from urllib3 import Retry
 from tools.submission import Submission
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 use_standalone = False
+
+# DEBUGGING
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(name)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 ##############################
 #       Helper Functions     #
@@ -182,8 +191,6 @@ def create_data_structure(logfile):
         data[row.user_id][row.content_section].append(sub)
     return data
 
-
-
 ##############################
 #       User Functions       #
 ##############################
@@ -248,7 +255,7 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
             input_hardcoded = input in line or any(word in line for word in input.split())
             output_hardcoded = output_on_same_line or output_on_next_line
             if input_hardcoded and output_hardcoded:
-                # print(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
+                # logger.debug(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
                 return 1
     return 0
 
@@ -270,7 +277,7 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
         testcase_in_code = check_testcase_in_code(code, testcase)
         testcase_in_soln = check_soln_for_testcase(solution_code, testcase)
         if testcase_in_code and not testcase_in_soln:
-            print(f"is_hardcoded is True for testcase {testcase}.")
+            logger.debug(f"is_hardcoded is True for testcase {testcase}.")
             is_hardcoded = True
 
     if is_hardcoded:
@@ -303,7 +310,7 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
         testcase_use_counts = {testcase: 0 for testcase in testcases}
         TESTCASE_USE_THRESHOLD = 0.6
         NUM_STUDENTS = len(data)
-        
+
         for lab in selected_labs:
             for user_id in data:
                 if user_id not in output:
@@ -322,9 +329,8 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                 for testcase in testcases:
                     hardcoded_testcases = output[user_id][lab][2]
                     hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
-                    print(f"({testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}%) hardcoded testcase {testcase}...")    # DEBUGGING
+                    logger.debug(f"({testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}%) hardcoded testcase {testcase}...")
                     if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
-                        print(f"Most students ({testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}%) hardcoded testcase {testcase}, removing from student {user_id}...")   # DEBUGGING
                         output[user_id][lab][2].remove(testcase)
                         if len(output[user_id][lab][2]) <= 0:
                             output[user_id][lab][0] = 0
