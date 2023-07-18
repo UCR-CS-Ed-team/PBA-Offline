@@ -230,6 +230,13 @@ def get_testcases(logfile):
 
     return testcases
 
+def set_code_in_logfile(logfile, code, percent):
+    for user_id, labs in logfile.items():
+        for lab, subs in labs.items():
+            for sub in subs:
+                if random() <= percent:
+                    sub.code = code
+
 ##############################
 #           Control          #
 ##############################
@@ -423,11 +430,7 @@ if __name__ == '__main__':
                     data = create_data_structure(logfile)
 
                 # TESTING, set code to hardcoding example
-                for user_id, labs in data.items():
-                    for lab, subs in labs.items():
-                        for sub in subs:
-                            if random() <= 0.2:
-                                sub.code = hardcode_example
+                set_code_in_logfile(data, hardcode_example, 0.8)
 
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile)
