@@ -197,55 +197,37 @@ def create_data_structure(logfile):
 
 IF_WITH_LITERAL_REGEX = r"(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))"
 
-def check_soln_for_testcase(solution_code: str, testcase: tuple) -> bool:
-    """
-    Checks if the given solution code contains hardcoding for a specific testcase.
-
-    Args:
-        solution_code (str): The solution code to be checked.
-        testcase (tuple): A tuple representing the input and expected output of the testcase.
-
-    Returns:
-        bool: True if the solution code contains hardcoding for the testcase, False otherwise.
-    """
-    lines = solution_code.splitlines()
+def check_if_literal(code: str) -> int:
+    '''Returns 1 if code includes an if statement comparing to literals'''
 
     # Remove lines that are empty or are only a left brace
+    lines = code.splitlines()
     lines = [line for line in lines if line.strip() not in ('', '{')]
 
+    # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
-            input = testcase[0]
-            output = testcase[1]
+            # Ensure output occurs after "cout" in the line
+            if 'cout' in line or 'cout' in lines[i+1]:
+                return 1
+    return 0
 
-            # Ensure the output testcase occurs after "cout" in the line
-            cout_index = line.find('cout')
-            output_on_same_line = (cout_index != -1) and (line.find(output) > cout_index)
-            cout_index = lines[i+1].find('cout')
-            output_on_next_line = (cout_index != -1) and (lines[i+1].find(output) > cout_index)
-
-            if (input in line) and (output_on_same_line or output_on_next_line):
-                print(f"\nSolution has hardcoding with input '{input}' and output '{output}'!")   # DEBUGGING
-                return True
-            
-    return False
 
 def check_testcase_in_code(code: str, testcase: tuple) -> int:
     """
     Checks whether a testcase is found within a string.
     Returns 1 if the testcase is found, else 0.
     """
-    lines = code.splitlines()
+    input = testcase[0]
+    output = testcase[1]
 
     # Remove lines that are empty or are only a left brace
+    lines = code.splitlines()
     lines = [line for line in lines if line.strip() not in ('', '{')]
 
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
-            input = testcase[0]
-            output = testcase[1]
-
             # Ensure the output testcase occurs after "cout" in the line
             cout_index = line.find('cout')
             output_on_same_line = (cout_index != -1) and (line.find(output) > cout_index)
@@ -258,6 +240,7 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
                 # logger.debug(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
                 return 1
     return 0
+
 
 def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) -> int:
     """
@@ -275,7 +258,7 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
 
     for testcase in testcases:
         testcase_in_code = check_testcase_in_code(code, testcase)
-        testcase_in_soln = check_soln_for_testcase(solution_code, testcase)
+        testcase_in_soln = check_testcase_in_code(solution_code, testcase)
         if testcase_in_code and not testcase_in_soln:
             logger.debug(f"is_hardcoded is True for testcase {testcase}.")
             is_hardcoded = True
@@ -283,6 +266,7 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
     if is_hardcoded:
         return 1
     return 0
+
 
 def get_code_with_max_score(user_id, lab, submissions):
     max_score = 0
@@ -293,49 +277,79 @@ def get_code_with_max_score(user_id, lab, submissions):
             code = sub.code
     return code
 
+
 def hardcoding_analysis(data, selected_labs, testcases, solution_code):
     output = {}
 
-    if testcases and solution_code:
-        for lab in selected_labs:
-            for user_id in data:
-                if user_id not in output:
-                    output[user_id] = {}
-                if lab in data[user_id]:
-                    code = get_code_with_max_score(user_id, lab, data)
-                    hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
-                    output[user_id][lab] = [hardcode_score, code]
+    try:
+        if testcases and solution_code:
+            for lab in selected_labs:
+                for user_id in data:
+                    if user_id not in output:
+                        output[user_id] = {}
+                    if lab in data[user_id]:
+                        code = get_code_with_max_score(user_id, lab, data)
+                        hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
+                        output[user_id][lab] = [hardcode_score, code]
 
-    elif testcases and not solution_code:
-        testcase_use_counts = {testcase: 0 for testcase in testcases}
-        TESTCASE_USE_THRESHOLD = 0.6
-        NUM_STUDENTS = len(data)
+        elif testcases and not solution_code:
+            testcase_use_counts = {testcase: 0 for testcase in testcases}
+            TESTCASE_USE_THRESHOLD = 0.6
+            NUM_STUDENTS = len(data)
 
-        for lab in selected_labs:
-            for user_id in data:
-                if user_id not in output:
-                    output[user_id] = {}
-                if lab in data[user_id]:
-                    code = get_code_with_max_score(user_id, lab, data)
-                    output[user_id][lab] = [0, code, set()]
-                    for testcase in testcases:  # Track num times students hardcode testcases
-                        hardcode_score = check_testcase_in_code(code, testcase)
-                        output[user_id][lab][0] = hardcode_score
-                        if hardcode_score > 0:
-                            output[user_id][lab][2].add(testcase)
-                            testcase_use_counts[testcase] += 1
+            for lab in selected_labs:
+                for user_id in data:
+                    if user_id not in output:
+                        output[user_id] = {}
+                    if lab in data[user_id]:
+                        code = get_code_with_max_score(user_id, lab, data)
+                        output[user_id][lab] = [0, code, set()]
+                        for testcase in testcases:  # Track num times students hardcode testcases
+                            hardcode_score = check_testcase_in_code(code, testcase)
+                            output[user_id][lab][0] = hardcode_score
+                            if hardcode_score > 0:
+                                output[user_id][lab][2].add(testcase)
+                                testcase_use_counts[testcase] += 1
 
-            for user_id in data:
-                for testcase in testcases:
-                    hardcoded_testcases = output[user_id][lab][2]
-                    hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
-                    logger.debug(f"({testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}%) hardcoded testcase {testcase}...")
-                    if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
-                        output[user_id][lab][2].remove(testcase)
-                        if len(output[user_id][lab][2]) <= 0:
-                            output[user_id][lab][0] = 0
+                for user_id in data:
+                    for testcase in testcases:
+                        hardcoded_testcases = output[user_id][lab][2]
+                        hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
+                        logger.debug(f"{testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% hardcoded testcase {testcase}...")
+                        if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
+                            output[user_id][lab][2].remove(testcase)
+                            if len(output[user_id][lab][2]) <= 0:
+                                output[user_id][lab][0] = 0
 
-    return output
+        elif not testcases and not solution_code:
+            if_literal_use_count = 0
+            IF_LITERAL_THRESHOLD = 0.6
+            NUM_STUDENTS = len(data)
+
+            for lab in selected_labs:
+                for user_id in data:
+                    if user_id not in output:
+                        output[user_id] = {}
+                    if lab in data[user_id]:
+                        code = get_code_with_max_score(user_id, lab, data)
+                        hardcode_score = check_if_literal(code)
+                        output[user_id][lab] = [hardcode_score, code]
+                        if_literal_use_count += hardcode_score
+                
+                hardcoding_percentage = if_literal_use_count / NUM_STUDENTS
+                for user_id in data:
+                    if hardcoding_percentage > IF_LITERAL_THRESHOLD:
+                        logger.debug(f"{if_literal_use_count}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% compared to literals in an if statement...")
+                        output[user_id][lab][hardcode_score] = 0
+
+        else:
+            raise Exception("Unexpected input during hardcode analysis")
+        
+        return output
+        
+    except Exception as e:
+        logger.error(f"Error: {e}")
+
 
 def newtool(data, selected_labs):
     '''
@@ -377,6 +391,7 @@ def newtool(data, selected_labs):
                 num_develops = num_runs - num_submits
             newtool_output[user_id][lab] = [num_runs, num_develops, num_submits]
     return newtool_output
+
 
 ##############################
 #           Control          #
