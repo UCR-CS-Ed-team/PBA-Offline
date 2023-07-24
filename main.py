@@ -52,8 +52,12 @@ def get_valid_datetime(timestamp):
 
 def download_solution(logfile):
     ''' Return solution code in a logfile, if present '''
-    solution = logfile[logfile.user_id == -1].head(1)
-    if not solution.empty:
+    for row in logfile.itertuples():
+        if row.user_id == -1:
+            solution = row
+            break
+
+    if solution and not pd.isnull(solution.zip_location):
         solution_url = solution['zip_location'].values[0]
         solution_code = download_code_helper(solution_url)[1]
         return solution_code
@@ -217,29 +221,29 @@ def create_data_structure(logfile):
 def get_testcases(logfile):
     # Pick first student submission in logfile
     for row in logfile.itertuples():
-        if row.result and row.user_id != -1:
+        if row.user_id != -1:
             first_submission = row
             break
 
     testcases = set()
-    result = json.loads(first_submission.result)
-
-    # Save input for each test case
-    for test in result['config']['test_bench']:
-        # Check that the entry has the ['options'] fields
-        if test.get('options'):
-            # Save input/output for each test case
-            if test['options'].get('input') and test['options'].get('output'):
-                input = test['options']['input'].strip()
-                output = test['options']['output'].strip()
-                testcases.add((input, output))
-                print()                                 # DEBUGGING
-                print(f"Input testcase: {input}")       # DEBUGGING
-                print(f"Output testcase: {output}")     # DEBUGGING
-
+    # Check that 'results' column isn't empty
+    if not pd.isnull(first_submission.result):
+        result = json.loads(first_submission.result)
+        # Save input for each test case
+        for test in result['config']['test_bench']:
+            # Check that the entry has the ['options'] fields
+            if test.get('options'):
+                # Save input/output for each test case
+                if test['options'].get('input') and test['options'].get('output'):
+                    input = test['options']['input'].strip()
+                    output = test['options']['output'].strip()
+                    testcases.add((input, output))
+                    logger.debug(f"\nInput testcase: {input}")
+                    logger.debug(f"Output testcase: {output}")
     return testcases
 
 def set_code_in_logfile(logfile, code, percent):
+    '''For testing purposes'''
     for user_id, labs in logfile.items():
         for lab, subs in labs.items():
             for sub in subs:
@@ -439,7 +443,7 @@ if __name__ == '__main__':
                     data = create_data_structure(logfile)
 
                 # TESTING, set code to hardcoding example
-                set_code_in_logfile(data, hardcode_example, 0.8)
+                # set_code_in_logfile(data, hardcode_example, 0.8)
 
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile)

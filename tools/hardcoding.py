@@ -207,7 +207,7 @@ def check_if_literal(code: str) -> int:
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
         if re.search(IF_WITH_LITERAL_REGEX, line):
-            # Ensure output occurs after "cout" in the line
+            # Check for cout on same or next line
             if 'cout' in line or 'cout' in lines[i+1]:
                 return 1
     return 0
@@ -337,9 +337,9 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                         if_literal_use_count += hardcode_score
                 
                 hardcoding_percentage = if_literal_use_count / NUM_STUDENTS
+                logger.debug(f"{if_literal_use_count}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% compared to literals in an if statement...")
                 for user_id in data:
                     if hardcoding_percentage > IF_LITERAL_THRESHOLD:
-                        logger.debug(f"{if_literal_use_count}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% compared to literals in an if statement...")
                         output[user_id][lab][hardcode_score] = 0
 
         else:
@@ -349,6 +349,7 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
         
     except Exception as e:
         logger.error(f"Error: {e}")
+        exit(1)
 
 
 def newtool(data, selected_labs):
