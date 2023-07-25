@@ -22,6 +22,7 @@ import json
 from tqdm import tqdm
 from random import random
 import logging
+import pickle
 
 # DEBUGGING
 logger = logging.getLogger(__name__)

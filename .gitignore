@@ -21,3 +21,4 @@ hardcode-testing.py
 input.txt
 solution.cpp
 submission.cpp
+*.pk1

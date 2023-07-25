@@ -8,6 +8,7 @@ import csv
 import io
 import re
 import logging
+import pickle
 from urllib3 import Retry
 from tools.submission import Submission
 from concurrent.futures import ThreadPoolExecutor, as_completed
