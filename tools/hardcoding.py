@@ -340,7 +340,7 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
                 logger.debug(f"{if_literal_use_count}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% compared to literals in an if statement...")
                 for user_id in data:
                     if hardcoding_percentage > IF_LITERAL_THRESHOLD:
-                        output[user_id][lab][hardcode_score] = 0
+                        output[user_id][lab][0] = 0
 
         else:
             raise Exception("Unexpected input during hardcode analysis")

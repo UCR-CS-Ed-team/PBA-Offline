@@ -443,7 +443,7 @@ if __name__ == '__main__':
                     data = create_data_structure(logfile)
 
                 # TESTING, set code to hardcoding example
-                # set_code_in_logfile(data, hardcode_example, 0.8)
+                set_code_in_logfile(data, hardcode_example, 0.8)
 
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile)
