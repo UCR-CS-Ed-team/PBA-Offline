@@ -237,7 +237,6 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
             input_hardcoded = input in line or any(word in line for word in input.split())
             output_hardcoded = output_on_same_line or output_on_next_line
             if input_hardcoded and output_hardcoded:
-                # logger.debug(f"\nHardcoding detected with input '{input}' and output '{output}': \n {line} \n {lines[i+1]}") # DEBUGGING
                 return 1
     return 0
 
@@ -276,6 +275,77 @@ def get_code_with_max_score(user_id, lab, submissions):
             max_score = sub.max_score
             code = sub.code
     return code
+
+
+def hardcoding_analysis_1(data, selected_labs, testcases, solution_code):
+    '''Case 1: testcases and solution is available'''
+    output = {}
+    if testcases and solution_code:
+        for lab in selected_labs:
+            for user_id in data:
+                if user_id not in output:
+                    output[user_id] = {}
+                if lab in data[user_id]:
+                    code = get_code_with_max_score(user_id, lab, data)
+                    hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
+                    output[user_id][lab] = [hardcode_score, code]
+    return output
+
+
+def hardcoding_analysis_2(data, selected_labs, testcases):
+    '''Case 2: testcases are available, but no solution'''
+    output = {}
+    testcase_use_counts = {testcase: 0 for testcase in testcases}
+    TESTCASE_USE_THRESHOLD = 0.6
+    NUM_STUDENTS = len(data)
+
+    for lab in selected_labs:
+        for user_id in data:
+            if user_id not in output:
+                output[user_id] = {}
+            if lab in data[user_id]:
+                code = get_code_with_max_score(user_id, lab, data)
+                output[user_id][lab] = [0, code, set()]
+                for testcase in testcases:  # Track num times students hardcode testcases
+                    hardcode_score = check_testcase_in_code(code, testcase)
+                    output[user_id][lab][0] = hardcode_score
+                    if hardcode_score > 0:
+                        output[user_id][lab][2].add(testcase)
+                        testcase_use_counts[testcase] += 1
+        for user_id in data:
+            for testcase in testcases:
+                hardcoded_testcases = output[user_id][lab][2]
+                hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
+                logger.debug(f"{testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% hardcoded testcase {testcase}...")
+                if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
+                    output[user_id][lab][2].remove(testcase)
+                    if len(output[user_id][lab][2]) <= 0:
+                        output[user_id][lab][0] = 0
+    return output
+
+
+def hardcoding_analysis_3(data, selected_labs):
+    '''Case 3: no testcases or solution'''
+    output = {}
+    if_literal_use_count = 0
+    IF_LITERAL_THRESHOLD = 0.6
+    NUM_STUDENTS = len(data)
+
+    for lab in selected_labs:
+        for user_id in data:
+            if user_id not in output:
+                output[user_id] = {}
+            if lab in data[user_id]:
+                code = get_code_with_max_score(user_id, lab, data)
+                hardcode_score = check_if_literal(code)
+                output[user_id][lab] = [hardcode_score, code]
+                if_literal_use_count += hardcode_score
+        hardcoding_percentage = if_literal_use_count / NUM_STUDENTS
+        logger.debug(f"{if_literal_use_count}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% compared to literals in an if statement...")
+        for user_id in data:
+            if hardcoding_percentage > IF_LITERAL_THRESHOLD:
+                output[user_id][lab][0] = 0
+    return output
 
 
 def hardcoding_analysis(data, selected_labs, testcases, solution_code):

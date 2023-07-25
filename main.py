@@ -7,7 +7,7 @@ from tools.roster import roster
 from tools.quickanalysis import quick_analysis
 from tools.submission import Submission
 from tools.stylechecker import stylechecker
-from tools.hardcoding import hardcoding_analysis
+import tools.hardcoding
 import requests
 import zipfile
 import io
@@ -448,7 +448,22 @@ if __name__ == '__main__':
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile)
 
-                hardcoding_results = hardcoding_analysis(data, selected_labs, testcases, solution_code)
+                try:
+                    if testcases and solution_code:
+                        logger.debug("Case 1: testcases and solution")
+                        hardcoding_results = tools.hardcoding.hardcoding_analysis_1(data, selected_labs, testcases, solution_code)
+                    elif testcases and not solution_code:
+                        logger.debug("Case 2: testcases, no solution")
+                        hardcoding_results = tools.hardcoding.hardcoding_analysis_2(data, selected_labs, testcases)
+                    elif not testcases and not solution_code:
+                        logger.debug("Case 3: no testcases or solution")
+                        hardcoding_results = tools.hardcoding.hardcoding_analysis_3(data, selected_labs)
+                    else:
+                        raise Exception("Unexpected input during hardcode analysis")
+                except Exception as e:
+                    logger.error(f"Error: {e}")
+                    exit(1)
+
                 for user_id in hardcoding_results:
                     for lab in hardcoding_results[user_id]:
                         hardcoding_score = hardcoding_results[user_id][lab][0]
