@@ -58,8 +58,7 @@ def download_solution(logfile):
             break
 
     if solution and not pd.isnull(solution.zip_location):
-        solution_url = solution['zip_location'].values[0]
-        solution_code = download_code_helper(solution_url)[1]
+        solution_code = download_code_helper(solution.zip_location)[1]
         return solution_code
     return None
 
@@ -443,7 +442,7 @@ if __name__ == '__main__':
                     data = create_data_structure(logfile)
 
                 # TESTING, set code to hardcoding example
-                set_code_in_logfile(data, hardcode_example, 0.8)
+                # set_code_in_logfile(data, hardcode_example, 0.8)
 
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile)
