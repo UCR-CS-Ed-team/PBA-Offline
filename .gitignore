@@ -13,3 +13,12 @@ downloads/*
 # ignoring all files from the output folder except .gitkeep
 output/*
 output/.gitkeep
+
+# ignore VS Code config files
+.vscode
+
+hardcode-testing.py
+input.txt
+solution.cpp
+submission.cpp
+*.pk1

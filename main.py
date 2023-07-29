@@ -7,6 +7,7 @@ from tools.roster import roster
 from tools.quickanalysis import quick_analysis
 from tools.submission import Submission
 from tools.stylechecker import stylechecker
+import tools.hardcoding
 import requests
 import zipfile
 import io
@@ -17,6 +18,19 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import tkinter as tk
 from tkinter import filedialog
+import json
+from tqdm import tqdm
+from random import random
+import logging
+import pickle
+
+# DEBUGGING
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(name)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 ##############################
 #       Helper Functions     #
@@ -36,6 +50,18 @@ def get_valid_datetime(timestamp):
         except ValueError:
             pass
     raise ValueError('Cannot recognize datetime format: ' + t)
+
+def download_solution(logfile):
+    ''' Return solution code in a logfile, if present '''
+    for row in logfile.itertuples():
+        if row.user_id == -1:
+            solution = row
+            break
+
+    if solution and not pd.isnull(solution.zip_location):
+        solution_code = download_code_helper(solution.zip_location)[1]
+        return solution_code
+    return None
 
 def download_code_helper(url):
     '''
@@ -89,10 +115,12 @@ def download_code(logfile):
             threads.append(executor.submit(download_code_helper, url))
         student_code = []
         i = 0
-        for task in as_completed(threads):
-            # print(i)
-            student_code.append(task.result())
-            i += 1
+        with tqdm(total=len(threads)) as pbar:
+            for task in as_completed(threads):
+                # print(i)
+                student_code.append(task.result())
+                i += 1
+                pbar.update(1)
     df = pd.DataFrame(student_code, columns = ['zip_location', 'student_code'])
     logfile = pd.merge(left=logfile, right=df, on=['zip_location'])
     return logfile
@@ -190,25 +218,73 @@ def create_data_structure(logfile):
         data[row.user_id][row.content_section].append(sub)
     return data
 
+def get_testcases(logfile):
+    # Pick first student submission in logfile
+    for row in logfile.itertuples():
+        if row.user_id != -1:
+            first_submission = row
+            break
+
+    testcases = set()
+    # Check that 'results' column isn't empty
+    if not pd.isnull(first_submission.result):
+        result = json.loads(first_submission.result)
+        # Save input for each test case
+        for test in result['config']['test_bench']:
+            # Check that the entry has the ['options'] fields
+            if test.get('options'):
+                # Save input/output for each test case
+                if test['options'].get('input') and test['options'].get('output'):
+                    input = test['options']['input'].strip()
+                    output = test['options']['output'].strip()
+                    testcases.add((input, output))
+                    logger.debug(f"\nInput testcase: {input}")
+                    logger.debug(f"Output testcase: {output}")
+    return testcases
+
+def set_code_in_logfile(logfile, code, percent):
+    '''For testing purposes'''
+    for user_id, labs in logfile.items():
+        for lab, subs in labs.items():
+            for sub in subs:
+                if random() <= percent:
+                    sub.code = code
 
 ##############################
 #           Control          #
 ##############################
 if __name__ == '__main__':
-    # Read File into a pandas dataframe
+    # Read logfile into a Pandas DataFrame
     file_path = filedialog.askopenfilename()
-    # file_path = r""
     folder_path = os.path.split(file_path)[0]
     filename = os.path.basename(file_path).split('/')[-1]
     logfile = pd.read_csv(file_path)
+
+    # Locate solution in logfile and download its code
+    solution_code = download_solution(logfile)
+
+    # Save student submission URLs and selected labs
     logfile = logfile[logfile.role == 'Student']
     urls = logfile.zip_location.to_list()
     selected_labs = get_selected_labs(logfile)
+
     data = {}
     final_roster = {}
-    
+    prompt = (
+        '\n1. Quick Analysis (averages for all labs) \n'
+        '2. Basic statisics (roster for selected labs) \n'
+        '3. Anomalies (selected labs) \n'
+        '4. Coding Trails (all labs) \n'
+        '6. Automatic anomaly detection (selected labs) \n'
+        '7. Hardcoding detection (selected labs) \n'
+        '8. Quit \n'
+    )
+
+    # TESTING
+    hardcode_example = '#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n   vector<int> userInput;\n   int minVal = 0;\n   unsigned int i;\n   \n   for(i = 0; i < userInput.size(); ++i) {\n      cin >> userInput.at(i);\n   }\n   \n   for(i = 0; i < userInput.size(); ++i) {\n      cout << userInput.at(i) << " ";\n   }\n   \n   cout << endl;\n      \n   \n   /*string x;\n   getline(cin, x);*/\n   \n   /*if(x == "5 10 5 3 21 2"){\n      cout << "2 3" << endl;\n   }\n   if(x == "4 1 2 31 15"){\n      cout << "1 2" << endl;\n   }\n   if(x == "5 1 8 91 23 7"){\n      cout << "1 7" << endl;\n   }*/\n   \n\n   return 0;\n}\n'
+
     while(1):
-        print(" 1. Quick Analysis (averages for all labs) \n 2. Basic statisics (roster for selected labs) \n 3. Anomalies (selected labs) \n 4. Coding Trails (all labs) \n 5. Style anomalies (cpplint, all labs) \n 6. Automatic anomaly detection (selected labs) \n 7. Quit")
+        print(prompt)
         inp = input()
         final_roster = {}
         input_list = inp.split(' ')
@@ -310,7 +386,6 @@ if __name__ == '__main__':
             
             # Automatic anomaly detection for selected labs
             elif inp == 6:
-
                 final_roster = {}   # Reset roster, fixme later
                 if data == {}:
                     logfile = download_code(logfile)
@@ -360,10 +435,56 @@ if __name__ == '__main__':
 
                 # Outputs to its own file for now
                 write_output_to_csv(final_roster, 'anomaly_counts.csv')
-
-            elif inp == 7:
-                exit(0)
             
+            # Hardcode detection for selected labs
+            elif inp == 7:
+                if data == {}:
+                    logfile = download_code(logfile)
+                    data = create_data_structure(logfile)
+
+                # TESTING, set code to hardcoding example
+                # set_code_in_logfile(data, hardcode_example, 0.8)
+
+                # Tuple of testcases: (output, input)
+                testcases = get_testcases(logfile)
+
+                try:
+                    if testcases and solution_code:
+                        logger.debug("Case 1: testcases and solution")
+                        hardcoding_results = tools.hardcoding.hardcoding_analysis_1(data, selected_labs, testcases, solution_code)
+                    elif testcases and not solution_code:
+                        logger.debug("Case 2: testcases, no solution")
+                        hardcoding_results = tools.hardcoding.hardcoding_analysis_2(data, selected_labs, testcases)
+                    elif not testcases and not solution_code:
+                        logger.debug("Case 3: no testcases or solution")
+                        hardcoding_results = tools.hardcoding.hardcoding_analysis_3(data, selected_labs)
+                    else:
+                        raise Exception("Unexpected input during hardcode analysis")
+                except Exception as e:
+                    logger.error(f"Error: {e}")
+                    exit(1)
+
+                for user_id in hardcoding_results:
+                    for lab in hardcoding_results[user_id]:
+                        hardcoding_score = hardcoding_results[user_id][lab][0]
+                        student_code = hardcoding_results[user_id][lab][1]
+                        if user_id in final_roster:
+                            final_roster[user_id]['Lab ' + str(lab) + ' hardcoding score'] = hardcoding_score
+                            final_roster[user_id][str(lab) + ' Student code'] = student_code
+                        else:
+                            final_roster[user_id] = {
+                                'User ID': user_id,
+                                'Last Name': data[user_id][lab][0].last_name[0],
+                                'First Name': data[user_id][lab][0].first_name[0],
+                                'Email': data[user_id][lab][0].email[0],
+                                'Role': 'Student',
+                                'Lab ' + str(lab) + ' hardcoding score' : hardcoding_score,
+                                str(lab) + ' Student code' : student_code
+                            }
+
+            elif inp == 8:
+                exit(0)
+
             else:
                 print("Please select a valid option")
         

@@ -51,7 +51,7 @@ def get_valid_date_time(t):
     '''
     There are lots of different datetime formats, this function accounts for those and returns the timestamp
     '''
-    for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%y %H:%M'):
+    for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%y %H:%M', '%m/%d/%Y %H:%M'):
         try:
             return datetime.strptime(t, fmt)
         except ValueError:
@@ -61,7 +61,7 @@ def get_valid_date_time(t):
 def time_to_minutes_seconds(time_list): 
     # Converts time to minutes and seconds (ex: 1m 30s) ignores anything over the 10 minute interval
     time_spent_by_user = 0
-    fmt = '%Y-%m-%d %H:%M:%S'
+    #fmt = '%Y-%m-%d %H:%M:%S'
     for i in range(len(time_list)-1):
         # d1 = datetime.strptime(str(time_list[i]), fmt)
         # d2 = datetime.strptime(str(time_list[i+1]), fmt)
@@ -74,21 +74,40 @@ def time_to_minutes_seconds(time_list):
     time_spent_seconds = time_spent_by_user * 60
     td = str(timedelta(seconds=time_spent_seconds))
     td_split = td.split(':')
-    time_spent = td_split[1] +'m '+ td_split[2].split('.')[0] + 's'
+    time_spent = td_split[0] + 'h ' + td_split[1] + 'm ' + td_split[2].split('.')[0] + 's'
     return time_spent
 
 def add_total_time(total_time, lab_time): 
     # Adds time to calculate total time spent by the user
-    total_time_minutes = int(total_time.split(' ')[0].strip('m'))
-    total_time_seconds = int(total_time.split(' ')[1].strip('s'))
-    total_time = total_time_minutes * 60 + total_time_seconds
-    lab_time_minutes = int(lab_time.split(' ')[0].strip('m'))
-    lab_time_seconds = int(lab_time.split(' ')[1].strip('s'))
-    lab_time = lab_time_minutes * 60 + lab_time_seconds
+    total_time_split = total_time.split(' ')
+    total_time_hours = 0
+    if len(total_time_split) > 2: # Check if time has hours
+        total_time_hours = int(total_time_split[0].strip('h'))
+        total_time_minutes = int(total_time_split[1].strip('m'))
+        total_time_seconds = int(total_time_split[2].strip('s'))
+    else:
+        total_time_minutes = int(total_time_split[0].strip('m'))
+        total_time_seconds = int(total_time_split[1].strip('s'))
+    total_time = (total_time_hours * 3600) + (total_time_minutes * 60) + total_time_seconds
+
+    lab_time_split = lab_time.split(' ')
+    lab_time_hours = 0
+    if len(lab_time_split) > 2: # Check if time has hours
+        lab_time_hours = int(lab_time_split[0].strip('h'))
+        lab_time_minutes = int(lab_time_split[1].strip('m'))
+        lab_time_seconds = int(lab_time_split[2].strip('s'))
+    else:
+        lab_time_minutes = int(lab_time_split[0].strip('m'))
+        lab_time_seconds = int(lab_time_split[1].strip('s'))
+    lab_time = (lab_time_hours * 3600) + (lab_time_minutes * 60) + lab_time_seconds
+
     total_time = total_time + lab_time
     td = str(timedelta(seconds=total_time))
     td_split = td.split(':')
-    total_time = td_split[1] +'m '+ td_split[2].split('.')[0] + 's'
+    if len(td_split) > 2:
+        total_time = td_split[0] + 'h ' + td_split[1] + 'm ' + td_split[2] + 's'
+    else:
+        total_time = '0h ' + td_split[0] + 'm ' + td_split[2] + 's'
     return total_time
 
 def get_ppm(time_spent, score):
@@ -102,9 +121,10 @@ def get_ppm(time_spent, score):
         Returns a float points per minute 
     '''
     time = time_spent.split()
-    minutes = int(time[0].strip('m'))
-    seconds = int(time[1].strip('s'))
-    total_seconds = (minutes * 60) + seconds
+    hours = int(time[0].strip('h'))
+    minutes = int(time[1].strip('m'))
+    seconds = int(time[2].strip('s'))
+    total_seconds = (hours * 3600) + (minutes * 60) + seconds
     if total_seconds == 0:
         return 10
     else:
@@ -204,7 +224,7 @@ def roster(dataframe, selected_labs):
                 for time in user_df['date_submitted']:
                     time_list.append(time)
             else:
-                for time in user_df['date_submitted(US/Pacific)']:
+                for time in user_df['date_submitted(UTC)']:
                     time_list.append(time)
             time_spent_by_user = time_to_minutes_seconds(time_list)
 
