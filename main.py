@@ -1,22 +1,8 @@
-import csv
-import datetime
-import io
-import json
 import logging
 import os
-import pickle
-import tkinter as tk
-import zipfile
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
-from random import random
 from tkinter import filedialog
 
 import pandas as pd
-import requests
-from requests.adapters import HTTPAdapter
-from tqdm import tqdm
-from urllib3 import Retry
 
 import tools.hardcoding
 from tools import incdev
@@ -24,7 +10,6 @@ from tools.anomaly import anomaly
 from tools.quickanalysis import quick_analysis
 from tools.roster import roster
 from tools.stylechecker import stylechecker
-from tools.submission import Submission
 from tools.utilities import (
     create_data_structure,
     download_code,
