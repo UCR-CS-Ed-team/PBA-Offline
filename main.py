@@ -80,7 +80,6 @@ def download_code_helper(url):
     file_name = url.split('/')[-1].strip('.zip')
     path = 'downloads/' + file_name +'.cpp'
     if not os.path.isfile(path):
-        print('downloading')
         try:
             response = session.get(url)
             if response.status_code > 200 and response.status_code < 300:
@@ -114,12 +113,9 @@ def download_code(logfile):
         for url in urls:
             threads.append(executor.submit(download_code_helper, url))
         student_code = []
-        i = 0
-        with tqdm(total=len(threads)) as pbar:
+        with tqdm(total=len(threads), desc="Downloading student submissions") as pbar:
             for task in as_completed(threads):
-                # print(i)
                 student_code.append(task.result())
-                i += 1
                 pbar.update(1)
     df = pd.DataFrame(student_code, columns = ['zip_location', 'student_code'])
     logfile = pd.merge(left=logfile, right=df, on=['zip_location'])

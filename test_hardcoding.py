@@ -1,5 +1,4 @@
 from tools import hardcoding
-import pytest
 
 class TestCheckIfLiteral:
     def test_code_without_if_literal(self):
