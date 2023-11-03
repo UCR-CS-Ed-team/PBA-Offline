@@ -1,28 +1,38 @@
-import datetime
-import pandas as pd
-from urllib3 import Retry
-from requests.adapters import HTTPAdapter
-from tools.anomaly import anomaly
-from tools.roster import roster
-from tools.quickanalysis import quick_analysis
-from tools.submission import Submission
-from tools.stylechecker import stylechecker
-import tools.hardcoding
-import requests
-import zipfile
-import io
-from tools import incdev
-import os
 import csv
-from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import tkinter as tk
-from tkinter import filedialog
+import datetime
+import io
 import json
-from tqdm import tqdm
-from random import random
 import logging
+import os
 import pickle
+import tkinter as tk
+import zipfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+from random import random
+from tkinter import filedialog
+
+import pandas as pd
+import requests
+from requests.adapters import HTTPAdapter
+from tqdm import tqdm
+from urllib3 import Retry
+
+import tools.hardcoding
+from tools import incdev
+from tools.anomaly import anomaly
+from tools.quickanalysis import quick_analysis
+from tools.roster import roster
+from tools.stylechecker import stylechecker
+from tools.submission import Submission
+from tools.utilities import (
+    create_data_structure,
+    download_code,
+    download_solution,
+    get_selected_labs,
+    get_testcases,
+    write_output_to_csv,
+)
 
 # DEBUGGING
 logger = logging.getLogger(__name__)
