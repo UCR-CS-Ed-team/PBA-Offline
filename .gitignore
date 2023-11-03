@@ -1,5 +1,6 @@
 *.pyc  
-*~  
+*~
+output_testing
 
 # All files from the downloads folder except .gitkeep
 downloads/*
