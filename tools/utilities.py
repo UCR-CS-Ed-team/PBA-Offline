@@ -95,8 +95,8 @@ def download_code(logfile):
 	"""
 	Iterates through the zybooks logfile dataframe, appends a new column "student_code" to the dataframe and returns it
 
-	Note: This is the fastest way to download code submissions of all students at this time. 
-    We tried AsyncIO but it turned out to be slower than multithreading
+	Note: This is the fastest way to download code submissions of all students at this time.
+	We tried AsyncIO but it turned out to be slower than multithreading
 	"""
 	urls = logfile.zip_location.to_list()
 	threads = []
@@ -168,17 +168,17 @@ def create_data_structure(logfile):
 	Creates a datastructure which stores all submission objects of each student
 
 	data = {
-        user_id_1: {
-			lab_id_1 : [submission, submission, submission],
-            lab_id_2 : [submission, submission, submission]
-        }
-        user_id_2: {
-			lab_id_1 : [submission, submission, submission],
-            lab_id_2 : [submission, submission, submission]
-        }
-        ...
-        ...
-        ...
+	user_id_1: {
+	        lab_id_1 : [submission, submission, submission],
+	        lab_id_2 : [submission, submission, submission]
+	}
+	user_id_2: {
+	        lab_id_1 : [submission, submission, submission],
+	        lab_id_2 : [submission, submission, submission]
+	}
+	...
+	...
+	...
 	}
 
 	"""
