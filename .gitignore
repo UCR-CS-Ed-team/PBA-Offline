@@ -1,5 +1,7 @@
-*.pyc  
-*~
+# Other
+.DS_Store
+*.dSYM
+_MACOSX/
 output_testing
 
 # All files from the downloads folder except .gitkeep
