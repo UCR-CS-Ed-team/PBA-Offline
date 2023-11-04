@@ -178,37 +178,37 @@ if __name__ == '__main__':
 						# Instance count of every anomaly for [user_id][lab]
 						anomalies_found = anomaly_detection_output[user_id][lab][0]
 						# Create a column for each anomaly with the anomaly's count
-						for anomaly in anomalies_found:
-							final_roster[user_id][f'Lab {str(lab)} {anomaly}'] = anomalies_found[anomaly]
+						for found_anomaly in anomalies_found:
+							final_roster[user_id][f'Lab {str(lab)} {found_anomaly}'] = anomalies_found[found_anomaly]
 
 				# Count of users that use each anomaly, per-lab
 				num_users_per_anomaly = {}
-				for anomaly in anomalies_found:
-					num_users_per_anomaly[anomaly] = {}
+				for found_anomaly in anomalies_found:
+					num_users_per_anomaly[found_anomaly] = {}
 
 				# Count the *number of students* that used each anomaly, per-lab
 				for user_id in final_roster:
 					for lab in anomaly_detection_output[user_id]:
-						for anomaly in num_users_per_anomaly:
+						for found_anomaly in num_users_per_anomaly:
 							# Need to consider anomalies from every lab
-							if lab not in num_users_per_anomaly[anomaly]:
-								num_users_per_anomaly[anomaly][lab] = 0
-							anomaly_count = final_roster[user_id][f'Lab {str(lab)} {anomaly}']
+							if lab not in num_users_per_anomaly[found_anomaly]:
+								num_users_per_anomaly[found_anomaly][lab] = 0
+							anomaly_count = final_roster[user_id][f'Lab {str(lab)} {found_anomaly}']
 							if anomaly_count > 0:
-								num_users_per_anomaly[anomaly][lab] += 1
+								num_users_per_anomaly[found_anomaly][lab] += 1
 
 				# Append a row at bottom for "totals"
 				final_roster['Status'] = {}
 				final_roster['Status']['User ID'] = 'Is Anomaly?'
-				for anomaly in num_users_per_anomaly:
-					for lab in num_users_per_anomaly[anomaly]:
-						anomaly_count = num_users_per_anomaly[anomaly][lab]
+				for found_anomaly in num_users_per_anomaly:
+					for lab in num_users_per_anomaly[found_anomaly]:
+						anomaly_count = num_users_per_anomaly[found_anomaly][lab]
 						total_users = len(data)
 						# If a clear majority uses an "anomaly", it's not anomalous
 						if anomaly_count / total_users >= 0.8:
-							final_roster['Status'][f'Lab {str(lab)} {anomaly}'] = 'No'
+							final_roster['Status'][f'Lab {str(lab)} {found_anomaly}'] = 'No'
 						else:
-							final_roster['Status'][f'Lab {str(lab)} {anomaly}'] = 'Yes'
+							final_roster['Status'][f'Lab {str(lab)} {found_anomaly}'] = 'Yes'
 
 				# Outputs to its own file for now
 				write_output_to_csv(final_roster, 'anomaly_counts.csv')
