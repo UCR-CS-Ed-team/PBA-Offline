@@ -119,7 +119,7 @@ def get_selected_labs(logfile):
 	"""
 	lab_ids = logfile.content_section.unique()
 	# Select the labs you want a roster for
-	print('Select the indexes you want a roster for seperated by a space: (Ex: 1 or 1 2 3 or 2 3)')
+	print('Select the indexes you want a roster for separated by a space: (Ex: 1 or 1 2 3 or 2 3)')
 	labs_list = []
 	i = 0
 	print(i, '  select all labs')
@@ -165,7 +165,7 @@ def write_output_to_csv(final_roster, file_name='roster.csv'):
 
 def create_data_structure(logfile):
 	"""
-	Creates a datastructure which stores all submission objects of each student
+	Creates a data structure which stores all submission objects of each student
 
 	data = {
 	user_id_1: {

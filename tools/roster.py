@@ -79,7 +79,7 @@ def add_total_time(total_time, lab_time):
 
 def get_ppm(time_spent, score):
 	"""
-	Checks if a student scored too many points too quickly, Indicates suspicious acitivity (might have copied)
+	Checks if a student scored too many points too quickly, Indicates suspicious activity (might have copied)
 	Input:
 	------
 		Accepts time spent on that lab and the maximum number of points scored by the student as an input
@@ -159,7 +159,7 @@ def roster(dataframe, selected_labs):
 		section = str(lab_df['content_section'][0])
 
 		for unique_id in user_id:  # Iterating through each user id in that lab
-			user_df = lab_df[lab_df['user_id'] == unique_id]  # Creating a seperate dataframe for that user in that lab
+			user_df = lab_df[lab_df['user_id'] == unique_id]  # Creating a separate dataframe for that user in that lab
 			user_id_df = user_df['user_id']
 			user_id = user_id_df.iloc[0]
 			first_name = user_df['first_name'].iloc[0]

@@ -277,7 +277,7 @@ def newtool(data, selected_labs):
 	}
 	newtool_output = `dict` [`str`][`dict`]
 	
-	Nested dictionary of students containg student_id and labs and their results
+	Nested dictionary of students containing student_id and labs and their results
 	"""
 	newtool_output = {}
 	for lab in selected_labs:
