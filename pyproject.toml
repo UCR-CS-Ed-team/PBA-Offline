@@ -1,5 +1,6 @@
 [tool.ruff]
 line-length = 120
+exclude = ["random.py", "__init__.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
