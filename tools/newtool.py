@@ -1,4 +1,3 @@
-
 import pandas as pd
 
 from tools.utilities import (
@@ -129,7 +128,7 @@ summary_output structure to be sent to write_output_to_csv function
 
 
 """
-if use_standalone == True:
+if use_standalone:
 	logfile_path = input('Enter path to the file including file name: ')
 	# logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile1.csv'
 	logfile = pd.read_csv(logfile_path)

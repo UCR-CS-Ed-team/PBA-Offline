@@ -76,15 +76,11 @@ def quick_analysis(dataframe):
 		time_spent = 0
 		for unique_id in unique_user_id:
 			user_df = lab[lab['user_id'] == unique_id]
-			# print(user_df)
 			max_score = 0
 			time_spent_by_user = 0
 			time_list = []
 			for time in user_df['date_submitted(US/Pacific)']:
 				time_list.append(time)
-			# print(time_list)
-			# fmt = '%Y-%m-%d %H:%M:%S'
-			fmt = '%m/%d/%y %H:%M'
 			for i in range(len(time_list) - 1):
 				d1 = get_valid_datetime(str(time_list[i]))
 				d2 = get_valid_datetime(str(time_list[i + 1]))
@@ -92,10 +88,8 @@ def quick_analysis(dataframe):
 				diff_minutes = (diff.days * 24 * 60) + (diff.seconds / 60)
 				if diff_minutes <= 10:
 					time_spent_by_user += diff_minutes
-			# print(time_spent)
 			for score in user_df['score']:
 				if not pd.isna(score):
-					# print(type(score))
 					max_score = max(score, max_score)
 			for submission in user_df['is_submission']:
 				if submission == 1:

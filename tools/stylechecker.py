@@ -35,8 +35,8 @@ def stylechecker(data, selected_labs):
 	    }
 
 	Note:
-	    Todo: This currently creates a new .cpp file and runs the package on that, modify it in such a way to avoid creating a new file
-	          and directly use the code in data
+	    Todo: This currently creates a new .cpp file and runs the package on that, modify it in 
+			such a way to avoid creating a new file and directly use the code in data
 	"""
 	output = {}
 	for lab in selected_labs:

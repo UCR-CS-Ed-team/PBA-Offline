@@ -4,6 +4,7 @@ exclude = ["random.py", "__init__.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
+ignore = ["E101"]
 
 [tool.ruff.format]
 quote-style = "single"

@@ -112,7 +112,7 @@ def get_anomaly_score(code, auto=0):
 	}
 
 	anomaly_score = 0  # Initial anomaly Score
-	anomalies_found = 0  # Counts the number of anamolies found
+	anomalies_found = 0  # Counts the number of anomalies found
 	checkLineSpacing = False  # Indicates whether to check for Line Spacing anomaly
 	leftBraceCount = 0  # Count of left braces for Line Spacing anomaly
 	rightBraceCount = 0  # Count of right braces for Line Spacing anomaly

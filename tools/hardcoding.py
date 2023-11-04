@@ -72,12 +72,12 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
 	Returns a score indicating whether student code used hardcoding, based on a logfile's testcases and solution.
 
 	Args:
-	    code (str): The student code to be evaluated.
-	    testcases (set[tuple[str, str]]): List of testcases, each represented by a tuple of expected input and output.
-	    solution_code (str): The solution code for comparison.
+		code (str): The student code to be evaluated.
+		testcases (set[tuple[str, str]]): List of testcases, each represented by a tuple of expected input and output.
+		solution_code (str): The solution code for comparison.
 
 	Returns:
-	    int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
+		int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
 	"""
 	is_hardcoded = False
 
@@ -261,23 +261,23 @@ def newtool(data, selected_labs):
 	Parameters
 	----------
 	data: `dict` [`str`, `dict`]
-	        Nested dictionary containing all student submission objects
-	        Particular submission can be accessed with data[user_id][lab_id][n]
+			Nested dictionary containing all student submission objects
+			Particular submission can be accessed with data[user_id][lab_id][n]
 
 	Returns
 	-------
 	newtool_output = {
-	                    'student_id(1)' : {
-	                                        'lab1' : [num_runs, num_develops, num_submits],
-	                                        'lab2' : [num_runs, num_develops, num_submits],
-	                                        .
-	                                        .
-	                                        'labn' : [num_runs, num_develops, num_submits]
-	                    }
+					'student_id(1)' : {
+						'lab1' : [num_runs, num_develops, num_submits],
+						'lab2' : [num_runs, num_develops, num_submits],
+						.
+						.
+						'labn' : [num_runs, num_develops, num_submits]
+					}
 	}
 	newtool_output = `dict` [`str`][`dict`]
-	        Nested dictionary of students containg student_id and labs and their results
-
+	
+	Nested dictionary of students containg student_id and labs and their results
 	"""
 	newtool_output = {}
 	for lab in selected_labs:
