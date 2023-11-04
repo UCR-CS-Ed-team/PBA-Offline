@@ -9,6 +9,7 @@ from tools.utilities import get_selected_labs, write_output_to_csv
 
 use_standalone = False
 
+
 # TODO: replace this with the one from utilities.py
 def get_valid_date_time(t):
 	"""
@@ -78,13 +79,13 @@ def add_total_time(total_time, lab_time):
 
 def get_ppm(time_spent, score):
 	"""
-	Checks if a student scored too many points too quickly, Indicates suspicious acitivity (might have copied the solution)
+	Checks if a student scored too many points too quickly, Indicates suspicious acitivity (might have copied)
 	Input:
 	------
-	    Accepts time spent on that lab and the maximum number of points scored by the student as an input
+		Accepts time spent on that lab and the maximum number of points scored by the student as an input
 	Output:
 	-------
-	    Returns a float points per minute
+		Returns a float points per minute
 	"""
 	time = time_spent.split()
 	hours = int(time[0].strip('h'))
@@ -101,41 +102,41 @@ def roster(dataframe, selected_labs):
 	"""
 	Input:
 	------
-	    Accepts a logfile dataframe and selected labs as an input
+			Accepts a logfile dataframe and selected labs as an input
 
 	Output:
 	-------
-	    Calculates the total time spent across selected labs, total time spent, total develops, total submits, and also details about
-	    time spent on each lab, number of submits in each lab, etc
+			Calculates the total time spent across selected labs, total time spent, total develops, total submits,
+			and also details about time spent on each lab, number of submits in each lab, etc
 
-	    summary_roster = {
-	        user_id_1: {
-	            user_id:            121314141,
-	            last_name:          'Doe,
-	            first_name:         'John',
-	            Email:              jdoe009@ucr.edu,
-	            Role:               student,
-	            points_per_minute:  0.0,
-	            'Time Spent(total)':'16m 00s',
-	            'Total Runs':       17,
-	            'Total Score':      10.0,
-	            'Total Develops':   8,
-	            'Total Submits':    9,
-	            'Total Pivots':     0,
-	            'Lab 1.2 Points per minute': 0.0,
-	            'Lab 1.2 Time spent': '16m 00s',
-	            'Lab 1.2 # of runs': 17,
-	            'Lab 1.2 % score': 10.0,
-	            'Lab 1.2 # of devs': 8,
-	            'Lab 1.2 # of subs': 9
-	            ...
-	            ...
-	            ...
-	        },
-	        ...
-	        ...
-	        ...
-	    }
+			summary_roster = {
+				user_id_1: {
+					user_id:            121314141,
+					last_name:          'Doe,
+					first_name:         'John',
+					Email:              jdoe009@ucr.edu,
+					Role:               student,
+					points_per_minute:  0.0,
+					'Time Spent(total)':'16m 00s',
+					'Total Runs':       17,
+					'Total Score':      10.0,
+					'Total Develops':   8,
+					'Total Submits':    9,
+					'Total Pivots':     0,
+					'Lab 1.2 Points per minute': 0.0,
+					'Lab 1.2 Time spent': '16m 00s',
+					'Lab 1.2 # of runs': 17,
+					'Lab 1.2 % score': 10.0,
+					'Lab 1.2 # of devs': 8,
+					'Lab 1.2 # of subs': 9
+					...
+					...
+					...
+				},
+				...
+				...
+				...
+			}
 	"""
 
 	df = dataframe
@@ -155,7 +156,6 @@ def roster(dataframe, selected_labs):
 		lab_df = df[df['content_section'] == selected_lab].reset_index()  # Dataframe for that particular lab
 		user_id = lab_df['user_id']
 		user_id = set(user_id)  # Set does not contain duplicates so here we get all user ids without repetition
-		lab_name = lab_df['caption'][0]
 		section = str(lab_df['content_section'][0])
 
 		for unique_id in user_id:  # Iterating through each user id in that lab
@@ -191,7 +191,7 @@ def roster(dataframe, selected_labs):
 					time_list.append(time)
 			time_spent_by_user = time_to_minutes_seconds(time_list)
 
-			# Points per minute, Indicates if a student scores too many points too quickly, Might have copied the solution?
+			# Points per minute, Indicates if a student scores too many points too quickly, might have copied?
 			ppm = get_ppm(time_spent_by_user, max_score)
 
 			# Normalization zi = (xi - min(x)) / (max(x) – min(x))  | We assumed max(x) = 10 and min(x) = 0
@@ -199,7 +199,8 @@ def roster(dataframe, selected_labs):
 
 			if (
 				user_id not in summary_roster
-			):  # First time entry into the map, implemented it this way so we do not need to reiterate through it to get all the timestamps and get the time spent
+			):  # First time entry into the map, implemented it this way so we do not need to reiterate through it 
+				# to get all the timestamps and get the time spent
 				summary_roster[int(user_id)] = {
 					'User ID': user_id,
 					'Last Name': last_name,
@@ -218,7 +219,9 @@ def roster(dataframe, selected_labs):
 					'Lab' + section + ' % score': max_score,
 					'Lab' + section + ' # of devs': num_of_devs,
 				}
-			else:  # Appending to the existing entries for that user. So we wont have to iterate through the whole user dataframe again
+			else:
+				# Appending to the existing entries for that user.
+				# So we wont have to iterate through the whole user dataframe again
 				summary_roster[user_id]['Lab' + section + ' Points per minute'] = ppm_normalized
 				summary_roster[user_id]['Lab' + section + ' Time spent'] = time_spent_by_user
 				summary_roster[user_id]['Lab' + section + ' # of runs'] = num_of_runs
