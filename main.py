@@ -81,11 +81,9 @@ if __name__ == '__main__':
 						anomalies_found = anomaly_detection_output[user_id][lab][0]
 						anomaly_score = anomaly_detection_output[user_id][lab][1]
 						if user_id in final_roster:
-							final_roster[user_id]['Lab ' + str(lab) + ' anomalies found'] = anomalies_found
-							final_roster[user_id]['Lab ' + str(lab) + ' anomaly score'] = anomaly_score
-							final_roster[user_id][str(lab) + ' Student code'] = anomaly_detection_output[user_id][lab][
-								2
-							]
+							final_roster[user_id][f'Lab {lab} anomalies found'] = anomalies_found
+							final_roster[user_id][f'Lab {lab} anomaly score'] = anomaly_score
+							final_roster[user_id][f'{lab} Student code'] = anomaly_detection_output[user_id][lab][2]
 						else:
 							final_roster[user_id] = {
 								'User ID': user_id,
@@ -142,13 +140,9 @@ if __name__ == '__main__':
 				for user_id in stylechecker_output:
 					for lab_id in stylechecker_output[user_id]:
 						if user_id in final_roster:
-							final_roster[user_id][str(lab_id) + 'Style score'] = stylechecker_output[user_id][lab_id][0]
-							final_roster[user_id][str(lab_id) + 'Style output'] = stylechecker_output[user_id][lab_id][
-								1
-							]
-							final_roster[user_id][str(lab_id) + ' Student code'] = stylechecker_output[user_id][lab_id][
-								2
-							]
+							final_roster[user_id][f'{lab_id} Style score'] = stylechecker_output[user_id][lab_id][0]
+							final_roster[user_id][f'{lab_id} Style output'] = stylechecker_output[user_id][lab_id][1]
+							final_roster[user_id][f'{lab_id} Student code'] = stylechecker_output[user_id][lab_id][2]
 						else:
 							final_roster[user_id] = {
 								'User ID': user_id,
