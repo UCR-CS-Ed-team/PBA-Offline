@@ -237,7 +237,7 @@ def get_anomaly_score(code, auto=0):
 					anomalies_found += 1
 
 		if Styleanomaly['User-Defined Functions'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['User-Defined Functions'][3], line) and not line.__contains__('main()'):
+			if re.search(Styleanomaly['User-Defined Functions'][3], line) and 'main()' not in line:
 				if Styleanomaly['User-Defined Functions'][0] == 1 or (
 					Styleanomaly['User-Defined Functions'][0] == 0 and Styleanomaly['User-Defined Functions'][4] == 0
 				):
@@ -292,8 +292,8 @@ def get_anomaly_score(code, auto=0):
 		if Styleanomaly['Scope Operator'][2] != 0:  # Check if the anomaly is turned on
 			if (
 				re.search(Styleanomaly['Scope Operator'][3], line)
-				and not line.__contains__('string::npos')
-				and not line.__contains__('std::')
+				and 'string::npos' not in line
+				and 'std::' not in line
 			):
 				if Styleanomaly['Scope Operator'][0] == 1 or (
 					Styleanomaly['Scope Operator'][0] == 0 and Styleanomaly['Scope Operator'][4] == 0
