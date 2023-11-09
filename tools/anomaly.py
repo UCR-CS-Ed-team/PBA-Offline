@@ -78,7 +78,7 @@ def get_anomaly_score(code, auto=0):
 	# Below is the format for the anomaly in question
 	# [Count_instances, points/instance, anomaly on/off, regex, count of instances, instance cap (-1 for no cap)]
 	# Add to the hashmap Styleanomaly in case you need new anomaly to be detected
-	Styleanomaly = {
+	style_anomalies = {
 		'Pointers': {0: 1, 1: 0.9, 2: 1, 3: POINTERS_REGEX, 4: 0, 5: -1},
 		'Infinite_loop': {0: 1, 1: 0.9, 2: 1, 3: INFINITE_LOOP_REGEX, 4: 0, 5: -1},
 		'Atypical Includes': {0: 1, 1: 0.1, 2: 1, 3: ATYPICAL_INCLUDE_REGEX, 4: 0, 5: -1},
@@ -113,524 +113,542 @@ def get_anomaly_score(code, auto=0):
 
 	anomaly_score = 0  # Initial anomaly Score
 	anomalies_found = 0  # Counts the number of anomalies found
-	checkLineSpacing = False  # Indicates whether to check for Line Spacing anomaly
-	leftBraceCount = 0  # Count of left braces for Line Spacing anomaly
-	rightBraceCount = 0  # Count of right braces for Line Spacing anomaly
-	openingBrace = False  # Indicates if `line` is the opening brace for the function on its own line
+	check_line_spacing = False  # Indicates whether to check for Line Spacing anomaly
+	left_brace_count = 0  # Count of left braces for Line Spacing anomaly
+	right_brace_count = 0  # Count of right braces for Line Spacing anomaly
+	opening_brace = False  # Indicates if `line` is the opening brace for the function on its own line
 
 	# For automatic anomaly detection, enable every anomaly
 	if auto == 1:
-		for anomaly in Styleanomaly:
-			Styleanomaly[anomaly][2] = 1
+		for anomaly in style_anomalies:
+			style_anomalies[anomaly][2] = 1
 
 	lines = code.splitlines()
 	for i, line in enumerate(lines):  # Reading through lines in the code and checking for each anomaly
-		if Styleanomaly['Pointers'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Pointers'][3], line):
-				if Styleanomaly['Pointers'][0] == 1 or (
-					Styleanomaly['Pointers'][0] == 0 and Styleanomaly['Pointers'][4] == 0
+		if style_anomalies['Pointers'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Pointers'][3], line):
+				if style_anomalies['Pointers'][0] == 1 or (
+					style_anomalies['Pointers'][0] == 0 and style_anomalies['Pointers'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Pointers'][5] <= -1) or (
-						Styleanomaly['Pointers'][5] > -1 and (Styleanomaly['Pointers'][4] < Styleanomaly['Pointers'][5])
+					if (style_anomalies['Pointers'][5] <= -1) or (
+						style_anomalies['Pointers'][5] > -1
+						and (style_anomalies['Pointers'][4] < style_anomalies['Pointers'][5])
 					):
-						anomaly_score += Styleanomaly['Pointers'][1]
-					Styleanomaly['Pointers'][4] += 1
+						anomaly_score += style_anomalies['Pointers'][1]
+					style_anomalies['Pointers'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Infinite_loop'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Infinite_loop'][3], line):
-				if Styleanomaly['Infinite_loop'][0] == 1 or (
-					Styleanomaly['Infinite_loop'][0] == 0 and Styleanomaly['Infinite_loop'][4] == 0
+		if style_anomalies['Infinite_loop'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Infinite_loop'][3], line):
+				if style_anomalies['Infinite_loop'][0] == 1 or (
+					style_anomalies['Infinite_loop'][0] == 0 and style_anomalies['Infinite_loop'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Infinite_loop'][5] <= -1) or (
-						Styleanomaly['Infinite_loop'][5] > -1
-						and (Styleanomaly['Infinite_loop'][4] < Styleanomaly['Infinite_loop'][5])
+					if (style_anomalies['Infinite_loop'][5] <= -1) or (
+						style_anomalies['Infinite_loop'][5] > -1
+						and (style_anomalies['Infinite_loop'][4] < style_anomalies['Infinite_loop'][5])
 					):
-						anomaly_score += Styleanomaly['Infinite_loop'][1]
-					Styleanomaly['Infinite_loop'][4] += 1
+						anomaly_score += style_anomalies['Infinite_loop'][1]
+					style_anomalies['Infinite_loop'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Atypical Includes'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Atypical Includes'][3], line):
-				if Styleanomaly['Atypical Includes'][0] == 1 or (
-					Styleanomaly['Atypical Includes'][0] == 0 and Styleanomaly['Atypical Includes'][4] == 0
+		if style_anomalies['Atypical Includes'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Atypical Includes'][3], line):
+				if style_anomalies['Atypical Includes'][0] == 1 or (
+					style_anomalies['Atypical Includes'][0] == 0 and style_anomalies['Atypical Includes'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Atypical Includes'][5] <= -1) or (
-						Styleanomaly['Atypical Includes'][5] > -1
-						and (Styleanomaly['Atypical Includes'][4] < Styleanomaly['Atypical Includes'][5])
+					if (style_anomalies['Atypical Includes'][5] <= -1) or (
+						style_anomalies['Atypical Includes'][5] > -1
+						and (style_anomalies['Atypical Includes'][4] < style_anomalies['Atypical Includes'][5])
 					):
-						anomaly_score += Styleanomaly['Atypical Includes'][1]
-					Styleanomaly['Atypical Includes'][4] += 1
+						anomaly_score += style_anomalies['Atypical Includes'][1]
+					style_anomalies['Atypical Includes'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Atypical Keywords'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Atypical Keywords'][3], line, flags=re.X):
-				if Styleanomaly['Atypical Keywords'][0] == 1 or (
-					Styleanomaly['Atypical Keywords'][0] == 0 and Styleanomaly['Atypical Keywords'][4] == 0
+		if style_anomalies['Atypical Keywords'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Atypical Keywords'][3], line, flags=re.X):
+				if style_anomalies['Atypical Keywords'][0] == 1 or (
+					style_anomalies['Atypical Keywords'][0] == 0 and style_anomalies['Atypical Keywords'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Atypical Keywords'][5] <= -1) or (
-						Styleanomaly['Atypical Keywords'][5] > -1
-						and (Styleanomaly['Atypical Keywords'][4] < Styleanomaly['Atypical Keywords'][5])
+					if (style_anomalies['Atypical Keywords'][5] <= -1) or (
+						style_anomalies['Atypical Keywords'][5] > -1
+						and (style_anomalies['Atypical Keywords'][4] < style_anomalies['Atypical Keywords'][5])
 					):
-						anomaly_score += Styleanomaly['Atypical Keywords'][1]
-					Styleanomaly['Atypical Keywords'][4] += 1
+						anomaly_score += style_anomalies['Atypical Keywords'][1]
+					style_anomalies['Atypical Keywords'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Array Accesses'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Array Accesses'][3], line):
-				if Styleanomaly['Array Accesses'][0] == 1 or (
-					Styleanomaly['Array Accesses'][0] == 0 and Styleanomaly['Array Accesses'][4] == 0
+		if style_anomalies['Array Accesses'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Array Accesses'][3], line):
+				if style_anomalies['Array Accesses'][0] == 1 or (
+					style_anomalies['Array Accesses'][0] == 0 and style_anomalies['Array Accesses'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Array Accesses'][5] <= -1) or (
-						Styleanomaly['Array Accesses'][5] > -1
-						and (Styleanomaly['Array Accesses'][4] < Styleanomaly['Array Accesses'][5])
+					if (style_anomalies['Array Accesses'][5] <= -1) or (
+						style_anomalies['Array Accesses'][5] > -1
+						and (style_anomalies['Array Accesses'][4] < style_anomalies['Array Accesses'][5])
 					):
-						anomaly_score += Styleanomaly['Array Accesses'][1]
-					Styleanomaly['Array Accesses'][4] += 1
+						anomaly_score += style_anomalies['Array Accesses'][1]
+					style_anomalies['Array Accesses'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Namespace Std'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Namespace Std'][3], line):
-				if Styleanomaly['Namespace Std'][0] == 1 or (
-					Styleanomaly['Namespace Std'][0] == 0 and Styleanomaly['Namespace Std'][4] == 0
+		if style_anomalies['Namespace Std'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Namespace Std'][3], line):
+				if style_anomalies['Namespace Std'][0] == 1 or (
+					style_anomalies['Namespace Std'][0] == 0 and style_anomalies['Namespace Std'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Namespace Std'][5] <= -1) or (
-						Styleanomaly['Namespace Std'][5] > -1
-						and (Styleanomaly['Namespace Std'][4] < Styleanomaly['Namespace Std'][5])
+					if (style_anomalies['Namespace Std'][5] <= -1) or (
+						style_anomalies['Namespace Std'][5] > -1
+						and (style_anomalies['Namespace Std'][4] < style_anomalies['Namespace Std'][5])
 					):
-						anomaly_score += Styleanomaly['Namespace Std'][1]
-					Styleanomaly['Namespace Std'][4] += 1
+						anomaly_score += style_anomalies['Namespace Std'][1]
+					style_anomalies['Namespace Std'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Brace Styling'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Brace Styling'][3], line, flags=re.X):
-				if Styleanomaly['Brace Styling'][0] == 1 or (
-					Styleanomaly['Brace Styling'][0] == 0 and Styleanomaly['Brace Styling'][4] == 0
+		if style_anomalies['Brace Styling'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Brace Styling'][3], line, flags=re.X):
+				if style_anomalies['Brace Styling'][0] == 1 or (
+					style_anomalies['Brace Styling'][0] == 0 and style_anomalies['Brace Styling'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Brace Styling'][5] <= -1) or (
-						Styleanomaly['Brace Styling'][5] > -1
-						and (Styleanomaly['Brace Styling'][4] < Styleanomaly['Brace Styling'][5])
+					if (style_anomalies['Brace Styling'][5] <= -1) or (
+						style_anomalies['Brace Styling'][5] > -1
+						and (style_anomalies['Brace Styling'][4] < style_anomalies['Brace Styling'][5])
 					):
-						anomaly_score += Styleanomaly['Brace Styling'][1]
-					Styleanomaly['Brace Styling'][4] += 1
+						anomaly_score += style_anomalies['Brace Styling'][1]
+					style_anomalies['Brace Styling'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Escaped Newline'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Escaped Newline'][3], line):
-				if Styleanomaly['Escaped Newline'][0] == 1 or (
-					Styleanomaly['Escaped Newline'][0] == 0 and Styleanomaly['Escaped Newline'][4] == 0
+		if style_anomalies['Escaped Newline'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Escaped Newline'][3], line):
+				if style_anomalies['Escaped Newline'][0] == 1 or (
+					style_anomalies['Escaped Newline'][0] == 0 and style_anomalies['Escaped Newline'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Escaped Newline'][5] <= -1) or (
-						Styleanomaly['Escaped Newline'][5] > -1
-						and (Styleanomaly['Escaped Newline'][4] < Styleanomaly['Escaped Newline'][5])
+					if (style_anomalies['Escaped Newline'][5] <= -1) or (
+						style_anomalies['Escaped Newline'][5] > -1
+						and (style_anomalies['Escaped Newline'][4] < style_anomalies['Escaped Newline'][5])
 					):
-						anomaly_score += Styleanomaly['Escaped Newline'][1]
-					Styleanomaly['Escaped Newline'][4] += 1
+						anomaly_score += style_anomalies['Escaped Newline'][1]
+					style_anomalies['Escaped Newline'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['User-Defined Functions'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['User-Defined Functions'][3], line) and 'main()' not in line:
-				if Styleanomaly['User-Defined Functions'][0] == 1 or (
-					Styleanomaly['User-Defined Functions'][0] == 0 and Styleanomaly['User-Defined Functions'][4] == 0
+		if style_anomalies['User-Defined Functions'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['User-Defined Functions'][3], line) and 'main()' not in line:
+				if style_anomalies['User-Defined Functions'][0] == 1 or (
+					style_anomalies['User-Defined Functions'][0] == 0
+					and style_anomalies['User-Defined Functions'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['User-Defined Functions'][5] <= -1) or (
-						Styleanomaly['User-Defined Functions'][5] > -1
-						and (Styleanomaly['User-Defined Functions'][4] < Styleanomaly['User-Defined Functions'][5])
+					if (style_anomalies['User-Defined Functions'][5] <= -1) or (
+						style_anomalies['User-Defined Functions'][5] > -1
+						and (
+							style_anomalies['User-Defined Functions'][4] < style_anomalies['User-Defined Functions'][5]
+						)
 					):
-						anomaly_score += Styleanomaly['User-Defined Functions'][1]
-					Styleanomaly['User-Defined Functions'][4] += 1
+						anomaly_score += style_anomalies['User-Defined Functions'][1]
+					style_anomalies['User-Defined Functions'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Ternary Operator'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Ternary Operator'][3], line):
-				if Styleanomaly['Ternary Operator'][0] == 1 or (
-					Styleanomaly['Ternary Operator'][0] == 0 and Styleanomaly['Ternary Operator'][4] == 0
+		if style_anomalies['Ternary Operator'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Ternary Operator'][3], line):
+				if style_anomalies['Ternary Operator'][0] == 1 or (
+					style_anomalies['Ternary Operator'][0] == 0 and style_anomalies['Ternary Operator'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Ternary Operator'][5] <= -1) or (
-						Styleanomaly['Ternary Operator'][5] > -1
-						and (Styleanomaly['Ternary Operator'][4] < Styleanomaly['Ternary Operator'][5])
+					if (style_anomalies['Ternary Operator'][5] <= -1) or (
+						style_anomalies['Ternary Operator'][5] > -1
+						and (style_anomalies['Ternary Operator'][4] < style_anomalies['Ternary Operator'][5])
 					):
-						anomaly_score += Styleanomaly['Ternary Operator'][1]
-					Styleanomaly['Ternary Operator'][4] += 1
+						anomaly_score += style_anomalies['Ternary Operator'][1]
+					style_anomalies['Ternary Operator'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Command-Line Arguments'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Command-Line Arguments'][3], line):
-				if Styleanomaly['Command-Line Arguments'][0] == 1 or (
-					Styleanomaly['Command-Line Arguments'][0] == 0 and Styleanomaly['Command-Line Arguments'][4] == 0
+		if style_anomalies['Command-Line Arguments'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Command-Line Arguments'][3], line):
+				if style_anomalies['Command-Line Arguments'][0] == 1 or (
+					style_anomalies['Command-Line Arguments'][0] == 0
+					and style_anomalies['Command-Line Arguments'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Command-Line Arguments'][5] <= -1) or (
-						Styleanomaly['Command-Line Arguments'][5] > -1
-						and (Styleanomaly['Command-Line Arguments'][4] < Styleanomaly['Command-Line Arguments'][5])
+					if (style_anomalies['Command-Line Arguments'][5] <= -1) or (
+						style_anomalies['Command-Line Arguments'][5] > -1
+						and (
+							style_anomalies['Command-Line Arguments'][4] < style_anomalies['Command-Line Arguments'][5]
+						)
 					):
-						anomaly_score += Styleanomaly['Command-Line Arguments'][1]
-					Styleanomaly['Command-Line Arguments'][4] += 1
+						anomaly_score += style_anomalies['Command-Line Arguments'][1]
+					style_anomalies['Command-Line Arguments'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Nulls'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Nulls'][3], line):
-				if Styleanomaly['Nulls'][0] == 1 or (Styleanomaly['Nulls'][0] == 0 and Styleanomaly['Nulls'][4] == 0):
+		if style_anomalies['Nulls'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Nulls'][3], line):
+				if style_anomalies['Nulls'][0] == 1 or (
+					style_anomalies['Nulls'][0] == 0 and style_anomalies['Nulls'][4] == 0
+				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Nulls'][5] <= -1) or (
-						Styleanomaly['Nulls'][5] > -1 and (Styleanomaly['Nulls'][4] < Styleanomaly['Nulls'][5])
+					if (style_anomalies['Nulls'][5] <= -1) or (
+						style_anomalies['Nulls'][5] > -1 and (style_anomalies['Nulls'][4] < style_anomalies['Nulls'][5])
 					):
-						anomaly_score += Styleanomaly['Nulls'][1]
-					Styleanomaly['Nulls'][4] += 1
+						anomaly_score += style_anomalies['Nulls'][1]
+					style_anomalies['Nulls'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Scope Operator'][2] != 0:  # Check if the anomaly is turned on
+		if style_anomalies['Scope Operator'][2] != 0:  # Check if the anomaly is turned on
 			if (
-				re.search(Styleanomaly['Scope Operator'][3], line)
+				re.search(style_anomalies['Scope Operator'][3], line)
 				and 'string::npos' not in line
 				and 'std::' not in line
 			):
-				if Styleanomaly['Scope Operator'][0] == 1 or (
-					Styleanomaly['Scope Operator'][0] == 0 and Styleanomaly['Scope Operator'][4] == 0
+				if style_anomalies['Scope Operator'][0] == 1 or (
+					style_anomalies['Scope Operator'][0] == 0 and style_anomalies['Scope Operator'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Scope Operator'][5] <= -1) or (
-						Styleanomaly['Scope Operator'][5] > -1
-						and (Styleanomaly['Scope Operator'][4] < Styleanomaly['Scope Operator'][5])
+					if (style_anomalies['Scope Operator'][5] <= -1) or (
+						style_anomalies['Scope Operator'][5] > -1
+						and (style_anomalies['Scope Operator'][4] < style_anomalies['Scope Operator'][5])
 					):
-						anomaly_score += Styleanomaly['Scope Operator'][1]
-					Styleanomaly['Scope Operator'][4] += 1
+						anomaly_score += style_anomalies['Scope Operator'][1]
+					style_anomalies['Scope Operator'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Max Min Macros'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Max Min Macros'][3], line):
-				if Styleanomaly['Max Min Macros'][0] == 1 or (
-					Styleanomaly['Max Min Macros'][0] == 0 and Styleanomaly['Max Min Macros'][4] == 0
+		if style_anomalies['Max Min Macros'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Max Min Macros'][3], line):
+				if style_anomalies['Max Min Macros'][0] == 1 or (
+					style_anomalies['Max Min Macros'][0] == 0 and style_anomalies['Max Min Macros'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Max Min Macros'][5] <= -1) or (
-						Styleanomaly['Max Min Macros'][5] > -1
-						and (Styleanomaly['Max Min Macros'][4] < Styleanomaly['Max Min Macros'][5])
+					if (style_anomalies['Max Min Macros'][5] <= -1) or (
+						style_anomalies['Max Min Macros'][5] > -1
+						and (style_anomalies['Max Min Macros'][4] < style_anomalies['Max Min Macros'][5])
 					):
-						anomaly_score += Styleanomaly['Max Min Macros'][1]
-					Styleanomaly['Max Min Macros'][4] += 1
+						anomaly_score += style_anomalies['Max Min Macros'][1]
+					style_anomalies['Max Min Macros'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Swap Function'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Swap Function'][3], line):
-				if Styleanomaly['Swap Function'][0] == 1 or (
-					Styleanomaly['Swap Function'][0] == 0 and Styleanomaly['Swap Function'][4] == 0
+		if style_anomalies['Swap Function'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Swap Function'][3], line):
+				if style_anomalies['Swap Function'][0] == 1 or (
+					style_anomalies['Swap Function'][0] == 0 and style_anomalies['Swap Function'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Swap Function'][5] <= -1) or (
-						Styleanomaly['Swap Function'][5] > -1
-						and (Styleanomaly['Swap Function'][4] < Styleanomaly['Swap Function'][5])
+					if (style_anomalies['Swap Function'][5] <= -1) or (
+						style_anomalies['Swap Function'][5] > -1
+						and (style_anomalies['Swap Function'][4] < style_anomalies['Swap Function'][5])
 					):
-						anomaly_score += Styleanomaly['Swap Function'][1]
-					Styleanomaly['Swap Function'][4] += 1
+						anomaly_score += style_anomalies['Swap Function'][1]
+					style_anomalies['Swap Function'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Cin Inside While'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Cin Inside While'][3], line):
-				if Styleanomaly['Cin Inside While'][0] == 1 or (
-					Styleanomaly['Cin Inside While'][0] == 0 and Styleanomaly['Cin Inside While'][4] == 0
+		if style_anomalies['Cin Inside While'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Cin Inside While'][3], line):
+				if style_anomalies['Cin Inside While'][0] == 1 or (
+					style_anomalies['Cin Inside While'][0] == 0 and style_anomalies['Cin Inside While'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Cin Inside While'][5] <= -1) or (
-						Styleanomaly['Cin Inside While'][5] > -1
-						and (Styleanomaly['Cin Inside While'][4] < Styleanomaly['Cin Inside While'][5])
+					if (style_anomalies['Cin Inside While'][5] <= -1) or (
+						style_anomalies['Cin Inside While'][5] > -1
+						and (style_anomalies['Cin Inside While'][4] < style_anomalies['Cin Inside While'][5])
 					):
-						anomaly_score += Styleanomaly['Cin Inside While'][1]
-					Styleanomaly['Cin Inside While'][4] += 1
+						anomaly_score += style_anomalies['Cin Inside While'][1]
+					style_anomalies['Cin Inside While'][4] += 1
 					anomalies_found += 1
 
 		# "Line Spacing" should only check lines inside main() and user functions
-		lineIsMain = re.search(INT_MAIN_REGEX, line)
-		lineIsUserFunc = re.search(USER_DEFINED_FUNCTIONS_REGEX, line)
-		lineIsForwardDec = re.search(FORWARD_DEC_REGEX, line)
-		if (lineIsMain or lineIsUserFunc) and not lineIsForwardDec:
-			checkLineSpacing = True
+		line_is_main = re.search(INT_MAIN_REGEX, line)
+		line_is_user_func = re.search(USER_DEFINED_FUNCTIONS_REGEX, line)
+		line_is_forward_dec = re.search(FORWARD_DEC_REGEX, line)
+		if (line_is_main or line_is_user_func) and not line_is_forward_dec:
+			check_line_spacing = True
 
 		# Keep track of how many left and right braces we've seen
-		if re.search(LEFT_BRACE_REGEX, line) and checkLineSpacing:
-			leftBraceCount += 1
-		if re.search(RIGHT_BRACE_REGEX, line) and checkLineSpacing:
-			rightBraceCount += 1
+		if re.search(LEFT_BRACE_REGEX, line) and check_line_spacing:
+			left_brace_count += 1
+		if re.search(RIGHT_BRACE_REGEX, line) and check_line_spacing:
+			right_brace_count += 1
 
 		# If brace counts match, we've seen the whole main() or user function
-		if (leftBraceCount == rightBraceCount) and leftBraceCount > 0:
-			checkLineSpacing = False
-			leftBraceCount = 0
-			rightBraceCount = 0
+		if (left_brace_count == right_brace_count) and left_brace_count > 0:
+			check_line_spacing = False
+			left_brace_count = 0
+			right_brace_count = 0
 
 		# Check if we're looking at the opening brace for a function on its own line
 		# If we are, skip it- it's a Brace Styling anomaly, not a Line Spacing anomaly
 		if re.search(LEFT_BRACE_REGEX, line) and (
 			re.search(INT_MAIN_REGEX, lines[i - 1]) or re.search(USER_DEFINED_FUNCTIONS_REGEX, lines[i - 1])
 		):
-			openingBrace = True
+			opening_brace = True
 		else:
-			openingBrace = False
+			opening_brace = False
 
 		if (
-			Styleanomaly['Line Spacing'][2] != 0
-			and checkLineSpacing
-			and not lineIsMain
-			and not lineIsUserFunc
-			and not openingBrace
-			and (leftBraceCount >= 1)
+			style_anomalies['Line Spacing'][2] != 0
+			and check_line_spacing
+			and not line_is_main
+			and not line_is_user_func
+			and not opening_brace
+			and (left_brace_count >= 1)
 		):  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Line Spacing'][3], line):
-				if Styleanomaly['Line Spacing'][0] == 1 or (
-					Styleanomaly['Line Spacing'][0] == 0 and Styleanomaly['Line Spacing'][4] == 0
+			if re.search(style_anomalies['Line Spacing'][3], line):
+				if style_anomalies['Line Spacing'][0] == 1 or (
+					style_anomalies['Line Spacing'][0] == 0 and style_anomalies['Line Spacing'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Line Spacing'][5] <= -1) or (
-						Styleanomaly['Line Spacing'][5] > -1
-						and (Styleanomaly['Line Spacing'][4] < Styleanomaly['Line Spacing'][5])
+					if (style_anomalies['Line Spacing'][5] <= -1) or (
+						style_anomalies['Line Spacing'][5] > -1
+						and (style_anomalies['Line Spacing'][4] < style_anomalies['Line Spacing'][5])
 					):
-						anomaly_score += Styleanomaly['Line Spacing'][1]
-					Styleanomaly['Line Spacing'][4] += 1
+						anomaly_score += style_anomalies['Line Spacing'][1]
+					style_anomalies['Line Spacing'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Multiple Declarations Same Line'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Multiple Declarations Same Line'][3], line):
-				if Styleanomaly['Multiple Declarations Same Line'][0] == 1 or (
-					Styleanomaly['Multiple Declarations Same Line'][0] == 0
-					and Styleanomaly['Multiple Declarations Same Line'][4] == 0
+		if style_anomalies['Multiple Declarations Same Line'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Multiple Declarations Same Line'][3], line):
+				if style_anomalies['Multiple Declarations Same Line'][0] == 1 or (
+					style_anomalies['Multiple Declarations Same Line'][0] == 0
+					and style_anomalies['Multiple Declarations Same Line'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Multiple Declarations Same Line'][5] <= -1) or (
-						Styleanomaly['Multiple Declarations Same Line'][5] > -1
+					if (style_anomalies['Multiple Declarations Same Line'][5] <= -1) or (
+						style_anomalies['Multiple Declarations Same Line'][5] > -1
 						and (
-							Styleanomaly['Multiple Declarations Same Line'][4]
-							< Styleanomaly['Multiple Declarations Same Line'][5]
+							style_anomalies['Multiple Declarations Same Line'][4]
+							< style_anomalies['Multiple Declarations Same Line'][5]
 						)
 					):
-						anomaly_score += Styleanomaly['Multiple Declarations Same Line'][1]
-					Styleanomaly['Multiple Declarations Same Line'][4] += 1
+						anomaly_score += style_anomalies['Multiple Declarations Same Line'][1]
+					style_anomalies['Multiple Declarations Same Line'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Multiple Cin Same Line'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Multiple Cin Same Line'][3], line):
-				if Styleanomaly['Multiple Cin Same Line'][0] == 1 or (
-					Styleanomaly['Multiple Cin Same Line'][0] == 0 and Styleanomaly['Multiple Cin Same Line'][4] == 0
+		if style_anomalies['Multiple Cin Same Line'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Multiple Cin Same Line'][3], line):
+				if style_anomalies['Multiple Cin Same Line'][0] == 1 or (
+					style_anomalies['Multiple Cin Same Line'][0] == 0
+					and style_anomalies['Multiple Cin Same Line'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Multiple Cin Same Line'][5] <= -1) or (
-						Styleanomaly['Multiple Cin Same Line'][5] > -1
-						and (Styleanomaly['Multiple Cin Same Line'][4] < Styleanomaly['Multiple Cin Same Line'][5])
+					if (style_anomalies['Multiple Cin Same Line'][5] <= -1) or (
+						style_anomalies['Multiple Cin Same Line'][5] > -1
+						and (
+							style_anomalies['Multiple Cin Same Line'][4] < style_anomalies['Multiple Cin Same Line'][5]
+						)
 					):
-						anomaly_score += Styleanomaly['Multiple Cin Same Line'][1]
-					Styleanomaly['Multiple Cin Same Line'][4] += 1
+						anomaly_score += style_anomalies['Multiple Cin Same Line'][1]
+					style_anomalies['Multiple Cin Same Line'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['and & or'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['and & or'][3], line):
-				if Styleanomaly['and & or'][0] == 1 or (
-					Styleanomaly['and & or'][0] == 0 and Styleanomaly['and & or'][4] == 0
+		if style_anomalies['and & or'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['and & or'][3], line):
+				if style_anomalies['and & or'][0] == 1 or (
+					style_anomalies['and & or'][0] == 0 and style_anomalies['and & or'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['and & or'][5] <= -1) or (
-						Styleanomaly['and & or'][5] > -1 and (Styleanomaly['and & or'][4] < Styleanomaly['and & or'][5])
+					if (style_anomalies['and & or'][5] <= -1) or (
+						style_anomalies['and & or'][5] > -1
+						and (style_anomalies['and & or'][4] < style_anomalies['and & or'][5])
 					):
-						anomaly_score += Styleanomaly['and & or'][1]
-					Styleanomaly['and & or'][4] += 1
+						anomaly_score += style_anomalies['and & or'][1]
+					style_anomalies['and & or'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['List Initialization'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['List Initialization'][3], line):
-				if Styleanomaly['List Initialization'][0] == 1 or (
-					Styleanomaly['List Initialization'][0] == 0 and Styleanomaly['List Initialization'][4] == 0
+		if style_anomalies['List Initialization'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['List Initialization'][3], line):
+				if style_anomalies['List Initialization'][0] == 1 or (
+					style_anomalies['List Initialization'][0] == 0 and style_anomalies['List Initialization'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['List Initialization'][5] <= -1) or (
-						Styleanomaly['List Initialization'][5] > -1
-						and (Styleanomaly['List Initialization'][4] < Styleanomaly['List Initialization'][5])
+					if (style_anomalies['List Initialization'][5] <= -1) or (
+						style_anomalies['List Initialization'][5] > -1
+						and (style_anomalies['List Initialization'][4] < style_anomalies['List Initialization'][5])
 					):
-						anomaly_score += Styleanomaly['List Initialization'][1]
-					Styleanomaly['List Initialization'][4] += 1
+						anomaly_score += style_anomalies['List Initialization'][1]
+					style_anomalies['List Initialization'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Vector Name Spacing'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Vector Name Spacing'][3], line):
-				if Styleanomaly['Vector Name Spacing'][0] == 1 or (
-					Styleanomaly['Vector Name Spacing'][0] == 0 and Styleanomaly['Vector Name Spacing'][4] == 0
+		if style_anomalies['Vector Name Spacing'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Vector Name Spacing'][3], line):
+				if style_anomalies['Vector Name Spacing'][0] == 1 or (
+					style_anomalies['Vector Name Spacing'][0] == 0 and style_anomalies['Vector Name Spacing'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Vector Name Spacing'][5] <= -1) or (
-						Styleanomaly['Vector Name Spacing'][5] > -1
-						and (Styleanomaly['Vector Name Spacing'][4] < Styleanomaly['Vector Name Spacing'][5])
+					if (style_anomalies['Vector Name Spacing'][5] <= -1) or (
+						style_anomalies['Vector Name Spacing'][5] > -1
+						and (style_anomalies['Vector Name Spacing'][4] < style_anomalies['Vector Name Spacing'][5])
 					):
-						anomaly_score += Styleanomaly['Vector Name Spacing'][1]
-					Styleanomaly['Vector Name Spacing'][4] += 1
+						anomaly_score += style_anomalies['Vector Name Spacing'][1]
+					style_anomalies['Vector Name Spacing'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Spaceless Operator'][2] != 0:  # Check if the anomaly is turned on
-			match = re.search(Styleanomaly['Spaceless Operator'][3], line)
+		if style_anomalies['Spaceless Operator'][2] != 0:  # Check if the anomaly is turned on
+			match = re.search(style_anomalies['Spaceless Operator'][3], line)
 			if match and '#include' not in line and 'vector<' not in match.group():
-				if Styleanomaly['Spaceless Operator'][0] == 1 or (
-					Styleanomaly['Spaceless Operator'][0] == 0 and Styleanomaly['Spaceless Operator'][4] == 0
+				if style_anomalies['Spaceless Operator'][0] == 1 or (
+					style_anomalies['Spaceless Operator'][0] == 0 and style_anomalies['Spaceless Operator'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Spaceless Operator'][5] <= -1) or (
-						Styleanomaly['Spaceless Operator'][5] > -1
-						and (Styleanomaly['Spaceless Operator'][4] < Styleanomaly['Spaceless Operator'][5])
+					if (style_anomalies['Spaceless Operator'][5] <= -1) or (
+						style_anomalies['Spaceless Operator'][5] > -1
+						and (style_anomalies['Spaceless Operator'][4] < style_anomalies['Spaceless Operator'][5])
 					):
-						anomaly_score += Styleanomaly['Spaceless Operator'][1]
-					Styleanomaly['Spaceless Operator'][4] += 1
+						anomaly_score += style_anomalies['Spaceless Operator'][1]
+					style_anomalies['Spaceless Operator'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Control Statement Spacing'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Control Statement Spacing'][3], line):
-				if Styleanomaly['Control Statement Spacing'][0] == 1 or (
-					Styleanomaly['Control Statement Spacing'][0] == 0
-					and Styleanomaly['Control Statement Spacing'][4] == 0
+		if style_anomalies['Control Statement Spacing'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Control Statement Spacing'][3], line):
+				if style_anomalies['Control Statement Spacing'][0] == 1 or (
+					style_anomalies['Control Statement Spacing'][0] == 0
+					and style_anomalies['Control Statement Spacing'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Control Statement Spacing'][5] <= -1) or (
-						Styleanomaly['Control Statement Spacing'][5] > -1
+					if (style_anomalies['Control Statement Spacing'][5] <= -1) or (
+						style_anomalies['Control Statement Spacing'][5] > -1
 						and (
-							Styleanomaly['Control Statement Spacing'][4] < Styleanomaly['Control Statement Spacing'][5]
+							style_anomalies['Control Statement Spacing'][4]
+							< style_anomalies['Control Statement Spacing'][5]
 						)
 					):
-						anomaly_score += Styleanomaly['Control Statement Spacing'][1]
-					Styleanomaly['Control Statement Spacing'][4] += 1
+						anomaly_score += style_anomalies['Control Statement Spacing'][1]
+					style_anomalies['Control Statement Spacing'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Main Void'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Main Void'][3], line):
-				if Styleanomaly['Main Void'][0] == 1 or (
-					Styleanomaly['Main Void'][0] == 0 and Styleanomaly['Main Void'][4] == 0
+		if style_anomalies['Main Void'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Main Void'][3], line):
+				if style_anomalies['Main Void'][0] == 1 or (
+					style_anomalies['Main Void'][0] == 0 and style_anomalies['Main Void'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Main Void'][5] <= -1) or (
-						Styleanomaly['Main Void'][5] > -1
-						and (Styleanomaly['Main Void'][4] < Styleanomaly['Main Void'][5])
+					if (style_anomalies['Main Void'][5] <= -1) or (
+						style_anomalies['Main Void'][5] > -1
+						and (style_anomalies['Main Void'][4] < style_anomalies['Main Void'][5])
 					):
-						anomaly_score += Styleanomaly['Main Void'][1]
-					Styleanomaly['Main Void'][4] += 1
+						anomaly_score += style_anomalies['Main Void'][1]
+					style_anomalies['Main Void'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Access And Increment'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Access And Increment'][3], line, flags=re.X):
-				if Styleanomaly['Access And Increment'][0] == 1 or (
-					Styleanomaly['Access And Increment'][0] == 0 and Styleanomaly['Access And Increment'][4] == 0
+		if style_anomalies['Access And Increment'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Access And Increment'][3], line, flags=re.X):
+				if style_anomalies['Access And Increment'][0] == 1 or (
+					style_anomalies['Access And Increment'][0] == 0 and style_anomalies['Access And Increment'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Access And Increment'][5] <= -1) or (
-						Styleanomaly['Access And Increment'][5] > -1
-						and (Styleanomaly['Access And Increment'][4] < Styleanomaly['Access And Increment'][5])
+					if (style_anomalies['Access And Increment'][5] <= -1) or (
+						style_anomalies['Access And Increment'][5] > -1
+						and (style_anomalies['Access And Increment'][4] < style_anomalies['Access And Increment'][5])
 					):
-						anomaly_score += Styleanomaly['Access And Increment'][1]
-					Styleanomaly['Access And Increment'][4] += 1
+						anomaly_score += style_anomalies['Access And Increment'][1]
+					style_anomalies['Access And Increment'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Auto'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Auto'][3], line):
-				if Styleanomaly['Auto'][0] == 1 or (Styleanomaly['Auto'][0] == 0 and Styleanomaly['Auto'][4] == 0):
-					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Auto'][5] <= -1) or (
-						Styleanomaly['Auto'][5] > -1 and (Styleanomaly['Auto'][4] < Styleanomaly['Auto'][5])
-					):
-						anomaly_score += Styleanomaly['Auto'][1]
-					Styleanomaly['Auto'][4] += 1
-					anomalies_found += 1
-
-		if Styleanomaly['zyBooks Set Precision'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['zyBooks Set Precision'][3], line):
-				if Styleanomaly['zyBooks Set Precision'][0] == 1 or (
-					Styleanomaly['zyBooks Set Precision'][0] == 0 and Styleanomaly['zyBooks Set Precision'][4] == 0
+		if style_anomalies['Auto'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Auto'][3], line):
+				if style_anomalies['Auto'][0] == 1 or (
+					style_anomalies['Auto'][0] == 0 and style_anomalies['Auto'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['zyBooks Set Precision'][5] <= -1) or (
-						Styleanomaly['zyBooks Set Precision'][5] > -1
-						and (Styleanomaly['zyBooks Set Precision'][4] < Styleanomaly['zyBooks Set Precision'][5])
+					if (style_anomalies['Auto'][5] <= -1) or (
+						style_anomalies['Auto'][5] > -1 and (style_anomalies['Auto'][4] < style_anomalies['Auto'][5])
 					):
-						anomaly_score += Styleanomaly['zyBooks Set Precision'][1]
-					Styleanomaly['zyBooks Set Precision'][4] += 1
+						anomaly_score += style_anomalies['Auto'][1]
+					style_anomalies['Auto'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Ranged-Based for Loop'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Ranged-Based for Loop'][3], line):
-				if Styleanomaly['Ranged-Based for Loop'][0] == 1 or (
-					Styleanomaly['Ranged-Based for Loop'][0] == 0 and Styleanomaly['Ranged-Based for Loop'][4] == 0
+		if style_anomalies['zyBooks Set Precision'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['zyBooks Set Precision'][3], line):
+				if style_anomalies['zyBooks Set Precision'][0] == 1 or (
+					style_anomalies['zyBooks Set Precision'][0] == 0
+					and style_anomalies['zyBooks Set Precision'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Ranged-Based for Loop'][5] <= -1) or (
-						Styleanomaly['Ranged-Based for Loop'][5] > -1
-						and (Styleanomaly['Ranged-Based for Loop'][4] < Styleanomaly['Ranged-Based for Loop'][5])
+					if (style_anomalies['zyBooks Set Precision'][5] <= -1) or (
+						style_anomalies['zyBooks Set Precision'][5] > -1
+						and (style_anomalies['zyBooks Set Precision'][4] < style_anomalies['zyBooks Set Precision'][5])
 					):
-						anomaly_score += Styleanomaly['Ranged-Based for Loop'][1]
-					Styleanomaly['Ranged-Based for Loop'][4] += 1
+						anomaly_score += style_anomalies['zyBooks Set Precision'][1]
+					style_anomalies['zyBooks Set Precision'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Iterator Functions'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Iterator Functions'][3], line):
-				if Styleanomaly['Iterator Functions'][0] == 1 or (
-					Styleanomaly['Iterator Functions'][0] == 0 and Styleanomaly['Iterator Functions'][4] == 0
+		if style_anomalies['Ranged-Based for Loop'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Ranged-Based for Loop'][3], line):
+				if style_anomalies['Ranged-Based for Loop'][0] == 1 or (
+					style_anomalies['Ranged-Based for Loop'][0] == 0
+					and style_anomalies['Ranged-Based for Loop'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Iterator Functions'][5] <= -1) or (
-						Styleanomaly['Iterator Functions'][5] > -1
-						and (Styleanomaly['Iterator Functions'][4] < Styleanomaly['Iterator Functions'][5])
+					if (style_anomalies['Ranged-Based for Loop'][5] <= -1) or (
+						style_anomalies['Ranged-Based for Loop'][5] > -1
+						and (style_anomalies['Ranged-Based for Loop'][4] < style_anomalies['Ranged-Based for Loop'][5])
 					):
-						anomaly_score += Styleanomaly['Iterator Functions'][1]
-					Styleanomaly['Iterator Functions'][4] += 1
+						anomaly_score += style_anomalies['Ranged-Based for Loop'][1]
+					style_anomalies['Ranged-Based for Loop'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Max Min Macros'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Max Min Macros'][3], line):
-				if Styleanomaly['Max Min Macros'][0] == 1 or (
-					Styleanomaly['Max Min Macros'][0] == 0 and Styleanomaly['Max Min Macros'][4] == 0
+		if style_anomalies['Iterator Functions'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Iterator Functions'][3], line):
+				if style_anomalies['Iterator Functions'][0] == 1 or (
+					style_anomalies['Iterator Functions'][0] == 0 and style_anomalies['Iterator Functions'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Max Min Macros'][5] <= -1) or (
-						Styleanomaly['Max Min Macros'][5] > -1
-						and (Styleanomaly['Max Min Macros'][4] < Styleanomaly['Max Min Macros'][5])
+					if (style_anomalies['Iterator Functions'][5] <= -1) or (
+						style_anomalies['Iterator Functions'][5] > -1
+						and (style_anomalies['Iterator Functions'][4] < style_anomalies['Iterator Functions'][5])
 					):
-						anomaly_score += Styleanomaly['Max Min Macros'][1]
-					Styleanomaly['Max Min Macros'][4] += 1
+						anomaly_score += style_anomalies['Iterator Functions'][1]
+					style_anomalies['Iterator Functions'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Swap Function'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Swap Function'][3], line):
-				if Styleanomaly['Swap Function'][0] == 1 or (
-					Styleanomaly['Swap Function'][0] == 0 and Styleanomaly['Swap Function'][4] == 0
+		if style_anomalies['Max Min Macros'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Max Min Macros'][3], line):
+				if style_anomalies['Max Min Macros'][0] == 1 or (
+					style_anomalies['Max Min Macros'][0] == 0 and style_anomalies['Max Min Macros'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Swap Function'][5] <= -1) or (
-						Styleanomaly['Swap Function'][5] > -1
-						and (Styleanomaly['Swap Function'][4] < Styleanomaly['Swap Function'][5])
+					if (style_anomalies['Max Min Macros'][5] <= -1) or (
+						style_anomalies['Max Min Macros'][5] > -1
+						and (style_anomalies['Max Min Macros'][4] < style_anomalies['Max Min Macros'][5])
 					):
-						anomaly_score += Styleanomaly['Swap Function'][1]
-					Styleanomaly['Swap Function'][4] += 1
+						anomaly_score += style_anomalies['Max Min Macros'][1]
+					style_anomalies['Max Min Macros'][4] += 1
 					anomalies_found += 1
 
-		if Styleanomaly['Cin Inside While'][2] != 0:  # Check if the anomaly is turned on
-			if re.search(Styleanomaly['Cin Inside While'][3], line):
-				if Styleanomaly['Cin Inside While'][0] == 1 or (
-					Styleanomaly['Cin Inside While'][0] == 0 and Styleanomaly['Cin Inside While'][4] == 0
+		if style_anomalies['Swap Function'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Swap Function'][3], line):
+				if style_anomalies['Swap Function'][0] == 1 or (
+					style_anomalies['Swap Function'][0] == 0 and style_anomalies['Swap Function'][4] == 0
 				):
 					# Score for this anomaly is capped to Styleanomaly[x][5] instances
-					if (Styleanomaly['Cin Inside While'][5] <= -1) or (
-						Styleanomaly['Cin Inside While'][5] > -1
-						and (Styleanomaly['Cin Inside While'][4] < Styleanomaly['Cin Inside While'][5])
+					if (style_anomalies['Swap Function'][5] <= -1) or (
+						style_anomalies['Swap Function'][5] > -1
+						and (style_anomalies['Swap Function'][4] < style_anomalies['Swap Function'][5])
 					):
-						anomaly_score += Styleanomaly['Cin Inside While'][1]
-					Styleanomaly['Cin Inside While'][4] += 1
+						anomaly_score += style_anomalies['Swap Function'][1]
+					style_anomalies['Swap Function'][4] += 1
+					anomalies_found += 1
+
+		if style_anomalies['Cin Inside While'][2] != 0:  # Check if the anomaly is turned on
+			if re.search(style_anomalies['Cin Inside While'][3], line):
+				if style_anomalies['Cin Inside While'][0] == 1 or (
+					style_anomalies['Cin Inside While'][0] == 0 and style_anomalies['Cin Inside While'][4] == 0
+				):
+					# Score for this anomaly is capped to Styleanomaly[x][5] instances
+					if (style_anomalies['Cin Inside While'][5] <= -1) or (
+						style_anomalies['Cin Inside While'][5] > -1
+						and (style_anomalies['Cin Inside While'][4] < style_anomalies['Cin Inside While'][5])
+					):
+						anomaly_score += style_anomalies['Cin Inside While'][1]
+					style_anomalies['Cin Inside While'][4] += 1
 					anomalies_found += 1
 
 	# For automatic anomaly detection, return *which* anomalies were found
 	if auto == 1:
 		anomalies_found = {}
-		for anomaly in Styleanomaly:
-			anomalies_found[anomaly] = Styleanomaly[anomaly][4]
+		for anomaly in style_anomalies:
+			anomalies_found[anomaly] = style_anomalies[anomaly][4]
 
 	return anomalies_found, anomaly_score
 
