@@ -72,12 +72,12 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
 	Returns a score indicating whether student code used hardcoding, based on a logfile's testcases and solution.
 
 	Args:
-		code (str): The student code to be evaluated.
-		testcases (set[tuple[str, str]]): List of testcases, each represented by a tuple of expected input and output.
-		solution_code (str): The solution code for comparison.
+	        code (str): The student code to be evaluated.
+	        testcases (set[tuple[str, str]]): List of testcases, each represented by a tuple of expected input and output.
+	        solution_code (str): The solution code for comparison.
 
 	Returns:
-		int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
+	        int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
 	"""
 	is_hardcoded = False
 
@@ -122,8 +122,8 @@ def hardcoding_analysis_2(data, selected_labs, testcases):
 	"""Case 2: testcases are available, but no solution"""
 	output = {}
 	testcase_use_counts = {testcase: 0 for testcase in testcases}
-	TESTCASE_USE_THRESHOLD = 0.6
-	NUM_STUDENTS = len(data)
+	testcase_use_threshold = 0.6
+	num_students = len(data)
 
 	for lab in selected_labs:
 		for user_id in data:
@@ -141,11 +141,9 @@ def hardcoding_analysis_2(data, selected_labs, testcases):
 		for user_id in data:
 			for testcase in testcases:
 				hardcoded_testcases = output[user_id][lab][2]
-				hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
-				logger.debug(
-					f'{testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% hardcoded testcase {testcase}...'
-				)
-				if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
+				hardcoding_percentage = testcase_use_counts[testcase] / num_students
+				logger.debug(f'{testcase_use_counts[testcase]}/{num_students} hardcoded testcase {testcase}...')
+				if (testcase in hardcoded_testcases) and (hardcoding_percentage >= testcase_use_threshold):
 					output[user_id][lab][2].remove(testcase)
 					if len(output[user_id][lab][2]) <= 0:
 						output[user_id][lab][0] = 0
@@ -156,8 +154,8 @@ def hardcoding_analysis_3(data, selected_labs):
 	"""Case 3: no testcases or solution"""
 	output = {}
 	if_literal_use_count = 0
-	IF_LITERAL_THRESHOLD = 0.6
-	NUM_STUDENTS = len(data)
+	if_literal_threshold = 0.6
+	num_students = len(data)
 
 	for lab in selected_labs:
 		for user_id in data:
@@ -168,12 +166,10 @@ def hardcoding_analysis_3(data, selected_labs):
 				hardcode_score = check_if_literal(code)
 				output[user_id][lab] = [hardcode_score, code]
 				if_literal_use_count += hardcode_score
-		hardcoding_percentage = if_literal_use_count / NUM_STUDENTS
-		logger.debug(
-			f'{if_literal_use_count}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% compared to literals in an if statement...'
-		)
+		hardcoding_percentage = if_literal_use_count / num_students
+		logger.debug(f'{if_literal_use_count}/{num_students} compared to literals in an if statement...')
 		for user_id in data:
-			if hardcoding_percentage > IF_LITERAL_THRESHOLD:
+			if hardcoding_percentage > if_literal_threshold:
 				output[user_id][lab][0] = 0
 	return output
 
@@ -194,8 +190,8 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
 
 		elif testcases and not solution_code:
 			testcase_use_counts = {testcase: 0 for testcase in testcases}
-			TESTCASE_USE_THRESHOLD = 0.6
-			NUM_STUDENTS = len(data)
+			testcase_use_threshold = 0.6
+			num_students = len(data)
 
 			for lab in selected_labs:
 				for user_id in data:
@@ -214,19 +210,17 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
 				for user_id in data:
 					for testcase in testcases:
 						hardcoded_testcases = output[user_id][lab][2]
-						hardcoding_percentage = testcase_use_counts[testcase] / NUM_STUDENTS
-						logger.debug(
-							f'{testcase_use_counts[testcase]}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% hardcoded testcase {testcase}...'
-						)
-						if (testcase in hardcoded_testcases) and (hardcoding_percentage >= TESTCASE_USE_THRESHOLD):
+						hardcoding_percentage = testcase_use_counts[testcase] / num_students
+						logger.debug(f'{testcase_use_counts[testcase]}/{num_students} hardcoded testcase {testcase}...')
+						if (testcase in hardcoded_testcases) and (hardcoding_percentage >= testcase_use_threshold):
 							output[user_id][lab][2].remove(testcase)
 							if len(output[user_id][lab][2]) <= 0:
 								output[user_id][lab][0] = 0
 
 		elif not testcases and not solution_code:
 			if_literal_use_count = 0
-			IF_LITERAL_THRESHOLD = 0.6
-			NUM_STUDENTS = len(data)
+			if_literal_threshold = 0.6
+			num_students = len(data)
 
 			for lab in selected_labs:
 				for user_id in data:
@@ -238,12 +232,10 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
 						output[user_id][lab] = [hardcode_score, code]
 						if_literal_use_count += hardcode_score
 
-				hardcoding_percentage = if_literal_use_count / NUM_STUDENTS
-				logger.debug(
-					f'{if_literal_use_count}/{NUM_STUDENTS}, or {round(hardcoding_percentage, 2) * 100}% compared to literals in an if statement...'
-				)
+				hardcoding_percentage = if_literal_use_count / num_students
+				logger.debug(f'{if_literal_use_count}/{num_students} compared to literals in an if statement...')
 				for user_id in data:
-					if hardcoding_percentage > IF_LITERAL_THRESHOLD:
+					if hardcoding_percentage > if_literal_threshold:
 						output[user_id][lab][0] = 0
 
 		else:
@@ -256,27 +248,28 @@ def hardcoding_analysis(data, selected_labs, testcases, solution_code):
 		exit(1)
 
 
+# TODO: check what this is used for, can we remove?
 def newtool(data, selected_labs):
 	"""
 	Parameters
 	----------
 	data: `dict` [`str`, `dict`]
-			Nested dictionary containing all student submission objects
-			Particular submission can be accessed with data[user_id][lab_id][n]
+	                Nested dictionary containing all student submission objects
+	                Particular submission can be accessed with data[user_id][lab_id][n]
 
 	Returns
 	-------
 	newtool_output = {
-					'student_id(1)' : {
-						'lab1' : [num_runs, num_develops, num_submits],
-						'lab2' : [num_runs, num_develops, num_submits],
-						.
-						.
-						'labn' : [num_runs, num_develops, num_submits]
-					}
+		'student_id(1)' : {
+			'lab1' : [num_runs, num_develops, num_submits],
+			'lab2' : [num_runs, num_develops, num_submits],
+			.
+			.
+			'labn' : [num_runs, num_develops, num_submits]
+		}
 	}
 	newtool_output = `dict` [`str`][`dict`]
-	
+
 	Nested dictionary of students containing student_id and labs and their results
 	"""
 	newtool_output = {}
@@ -288,10 +281,9 @@ def newtool(data, selected_labs):
 			num_submits = 0
 			num_develops = 0
 			if lab in data[user_id]:
-				for subObj in data[user_id][lab]:
+				for submission in data[user_id][lab]:
 					num_runs += 1
-					# print(int(subObj.submission[0]))
-					if int(subObj.submission[0]) == 1:
+					if int(submission.submission[0]) == 1:
 						num_submits += 1
 				num_develops = num_runs - num_submits
 			newtool_output[user_id][lab] = [num_runs, num_develops, num_submits]
@@ -323,24 +315,24 @@ Submission object structure (represents each column in the log file)
 
 Data from create_data_structure function
     data = {
-                student_id_1: {
-                    'lab 1': [
-                        Submission(), Submission(),
-                        Submission(), Submission(),
-                        ...
-                    ],
-                    ....
-                    'lab n': [
-                        Submission(), Submission(),
-                        Submission(), Submission(),
-                        ...
-                    ],
-                },
-                ...
-                student_id_n: {
-                    ...
-                }
-            }
+		student_id_1: {
+			'lab 1': [
+				Submission(), Submission(),
+				Submission(), Submission(),
+				...
+			],
+			....
+			'lab n': [
+				Submission(), Submission(),
+				Submission(), Submission(),
+				...
+			],
+		},
+		...
+		student_id_n: {
+			...
+		}
+	}
 
 newtool_output from user defined function structure 
     newtool_output = {
