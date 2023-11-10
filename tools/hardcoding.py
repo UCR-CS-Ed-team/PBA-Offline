@@ -42,6 +42,27 @@ def check_if_with_literal_and_cout(code: str) -> int:
 	return 0
 
 
+def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
+	"""
+	Returns the lines of code within the scope of an if statement.
+	If 'if' is not in any line, return an empty list.
+	"""
+	if not any('if' in line for line in code):
+		return []
+
+	lines_in_scope = []
+	brace_count = 0
+	for line in code[start_index:]:
+		lines_in_scope.append(line)
+		if '{' in line:
+			brace_count += 1
+		if '}' in line:
+			brace_count -= 1
+		if brace_count == 0:
+			break
+	return lines_in_scope
+
+
 def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 	"""
 	Returns 1 if code:

@@ -1,12 +1,21 @@
 from tools import hardcoding
 
 
+def get_first_if_index(code: list[str]) -> int:
+	"""
+	Returns the index of the first line in code that contains an 'if' statement.
+	Return -1 if there is no such line.
+	"""
+	for i, line in enumerate(code):
+		if 'if' in line:
+			return i
+	return -1
+
+
 class TestCheckIfWithLiteralAndCout:
-	def test_empty_code(self):
-		code = ''
-		testcase = ('5 1 8', '1 7')
-		result = hardcoding.check_hardcoded_testcase(code, testcase)
-		assert result == 0
+	"""
+	Unit tests for the `check_if_with_literal_and_cout` function in the `hardcoding` module.
+	"""
 
 	def test_code_without_if_literal(self):
 		code = """
@@ -58,6 +67,16 @@ class TestCheckIfWithLiteralAndCout:
 
 
 class TestCheckHardcodedTestcase:
+	"""
+	Unit tests for the `check_hardcoded_testcase` function in the `hardcoding` module.
+	"""
+
+	def test_empty_code(self):
+		code = ''
+		testcase = ('5 1 8', '1 7')
+		result = hardcoding.check_hardcoded_testcase(code, testcase)
+		assert result == 0
+
 	def test_testcase_found_with_cout_on_same_line(self):
 		code = """
         int main() {
@@ -141,3 +160,80 @@ class TestCheckHardcodedTestcase:
 		testcase = ('5 1 8', '1 7')
 		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 0
+
+
+class TestGetLinesInIfScope:
+	"""
+	Unit tests for the `get_lines_in_if_scope` function in the `hardcoding` module.
+	"""
+
+	def test_empty_code(self):
+		code = ''
+		code_lines = code.splitlines()
+		result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+		assert result == []
+
+	def test_code_without_if(self):
+		code = """
+        int main() {
+            int x = 5;
+            cout << "x is " << x << endl;
+            return 0;
+        }
+        """
+		code_lines = code.splitlines()
+		result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+		assert result == []
+
+	def test_code_with_if_on_same_line(self):
+		code = """
+        int main() {
+            int x = 10;
+            if (x == 5) { cout << "x is 5" << endl; }
+            return 0;
+        }
+        """
+		code_lines = code.splitlines()
+		result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+		result = [line.strip() for line in result]  # Strip whitespace from results
+		assert result == ['if (x == 5) { cout << "x is 5" << endl; }']
+
+	def test_code_with_if_on_next_line(self):
+		code = """
+        int main() {
+            int x = 10;
+            if (x == 5) {
+                cout << "x is " << x << endl;
+            }
+            return 0;
+        }
+        """
+		code_lines = code.splitlines()
+		result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+		result = [line.strip() for line in result]  # Strip whitespace from results
+		assert result == ['if (x == 5) {', 'cout << "x is " << x << endl;', '}']
+
+	def test_code_with_nested_if(self):
+		code = """
+        int main() {
+            int x = 10;
+            if (x == 5) {
+                cout << "x is " << x << endl;
+                if (x == 10) {
+                    cout << "x is 10" << endl;
+                }
+            }
+            return 0;
+        }
+        """
+		code_lines = code.splitlines()
+		result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+		result = [line.strip() for line in result]  # Strip whitespace from results
+		assert result == [
+			'if (x == 5) {',
+			'cout << "x is " << x << endl;',
+			'if (x == 10) {',
+			'cout << "x is 10" << endl;',
+			'}',
+			'}',
+		]
