@@ -10,6 +10,7 @@ from random import random
 
 import pandas as pd
 import requests
+from dateutil import parser
 from tqdm import tqdm
 from urllib3 import Retry
 
@@ -34,13 +35,16 @@ def get_valid_datetime(timestamp):
 	"""
 	There are lots of different datetime formats, this function accounts for those and returns the timestamp
 	"""
-	t = timestamp
-	for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%Y %H:%M:%S', '%m/%d/%y %H:%M'):
-		try:
-			return datetime.strptime(t, fmt)
-		except ValueError:
-			pass
-	raise ValueError('Cannot recognize datetime format: ' + t)
+	return parser.parse(timestamp)
+	# t = timestamp
+	# test = parser.parse(timestamp)
+	# for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%Y %H:%M:%S', '%m/%d/%y %H:%M'):
+	# 	try:
+	# 		dttime = datetime.strptime(t, fmt)
+	# 		return datetime.strptime(t, fmt)
+	# 	except ValueError:
+	# 		pass
+	# raise ValueError('Cannot recognize datetime format: ' + t)
 
 
 def download_solution(logfile):
