@@ -203,7 +203,7 @@ def create_data_structure(logfile):
 			submission_id=row.zip_location.split('/')[-1],
 			type=row.is_submission,
 			code=row.student_code,
-			sub_time=get_valid_datetime(row._11),
+			sub_time=get_valid_datetime(row.date_submitted),
 			anomaly_dict=None,
 		)
 		data[row.user_id][row.content_section].append(sub)

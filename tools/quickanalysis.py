@@ -79,7 +79,7 @@ def quick_analysis(dataframe):
 			max_score = 0
 			time_spent_by_user = 0
 			time_list = []
-			for time in user_df['date_submitted(US/Pacific)']:
+			for time in user_df['date_submitted']:
 				time_list.append(time)
 			for i in range(len(time_list) - 1):
 				d1 = get_valid_datetime(str(time_list[i]))

@@ -127,10 +127,7 @@ def roster(dataframe, selected_labs):
 
 	# Identify unique labs
 	unique_lab_ids = set()
-	if 'content_resource_id' in df:
-		for lab_id in df['content_resource_id']:
-			unique_lab_ids.add(lab_id)
-	else:
+	if 'lab_id' in df:
 		for lab_id in df['lab_id']:
 			unique_lab_ids.add(lab_id)
 
@@ -154,11 +151,7 @@ def roster(dataframe, selected_labs):
 			num_of_submits = 0
 			if user_id == -1:  # Checking if the entry is a solution
 				continue
-			if 'submission' in user_df:
-				for submission in user_df['submission']:
-					if submission == 1:
-						num_of_submits += 1
-			else:
+			if 'is_submission' in user_df:
 				for submission in user_df['is_submission']:
 					if submission == 1:
 						num_of_submits += 1
@@ -169,9 +162,6 @@ def roster(dataframe, selected_labs):
 			time_list = []  # Contains timestamps for that user
 			if 'date_submitted' in user_df:
 				for time in user_df['date_submitted']:
-					time_list.append(time)
-			else:
-				for time in user_df['date_submitted(UTC)']:
 					time_list.append(time)
 			time_spent_by_user = time_to_minutes_seconds(time_list)
 
@@ -239,18 +229,11 @@ def roster(dataframe, selected_labs):
 #           Control          #
 ##############################
 if use_standalone:
-	# file_path = '/Users/ashleypang/Documents/GitHub/Frank_Vahid_Tools/PBA---Offline/logfile_multilab.csv'
 	file_path = filedialog.askopenfilename()
 	folder_path = os.path.split(file_path)[0]
 	file_name = os.path.basename(file_path).split('/')[-1]
 	logfile = pd.read_csv(file_path)
 	logfile = logfile[logfile.role == 'Student']
-
-	# Update column names if necessary
-	# Enables support for log files from learn.zybooks.com and Mode
-	logfile.columns = logfile.columns.str.replace('\(US/Pacific\)', '', regex=True)
-	logfile.columns = logfile.columns.str.replace('is_submission', 'submission')
-	logfile.columns = logfile.columns.str.replace('content_resource_id', 'lab_id')
 
 	selected_labs = get_selected_labs(logfile)
 	final_roster = roster(logfile, selected_labs)

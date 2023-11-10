@@ -677,19 +677,11 @@ def anomaly(data, selected_labs, auto=0):  # Function to calculate the anomaly s
 #           Control          #
 ##############################
 if use_standalone:
-	# logfile_path = input("Enter the path to the logfile: ")
-	# logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile.csv'
 	file_path = filedialog.askopenfilename()
 	folder_path = os.path.split(file_path)[0]
 	file_name = os.path.basename(file_path).split('/')[-1]
 	logfile = pd.read_csv(file_path)
 	logfile = logfile[logfile.role == 'Student']
-
-	# Update column names if necessary
-	# Enables support for log files from learn.zybooks.com and Mode
-	logfile.columns = logfile.columns.str.replace('\(US/Pacific\)', '', regex=True)
-	logfile.columns = logfile.columns.str.replace('is_submission', 'submission')
-	logfile.columns = logfile.columns.str.replace('content_resource_id', 'lab_id')
 
 	selected_labs = get_selected_labs(logfile)
 	print('Processing ' + file_name)

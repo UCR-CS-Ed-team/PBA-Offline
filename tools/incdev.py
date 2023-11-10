@@ -492,7 +492,6 @@ def adjust_score(score):
 			data[int(row.user_id)] = {}
 		if row.content_section not in data[row.user_id]:
 			data[row.user_id][row.content_section] = []
-		# url, result = get_code(row.zip_location)
 		sub = Submission(
 			student_id=row.user_id,
 			crid=row.content_resource_id,
