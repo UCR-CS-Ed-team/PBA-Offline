@@ -2,6 +2,12 @@ from tools import hardcoding
 
 
 class TestCheckIfLiteral:
+	def test_empty_code(self):
+		code = ''
+		testcase = ('5 1 8', '1 7')
+		result = hardcoding.check_testcase_in_code(code, testcase)
+		assert result == 0
+		
 	def test_code_without_if_literal(self):
 		code = """
         int main() {
@@ -132,12 +138,6 @@ class TestCheckTestcaseInCode:
             return 0;
         }
         """
-		testcase = ('5 1 8', '1 7')
-		result = hardcoding.check_testcase_in_code(code, testcase)
-		assert result == 0
-
-	def test_empty_code(self):
-		code = ''
 		testcase = ('5 1 8', '1 7')
 		result = hardcoding.check_testcase_in_code(code, testcase)
 		assert result == 0

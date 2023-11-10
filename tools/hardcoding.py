@@ -67,13 +67,13 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
 	return 0
 
 
-def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) -> int:
+def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code: str) -> int:
 	"""
 	Returns a score indicating whether student code used hardcoding, based on a logfile's testcases and solution.
 
 	Args:
 		code (str): The student code to be evaluated.
-		testcases (set[tuple[str, str]]): List of testcases, each represented by a tuple of expected input and output.
+		testcases (set[tuple]): Set of testcases, each represented by a tuple of expected input and output.
 		solution_code (str): The solution code for comparison.
 
 	Returns:
@@ -106,15 +106,14 @@ def get_code_with_max_score(user_id, lab, submissions):
 def hardcoding_analysis_1(data, selected_labs, testcases, solution_code):
 	"""Case 1: testcases and solution is available"""
 	output = {}
-	if testcases and solution_code:
-		for lab in selected_labs:
-			for user_id in data:
-				if user_id not in output:
-					output[user_id] = {}
-				if lab in data[user_id]:
-					code = get_code_with_max_score(user_id, lab, data)
-					hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
-					output[user_id][lab] = [hardcode_score, code]
+	for lab in selected_labs:
+		for user_id in data:
+			if user_id not in output:
+				output[user_id] = {}
+			if lab in data[user_id]:
+				code = get_code_with_max_score(user_id, lab, data)
+				hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
+				output[user_id][lab] = [hardcode_score, code]
 	return output
 
 

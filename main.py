@@ -51,6 +51,7 @@ if __name__ == '__main__':
 	urls = logfile.zip_location.to_list()
 	selected_labs = get_selected_labs(logfile)
 
+	# TODO: Call `create_data_structure` before while loop, or similar
 	data = {}
 	final_roster = {}
 	prompt = (
