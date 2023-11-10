@@ -21,6 +21,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 IF_WITH_LITERAL_REGEX = r'(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))'
+LITERAL_IN_QUOTES_REGEX = r'==\s*["\']([^"\']*)["\']'
 
 
 def check_if_literal(code: str) -> int:
@@ -52,15 +53,20 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
 	lines = [line for line in lines if line.strip() not in ('', '{')]
 
 	# Search every line for an 'if' comparing to a literal
+	# TODO: do we need this? Can we use check_if_literal instead?
 	for i, line in enumerate(lines):
-		if re.search(IF_WITH_LITERAL_REGEX, line):
+		if_with_literal_match = re.search(IF_WITH_LITERAL_REGEX, line)
+		if if_with_literal_match:
+			if_with_literal_str = if_with_literal_match.group(1)
+			literal = re.search(LITERAL_IN_QUOTES_REGEX, if_with_literal_str).group(1)
+
 			# Ensure the output testcase occurs after "cout" in the line
 			cout_index = line.find('cout')
 			output_on_same_line = (cout_index != -1) and (line.find(output) > cout_index)
 			cout_index = lines[i + 1].find('cout')
 			output_on_next_line = (cout_index != -1) and (lines[i + 1].find(output) > cout_index)
 
-			input_hardcoded = input in line or any(word in line for word in input.split())
+			input_hardcoded = input in literal or any(word in literal for word in input.split())
 			output_hardcoded = output_on_same_line or output_on_next_line
 			if input_hardcoded and output_hardcoded:
 				return 1

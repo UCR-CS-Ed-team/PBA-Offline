@@ -7,7 +7,7 @@ class TestCheckIfLiteral:
 		testcase = ('5 1 8', '1 7')
 		result = hardcoding.check_testcase_in_code(code, testcase)
 		assert result == 0
-		
+
 	def test_code_without_if_literal(self):
 		code = """
         int main() {
@@ -142,13 +142,13 @@ class TestCheckTestcaseInCode:
 		result = hardcoding.check_testcase_in_code(code, testcase)
 		assert result == 0
 
-	def test_testcase_not_found_with_input_prefix(self):
+	def test_testcase_not_found_with_input_substring(self):
 		code = """
         int main() {
             string x;
             getline(cin, x);
 
-            if (x == "4 1 2 31 15") {
+            if (x == "4 1 2 31 15") {   // '1' matches testcase input
                 cout << "1 7" << endl;
             }
 
