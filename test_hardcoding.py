@@ -1,11 +1,11 @@
 from tools import hardcoding
 
 
-class TestCheckIfLiteral:
+class TestCheckIfWithLiteralAndCout:
 	def test_empty_code(self):
 		code = ''
 		testcase = ('5 1 8', '1 7')
-		result = hardcoding.check_testcase_in_code(code, testcase)
+		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 0
 
 	def test_code_without_if_literal(self):
@@ -16,7 +16,7 @@ class TestCheckIfLiteral:
             return 0;
         }
         """
-		result = hardcoding.check_if_literal(code)
+		result = hardcoding.check_if_with_literal_and_cout(code)
 		assert result == 0
 
 	def test_code_with_if_literal_without_cout(self):
@@ -29,7 +29,7 @@ class TestCheckIfLiteral:
             return 0;
         }
         """
-		result = hardcoding.check_if_literal(code)
+		result = hardcoding.check_if_with_literal_and_cout(code)
 		assert result == 0
 
 	def test_code_with_if_literal_and_cout_on_same_line(self):
@@ -40,7 +40,7 @@ class TestCheckIfLiteral:
             return 0;
         }
         """
-		result = hardcoding.check_if_literal(code)
+		result = hardcoding.check_if_with_literal_and_cout(code)
 		assert result == 1
 
 	def test_code_with_if_literal_and_cout_on_next_line(self):
@@ -53,11 +53,11 @@ class TestCheckIfLiteral:
             return 0;
         }
         """
-		result = hardcoding.check_if_literal(code)
+		result = hardcoding.check_if_with_literal_and_cout(code)
 		assert result == 1
 
 
-class TestCheckTestcaseInCode:
+class TestCheckHardcodedTestcase:
 	def test_testcase_found_with_cout_on_same_line(self):
 		code = """
         int main() {
@@ -70,7 +70,7 @@ class TestCheckTestcaseInCode:
         }
         """
 		testcase = ('5 1 8', '1 7')
-		result = hardcoding.check_testcase_in_code(code, testcase)
+		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 1
 
 	def test_testcase_found_with_cout_on_next_line(self):
@@ -88,7 +88,7 @@ class TestCheckTestcaseInCode:
         }
         """
 		testcase = ('3 Joe,123-5432 Frank,867-5309 Frank', '867-5309')
-		result = hardcoding.check_testcase_in_code(code, testcase)
+		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 1
 
 	def test_testcase_found_compare_to_input_prefix(self):
@@ -105,7 +105,7 @@ class TestCheckTestcaseInCode:
         }
         """
 		testcase = ('5 1 8', '1 7')
-		result = hardcoding.check_testcase_in_code(code, testcase)
+		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 1
 
 	def test_testcase_found_compare_to_input_middle(self):
@@ -122,7 +122,7 @@ class TestCheckTestcaseInCode:
         }
         """
 		testcase = ('5 1 8', '1 7')
-		result = hardcoding.check_testcase_in_code(code, testcase)
+		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 1
 
 	def test_testcase_not_found(self):
@@ -139,7 +139,7 @@ class TestCheckTestcaseInCode:
         }
         """
 		testcase = ('5 1 8', '1 7')
-		result = hardcoding.check_testcase_in_code(code, testcase)
+		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 0
 
 	def test_testcase_not_found_with_input_substring(self):
@@ -156,5 +156,5 @@ class TestCheckTestcaseInCode:
         }
         """
 		testcase = ('5 1 8 91 23 7', '1 7')
-		result = hardcoding.check_testcase_in_code(code, testcase)
+		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 0

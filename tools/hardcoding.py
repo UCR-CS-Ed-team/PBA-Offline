@@ -20,12 +20,14 @@ formatter = logging.Formatter('%(name)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-IF_WITH_LITERAL_REGEX = r'(if\s*\(\s*\w+\s*==\s*(?:(?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))'
-LITERAL_IN_QUOTES_REGEX = r'==\s*["\']([^"\']*)["\']'
+IF_WITH_LITERAL_REGEX = r'(if\s*\(\s*\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))'
 
 
-def check_if_literal(code: str) -> int:
-	"""Returns 1 if code includes an if statement comparing to literals"""
+def check_if_with_literal_and_cout(code: str) -> int:
+	"""
+	Returns 1 if code has an if statement comparing to literals, followed by cout.
+	Used for case 3: no testcases or solution
+	"""
 
 	# Remove lines that are empty or are only a left brace
 	lines = code.splitlines()
@@ -40,10 +42,12 @@ def check_if_literal(code: str) -> int:
 	return 0
 
 
-def check_testcase_in_code(code: str, testcase: tuple) -> int:
+def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 	"""
-	Checks whether a testcase is found within a string.
-	Returns 1 if the testcase is found, else 0.
+	Returns 1 if code:
+		- Has an if statement comparing to literals, followed by cout
+		- The literal contains the input testcase, or a part of the testcase
+	Used for cases 1 and 2: testcases and solution are available, or only testcases are available
 	"""
 	input = testcase[0]
 	output = testcase[1]
@@ -53,12 +57,10 @@ def check_testcase_in_code(code: str, testcase: tuple) -> int:
 	lines = [line for line in lines if line.strip() not in ('', '{')]
 
 	# Search every line for an 'if' comparing to a literal
-	# TODO: do we need this? Can we use check_if_literal instead?
 	for i, line in enumerate(lines):
 		if_with_literal_match = re.search(IF_WITH_LITERAL_REGEX, line)
 		if if_with_literal_match:
-			if_with_literal_str = if_with_literal_match.group(1)
-			literal = re.search(LITERAL_IN_QUOTES_REGEX, if_with_literal_str).group(1)
+			literal = if_with_literal_match.group(2)
 
 			# Ensure the output testcase occurs after "cout" in the line
 			cout_index = line.find('cout')
@@ -88,8 +90,8 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
 	is_hardcoded = False
 
 	for testcase in testcases:
-		testcase_in_code = check_testcase_in_code(code, testcase)
-		testcase_in_soln = check_testcase_in_code(solution_code, testcase)
+		testcase_in_code = check_hardcoded_testcase(code, testcase)
+		testcase_in_soln = check_hardcoded_testcase(solution_code, testcase)
 		if testcase_in_code and not testcase_in_soln:
 			logger.debug(f'is_hardcoded is True for testcase {testcase}.')
 			is_hardcoded = True
@@ -138,7 +140,7 @@ def hardcoding_analysis_2(data, selected_labs, testcases):
 				code = get_code_with_max_score(user_id, lab, data)
 				output[user_id][lab] = [0, code, set()]
 				for testcase in testcases:  # Track num times students hardcode testcases
-					hardcode_score = check_testcase_in_code(code, testcase)
+					hardcode_score = check_hardcoded_testcase(code, testcase)
 					output[user_id][lab][0] = hardcode_score
 					if hardcode_score > 0:
 						output[user_id][lab][2].add(testcase)
@@ -168,7 +170,7 @@ def hardcoding_analysis_3(data, selected_labs):
 				output[user_id] = {}
 			if lab in data[user_id]:
 				code = get_code_with_max_score(user_id, lab, data)
-				hardcode_score = check_if_literal(code)
+				hardcode_score = check_if_with_literal_and_cout(code)
 				output[user_id][lab] = [hardcode_score, code]
 				if_literal_use_count += hardcode_score
 		hardcoding_percentage = if_literal_use_count / num_students
@@ -177,80 +179,6 @@ def hardcoding_analysis_3(data, selected_labs):
 			if hardcoding_percentage > if_literal_threshold:
 				output[user_id][lab][0] = 0
 	return output
-
-
-def hardcoding_analysis(data, selected_labs, testcases, solution_code):
-	output = {}
-
-	try:
-		if testcases and solution_code:
-			for lab in selected_labs:
-				for user_id in data:
-					if user_id not in output:
-						output[user_id] = {}
-					if lab in data[user_id]:
-						code = get_code_with_max_score(user_id, lab, data)
-						hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
-						output[user_id][lab] = [hardcode_score, code]
-
-		elif testcases and not solution_code:
-			testcase_use_counts = {testcase: 0 for testcase in testcases}
-			testcase_use_threshold = 0.6
-			num_students = len(data)
-
-			for lab in selected_labs:
-				for user_id in data:
-					if user_id not in output:
-						output[user_id] = {}
-					if lab in data[user_id]:
-						code = get_code_with_max_score(user_id, lab, data)
-						output[user_id][lab] = [0, code, set()]
-						for testcase in testcases:  # Track num times students hardcode testcases
-							hardcode_score = check_testcase_in_code(code, testcase)
-							output[user_id][lab][0] = hardcode_score
-							if hardcode_score > 0:
-								output[user_id][lab][2].add(testcase)
-								testcase_use_counts[testcase] += 1
-
-				for user_id in data:
-					for testcase in testcases:
-						hardcoded_testcases = output[user_id][lab][2]
-						hardcoding_percentage = testcase_use_counts[testcase] / num_students
-						logger.debug(f'{testcase_use_counts[testcase]}/{num_students} hardcoded testcase {testcase}...')
-						if (testcase in hardcoded_testcases) and (hardcoding_percentage >= testcase_use_threshold):
-							output[user_id][lab][2].remove(testcase)
-							if len(output[user_id][lab][2]) <= 0:
-								output[user_id][lab][0] = 0
-
-		elif not testcases and not solution_code:
-			if_literal_use_count = 0
-			if_literal_threshold = 0.6
-			num_students = len(data)
-
-			for lab in selected_labs:
-				for user_id in data:
-					if user_id not in output:
-						output[user_id] = {}
-					if lab in data[user_id]:
-						code = get_code_with_max_score(user_id, lab, data)
-						hardcode_score = check_if_literal(code)
-						output[user_id][lab] = [hardcode_score, code]
-						if_literal_use_count += hardcode_score
-
-				hardcoding_percentage = if_literal_use_count / num_students
-				logger.debug(f'{if_literal_use_count}/{num_students} compared to literals in an if statement...')
-				for user_id in data:
-					if hardcoding_percentage > if_literal_threshold:
-						output[user_id][lab][0] = 0
-
-		else:
-			raise Exception('Unexpected input during hardcode analysis')
-
-		return output
-
-	except Exception as e:
-		logger.error(f'Error: {e}')
-		exit(1)
 
 
 # TODO: check what this is used for, can we remove?
