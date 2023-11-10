@@ -72,12 +72,12 @@ def get_hardcode_score_with_soln(code: str, testcases: set, solution_code: str) 
 	Returns a score indicating whether student code used hardcoding, based on a logfile's testcases and solution.
 
 	Args:
-	        code (str): The student code to be evaluated.
-	        testcases (set[tuple[str, str]]): List of testcases, each represented by a tuple of expected input and output.
-	        solution_code (str): The solution code for comparison.
+		code (str): The student code to be evaluated.
+		testcases (set[tuple[str, str]]): List of testcases, each represented by a tuple of expected input and output.
+		solution_code (str): The solution code for comparison.
 
 	Returns:
-	        int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
+		int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
 	"""
 	is_hardcoded = False
 
