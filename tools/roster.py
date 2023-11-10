@@ -1,37 +1,21 @@
 import math
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from tkinter import filedialog
 
 import pandas as pd
 
-from tools.utilities import get_selected_labs, write_output_to_csv
+from tools.utilities import get_selected_labs, get_valid_datetime, write_output_to_csv
 
 use_standalone = False
-
-
-# TODO: replace this with the one from utilities.py
-def get_valid_date_time(t):
-	"""
-	There are lots of different datetime formats, this function accounts for those and returns the timestamp
-	"""
-	for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%y %H:%M', '%m/%d/%Y %H:%M'):
-		try:
-			return datetime.strptime(t, fmt)
-		except ValueError:
-			pass
-	raise ValueError('Cannot recognize datetime format: ' + t)
 
 
 def time_to_minutes_seconds(time_list):
 	# Converts time to minutes and seconds (ex: 1m 30s) ignores anything over the 10 minute interval
 	time_spent_by_user = 0
-	# fmt = '%Y-%m-%d %H:%M:%S'
 	for i in range(len(time_list) - 1):
-		# d1 = datetime.strptime(str(time_list[i]), fmt)
-		# d2 = datetime.strptime(str(time_list[i+1]), fmt)
-		d1 = get_valid_date_time(str(time_list[i]))
-		d2 = get_valid_date_time(str(time_list[i + 1]))
+		d1 = get_valid_datetime(str(time_list[i]))
+		d2 = get_valid_datetime(str(time_list[i + 1]))
 		diff = d2 - d1
 		diff_minutes = (diff.days * 24 * 60) + (diff.seconds / 60)
 		if diff_minutes <= 10:
@@ -82,10 +66,10 @@ def get_ppm(time_spent, score):
 	Checks if a student scored too many points too quickly, Indicates suspicious activity (might have copied)
 	Input:
 	------
-		Accepts time spent on that lab and the maximum number of points scored by the student as an input
+	Accepts time spent on that lab and the maximum number of points scored by the student as an input
 	Output:
 	-------
-		Returns a float points per minute
+	Returns a float points per minute
 	"""
 	time = time_spent.split()
 	hours = int(time[0].strip('h'))
@@ -102,41 +86,41 @@ def roster(dataframe, selected_labs):
 	"""
 	Input:
 	------
-			Accepts a logfile dataframe and selected labs as an input
+		Accepts a logfile dataframe and selected labs as an input
 
 	Output:
 	-------
-			Calculates the total time spent across selected labs, total time spent, total develops, total submits,
-			and also details about time spent on each lab, number of submits in each lab, etc
+		Calculates the total time spent across selected labs, total time spent, total develops, total submits,
+		and also details about time spent on each lab, number of submits in each lab, etc
 
-			summary_roster = {
-				user_id_1: {
-					user_id:            121314141,
-					last_name:          'Doe,
-					first_name:         'John',
-					Email:              jdoe009@ucr.edu,
-					Role:               student,
-					points_per_minute:  0.0,
-					'Time Spent(total)':'16m 00s',
-					'Total Runs':       17,
-					'Total Score':      10.0,
-					'Total Develops':   8,
-					'Total Submits':    9,
-					'Total Pivots':     0,
-					'Lab 1.2 Points per minute': 0.0,
-					'Lab 1.2 Time spent': '16m 00s',
-					'Lab 1.2 # of runs': 17,
-					'Lab 1.2 % score': 10.0,
-					'Lab 1.2 # of devs': 8,
-					'Lab 1.2 # of subs': 9
-					...
-					...
-					...
-				},
-				...
-				...
-				...
-			}
+	summary_roster = {
+	        user_id_1: {
+	                'user_id': 121314141,
+	                'last_name': 'Doe',
+	                'first_name': 'John',
+	                'Email': 'jdoe009@ucr.edu',
+	                'Role': 'student',
+	                'points_per_minute': 0.0,
+	                'Time Spent(total)': '16m 00s',
+	                'Total Runs': 17,
+	                'Total Score': 10.0,
+	                'Total Develops': 8,
+	                'Total Submits': 9,
+	                'Total Pivots': 0,
+	                'Lab 1.2 Points per minute': 0.0,
+	                'Lab 1.2 Time spent': '16m 00s',
+	                'Lab 1.2 # of runs': 17,
+	                'Lab 1.2 % score': 10.0,
+	                'Lab 1.2 # of devs': 8,
+	                'Lab 1.2 # of subs': 9,
+	                ...
+	                ...
+	                ...
+	        },
+	        ...
+	        ...
+	        ...
+	}
 	"""
 
 	df = dataframe
@@ -199,7 +183,7 @@ def roster(dataframe, selected_labs):
 
 			if (
 				user_id not in summary_roster
-			):  # First time entry into the map, implemented it this way so we do not need to reiterate through it 
+			):  # First time entry into the map, implemented it this way so we do not need to reiterate through it
 				# to get all the timestamps and get the time spent
 				summary_roster[int(user_id)] = {
 					'User ID': user_id,
