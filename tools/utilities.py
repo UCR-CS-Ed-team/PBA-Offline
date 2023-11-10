@@ -25,7 +25,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-class Not200Exception(Exception):
+class Not200Error(Exception):
 	"""Raise this custom exception if we receive a "valid" response from the server, but no data is present"""
 
 	pass
@@ -34,14 +34,14 @@ class Not200Exception(Exception):
 def get_valid_datetime(timestamp: str) -> datetime:
 	"""
 	Returns a datetime object for a submission timestamp.
-	
+
 	dateutil.parser handles many common datetime formats.
 	A ParserError is raised if the datetime cannot be parsed.
 	"""
 	try:
 		return parser.parse(timestamp)
 	except parser.ParserError:
-		  raise parser.ParserError(f'Cannot recognize datetime format: {timestamp}')
+		raise parser.ParserError(f'Cannot recognize datetime format: {timestamp}')
 
 
 def download_solution(logfile):
@@ -73,7 +73,7 @@ def download_code_helper(url):
 		try:
 			response = session.get(url)
 			if response.status_code > 200 and response.status_code < 300:
-				raise Not200Exception
+				raise Not200Error
 			zfile = zipfile.ZipFile(io.BytesIO(response.content))
 			filenames = zfile.namelist()
 			content = zfile.open(filenames[0], 'r').read()
@@ -81,7 +81,7 @@ def download_code_helper(url):
 			with open(path, 'w') as file:
 				file.write(result)
 			return (url, result)
-		except Not200Exception:
+		except Not200Error:
 			return (url, 'Successfully received a response, but not data was received')
 		except ConnectionError:
 			return (url, 'Max retries met, cannot retrieve student code submission')
