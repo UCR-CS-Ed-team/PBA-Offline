@@ -60,7 +60,7 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 	for i, line in enumerate(lines):
 		if_with_literal_match = re.search(IF_WITH_LITERAL_REGEX, line)
 		if if_with_literal_match:
-			literal = if_with_literal_match.group(2)
+			literal = if_with_literal_match.group(2)  # Isolate literal as a string
 
 			# Ensure the output testcase occurs after "cout" in the line
 			cout_index = line.find('cout')

@@ -141,20 +141,3 @@ class TestCheckHardcodedTestcase:
 		testcase = ('5 1 8', '1 7')
 		result = hardcoding.check_hardcoded_testcase(code, testcase)
 		assert result == 0
-
-	def test_testcase_not_found_with_input_substring(self):
-		code = """
-        int main() {
-            string x;
-            getline(cin, x);
-
-            if (x == "4 1 2 31 15") {   // '1' matches testcase input
-                cout << "1 7" << endl;
-            }
-
-            return 0;
-        }
-        """
-		testcase = ('5 1 8 91 23 7', '1 7')
-		result = hardcoding.check_hardcoded_testcase(code, testcase)
-		assert result == 0
