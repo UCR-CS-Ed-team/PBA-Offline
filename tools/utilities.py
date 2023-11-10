@@ -31,20 +31,17 @@ class Not200Exception(Exception):
 	pass
 
 
-def get_valid_datetime(timestamp):
+def get_valid_datetime(timestamp: str) -> datetime:
 	"""
-	There are lots of different datetime formats, this function accounts for those and returns the timestamp
+	Returns a datetime object for a submission timestamp.
+	
+	dateutil.parser handles many common datetime formats.
+	A ParserError is raised if the datetime cannot be parsed.
 	"""
-	return parser.parse(timestamp)
-	# t = timestamp
-	# test = parser.parse(timestamp)
-	# for fmt in ('%m/%d/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%m/%d/%Y %H:%M:%S', '%m/%d/%y %H:%M'):
-	# 	try:
-	# 		dttime = datetime.strptime(t, fmt)
-	# 		return datetime.strptime(t, fmt)
-	# 	except ValueError:
-	# 		pass
-	# raise ValueError('Cannot recognize datetime format: ' + t)
+	try:
+		return parser.parse(timestamp)
+	except parser.ParserError:
+		  raise parser.ParserError(f'Cannot recognize datetime format: {timestamp}')
 
 
 def download_solution(logfile):
