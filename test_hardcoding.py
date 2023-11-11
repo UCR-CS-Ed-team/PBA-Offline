@@ -161,6 +161,27 @@ class TestCheckHardcodedTestcase:
         result = hardcoding.check_hardcoded_testcase(code, testcase)
         assert result == 0
 
+    def test_testcase_found_cout_multiple_lines_down(self):
+        code = """
+        int main() {
+            int n;
+            string a;
+            cin >> n >> a;
+
+            if (a == "Joe,123-5432") {
+                n = n + 1;
+                // Some more lines here
+                cout << "867-5309" << endl;
+                a = ""; 
+            }
+
+            return 0;
+        }
+        """
+        testcase = ('3 Joe,123-5432 Frank,867-5309 Frank', '867-5309')
+        result = hardcoding.check_hardcoded_testcase(code, testcase)
+        assert result == 1
+
 
 class TestGetLinesInIfScope:
     """

@@ -73,24 +73,25 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
     input = testcase[0]
     output = testcase[1]
 
-    # Remove lines that are empty or are only a left brace
     lines = code.splitlines()
-    lines = [line for line in lines if line.strip() not in ('', '{')]
+    lines = [line for line in lines if line.strip() != '']  # Remove empty lines
 
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
         if_with_literal_match = re.search(IF_WITH_LITERAL_REGEX, line)
         if if_with_literal_match:
             literal = if_with_literal_match.group(2)  # Isolate literal as a string
-
-            # Ensure the output testcase occurs after "cout" in the line
-            cout_index = line.find('cout')
-            output_on_same_line = (cout_index != -1) and (line.find(output) > cout_index)
-            cout_index = lines[i + 1].find('cout')
-            output_on_next_line = (cout_index != -1) and (lines[i + 1].find(output) > cout_index)
-
             input_hardcoded = input in literal or any(word in literal for word in input.split())
-            output_hardcoded = output_on_same_line or output_on_next_line
+
+            # Look at all lines in the scope of the `if` statement
+            lines_in_if_scope = get_lines_in_if_scope(lines, i)
+            for if_line in lines_in_if_scope:
+                # Ensure the output testcase occurs after "cout" in the line
+                cout_index = if_line.find('cout')
+                output_hardcoded = (cout_index != -1) and (if_line.find(output) > cout_index)
+                if output_hardcoded:
+                    break
+
             if input_hardcoded and output_hardcoded:
                 return 1
     return 0
