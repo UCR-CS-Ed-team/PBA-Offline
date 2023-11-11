@@ -107,7 +107,7 @@ def download_code(logfile):
         for url in urls:
             threads.append(executor.submit(download_code_helper, url))
         student_code = []
-        with tqdm(total=len(threads), desc='Downloading student submissions') as pbar:
+        with tqdm(total=len(threads), desc='Downloading student code') as pbar:
             for task in as_completed(threads):
                 student_code.append(task.result())
                 pbar.update(1)
@@ -171,19 +171,16 @@ def create_data_structure(logfile):
     Creates a data structure which stores all submission objects of each student
 
     data = {
-    user_id_1: {
+        user_id_1: {
             lab_id_1 : [submission, submission, submission],
             lab_id_2 : [submission, submission, submission]
-    }
-    user_id_2: {
+        }
+        user_id_2: {
             lab_id_1 : [submission, submission, submission],
             lab_id_2 : [submission, submission, submission]
-    }
-    ...
-    ...
+        }
     ...
     }
-
     """
     data = {}
     for row in logfile.itertuples():

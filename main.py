@@ -45,8 +45,7 @@ if __name__ == '__main__':
     urls = logfile.zip_location.to_list()
     selected_labs = get_selected_labs(logfile)
 
-    # TODO: Call `create_data_structure` before while loop, or similar
-    data = {}
+    submissions = {}
     final_roster = {}
     prompt = (
         '\n1. Quick Analysis (averages for all labs) \n'
@@ -60,26 +59,31 @@ if __name__ == '__main__':
 
     while 1:
         print(prompt)
-        inp = input()
+        user_input = input()
         final_roster = {}
-        input_list = inp.split(' ')
+        input_list = user_input.split(' ')
+
+        if user_input != 8 and submissions == {}:
+            logfile_with_code = download_code(logfile)
+            submissions = create_data_structure(logfile_with_code)
+
         for i in input_list:
-            inp = int(i)
+            user_input = int(i)
 
             # Quick analysis for every lab
-            if inp == 1:
-                quick_analysis(logfile)
+            if user_input == 1:
+                quick_analysis(logfile_with_code)
 
             # Roster for selected labs
-            elif inp == 2:
-                final_roster = roster(logfile, selected_labs)
+            elif user_input == 2:
+                final_roster = roster(logfile_with_code, selected_labs)
 
             # Anomalies for selected labs
-            elif inp == 3:
-                if data == {}:
-                    logfile = download_code(logfile)
-                    data = create_data_structure(logfile)
-                anomaly_detection_output = anomaly(data, selected_labs, 0)
+            elif user_input == 3:
+                if submissions == {}:
+                    logfile_with_code = download_code(logfile_with_code)
+                    submissions = create_data_structure(logfile_with_code)
+                anomaly_detection_output = anomaly(submissions, selected_labs, 0)
                 for user_id in anomaly_detection_output:
                     for lab in anomaly_detection_output[user_id]:
                         anomalies_found = anomaly_detection_output[user_id][lab][0]
@@ -91,9 +95,9 @@ if __name__ == '__main__':
                         else:
                             final_roster[user_id] = {
                                 'User ID': user_id,
-                                'Last Name': data[user_id][lab][0].last_name[0],
-                                'First Name': data[user_id][lab][0].first_name[0],
-                                'Email': data[user_id][lab][0].email[0],
+                                'Last Name': submissions[user_id][lab][0].last_name[0],
+                                'First Name': submissions[user_id][lab][0].first_name[0],
+                                'Email': submissions[user_id][lab][0].email[0],
                                 'Role': 'Student',
                                 'Lab ' + str(lab) + ' anomalies found': anomalies_found,
                                 'Lab ' + str(lab) + ' anomaly score': anomaly_score,
@@ -101,12 +105,12 @@ if __name__ == '__main__':
                             }
 
             # Inc. development coding trails for all labs
-            elif inp == 4:
-                if data == {}:
-                    logfile = download_code(logfile)
-                    data = create_data_structure(logfile)
+            elif user_input == 4:
+                if submissions == {}:
+                    logfile_with_code = download_code(logfile_with_code)
+                    submissions = create_data_structure(logfile_with_code)
                 # Generate nested dict of IncDev results
-                incdev_output = incdev.run(data)
+                incdev_output = incdev.run(submissions)
                 for user_id in incdev_output:
                     for lab_id in incdev_output[user_id]:
                         lid = str(lab_id)
@@ -124,9 +128,9 @@ if __name__ == '__main__':
                         else:
                             final_roster[user_id] = {
                                 'User ID': user_id,
-                                'Last Name': data[user_id][lab_id][0].last_name[0],
-                                'First Name': data[user_id][lab_id][0].first_name[0],
-                                'Email': data[user_id][lab_id][0].email[0],
+                                'Last Name': submissions[user_id][lab_id][0].last_name[0],
+                                'First Name': submissions[user_id][lab_id][0].first_name[0],
+                                'Email': submissions[user_id][lab_id][0].email[0],
                                 'Role': 'Student',
                                 lid + ' incdev_score': score,
                                 lid + ' incdev_score_trail': score_trail,
@@ -136,11 +140,11 @@ if __name__ == '__main__':
                             }
 
             # Style anomalies for selected labs using cpplint
-            elif inp == 5:
-                if data == {}:
-                    logfile = download_code(logfile)
-                    data = create_data_structure(logfile)
-                stylechecker_output = stylechecker(data, selected_labs)
+            elif user_input == 5:
+                if submissions == {}:
+                    logfile_with_code = download_code(logfile_with_code)
+                    submissions = create_data_structure(logfile_with_code)
+                stylechecker_output = stylechecker(submissions, selected_labs)
                 for user_id in stylechecker_output:
                     for lab_id in stylechecker_output[user_id]:
                         if user_id in final_roster:
@@ -150,9 +154,9 @@ if __name__ == '__main__':
                         else:
                             final_roster[user_id] = {
                                 'User ID': user_id,
-                                'Last Name': data[user_id][lab_id][0].last_name[0],
-                                'First Name': data[user_id][lab_id][0].first_name[0],
-                                'Email': data[user_id][lab_id][0].email[0],
+                                'Last Name': submissions[user_id][lab_id][0].last_name[0],
+                                'First Name': submissions[user_id][lab_id][0].first_name[0],
+                                'Email': submissions[user_id][lab_id][0].email[0],
                                 'Role': 'Student',
                                 str(lab_id) + '  Style score': stylechecker_output[user_id][lab_id][0],
                                 str(lab_id) + '  Style output': stylechecker_output[user_id][lab_id][1],
@@ -160,13 +164,13 @@ if __name__ == '__main__':
                             }
 
             # Automatic anomaly detection for selected labs
-            elif inp == 6:
+            elif user_input == 6:
                 final_roster = {}  # Reset roster, fixme later
-                if data == {}:
-                    logfile = download_code(logfile)
-                    data = create_data_structure(logfile)
+                if submissions == {}:
+                    logfile_with_code = download_code(logfile_with_code)
+                    submissions = create_data_structure(logfile_with_code)
                 # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
-                anomaly_detection_output = anomaly(data, selected_labs, 1)
+                anomaly_detection_output = anomaly(submissions, selected_labs, 1)
 
                 # Populate anomaly counts for every user, for each lab
                 for user_id in anomaly_detection_output:
@@ -201,7 +205,7 @@ if __name__ == '__main__':
                 for found_anomaly in num_users_per_anomaly:
                     for lab in num_users_per_anomaly[found_anomaly]:
                         anomaly_count = num_users_per_anomaly[found_anomaly][lab]
-                        total_users = len(data)
+                        total_users = len(submissions)
                         # If a clear majority uses an "anomaly", it's not anomalous
                         if anomaly_count / total_users >= 0.8:
                             final_roster['Status'][f'Lab {str(lab)} {found_anomaly}'] = 'No'
@@ -212,26 +216,28 @@ if __name__ == '__main__':
                 write_output_to_csv(final_roster, 'anomaly_counts.csv')
 
             # Hardcode detection for selected labs
-            elif inp == 7:
-                if data == {}:
-                    logfile = download_code(logfile)
-                    data = create_data_structure(logfile)
+            elif user_input == 7:
+                if submissions == {}:
+                    logfile_with_code = download_code(logfile_with_code)
+                    submissions = create_data_structure(logfile_with_code)
 
                 # Tuple of testcases: (output, input)
-                testcases = get_testcases(logfile)
+                testcases = get_testcases(logfile_with_code)
 
                 try:
                     if testcases and solution_code:
                         logger.debug('Case 1: testcases and solution')
                         hardcoding_results = tools.hardcoding.hardcoding_analysis_1(
-                            data, selected_labs, testcases, solution_code
+                            submissions, selected_labs, testcases, solution_code
                         )
                     elif testcases and not solution_code:
                         logger.debug('Case 2: testcases, no solution')
-                        hardcoding_results = tools.hardcoding.hardcoding_analysis_2(data, selected_labs, testcases)
+                        hardcoding_results = tools.hardcoding.hardcoding_analysis_2(
+                            submissions, selected_labs, testcases
+                        )
                     elif not testcases and not solution_code:
                         logger.debug('Case 3: no testcases or solution')
-                        hardcoding_results = tools.hardcoding.hardcoding_analysis_3(data, selected_labs)
+                        hardcoding_results = tools.hardcoding.hardcoding_analysis_3(submissions, selected_labs)
                     else:
                         raise Exception('Unexpected input during hardcode analysis')
                 except Exception as e:
@@ -248,15 +254,15 @@ if __name__ == '__main__':
                         else:
                             final_roster[user_id] = {
                                 'User ID': user_id,
-                                'Last Name': data[user_id][lab][0].last_name[0],
-                                'First Name': data[user_id][lab][0].first_name[0],
-                                'Email': data[user_id][lab][0].email[0],
+                                'Last Name': submissions[user_id][lab][0].last_name[0],
+                                'First Name': submissions[user_id][lab][0].first_name[0],
+                                'Email': submissions[user_id][lab][0].email[0],
                                 'Role': 'Student',
                                 'Lab ' + str(lab) + ' hardcoding score': hardcoding_score,
                                 str(lab) + ' Student code': student_code,
                             }
 
-            elif inp == 8:
+            elif user_input == 8:
                 exit(0)
 
             else:
