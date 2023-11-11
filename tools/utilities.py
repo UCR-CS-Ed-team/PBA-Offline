@@ -211,24 +211,19 @@ def create_data_structure(logfile):
 
 def get_testcases(logfile):
     # Pick first student submission in logfile
-    for row in logfile.itertuples():
-        if row.user_id != -1:
-            first_submission = row
-            break
-
     testcases = set()
-    # Check that 'results' column isn't empty
-    if not pd.isnull(first_submission.result):
-        result = json.loads(first_submission.result)
-        # Save input for each test case
-        for test in result['config']['test_bench']:
-            # Check that the entry has the ['options'] fields
-            if test.get('options'):
-                # Save input/output for each test case
-                if test['options'].get('input') and test['options'].get('output'):
-                    input = test['options']['input'].strip()
-                    output = test['options']['output'].strip()
-                    testcases.add((input, output))
+    submissions = logfile[logfile['is_submission'] == 1]
+    for row in submissions.itertuples():
+        if not pd.isnull(row.result):  # Check that 'results' column isn't empty
+            result = json.loads(row.result)
+            for test in result['config']['test_bench']:
+                if test.get('options'):  # Check that the entry has the ['options'] fields
+                    # Save input/output for each test case
+                    if test['options'].get('input') and test['options'].get('output'):
+                        input = test['options']['input'].strip()
+                        output = test['options']['output'].strip()
+                        testcases.add((input, output))
+            break
     return testcases
 
 
