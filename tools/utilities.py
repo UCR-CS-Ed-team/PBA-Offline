@@ -16,19 +16,21 @@ from urllib3 import Retry
 
 from tools.submission import Submission
 
-# DEBUGGING
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(name)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
 
 class Not200Error(Exception):
     """Raise this custom exception if we receive a "valid" response from the server, but no data is present"""
 
     pass
+
+
+def setup_logger(name: str, log_level=logging.DEBUG, log_format='%(name)s : %(message)s'):
+    """Set up a logger with a given name."""
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(log_format))
+    logger = logging.getLogger(name)
+    logger.setLevel(log_level)
+    logger.addHandler(handler)
+    return logger
 
 
 def get_valid_datetime(timestamp: str) -> datetime:
@@ -230,8 +232,6 @@ def get_testcases(logfile):
                     input = test['options']['input'].strip()
                     output = test['options']['output'].strip()
                     testcases.add((input, output))
-                    logger.debug(f'\nInput testcase: {input}')
-                    logger.debug(f'Output testcase: {output}')
     return testcases
 
 

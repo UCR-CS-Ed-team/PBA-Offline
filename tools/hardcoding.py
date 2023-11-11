@@ -1,24 +1,12 @@
-import logging
 import re
 
 import pandas as pd
 
-from tools.utilities import (
-    create_data_structure,
-    download_code,
-    get_selected_labs,
-    write_output_to_csv,
-)
+from tools.utilities import create_data_structure, download_code, get_selected_labs, setup_logger, write_output_to_csv
+
+logger = setup_logger(__name__)  # DEBUGGING
 
 use_standalone = False
-
-# DEBUGGING
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(name)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 IF_WITH_LITERAL_REGEX = r'(if\s*\(\s*\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))'
 

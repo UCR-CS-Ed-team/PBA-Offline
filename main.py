@@ -1,4 +1,3 @@
-import logging
 import os
 from tkinter import filedialog
 
@@ -16,18 +15,13 @@ from tools.utilities import (
     download_solution,
     get_selected_labs,
     get_testcases,
+    setup_logger,
     write_output_to_csv,
 )
 
-# DEBUGGING
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(name)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
 if __name__ == '__main__':
+    logger = setup_logger(__name__)  # DEBUGGING
+
     # Read logfile into a Pandas DataFrame
     file_path = filedialog.askopenfilename()
     folder_path = os.path.split(file_path)[0]
