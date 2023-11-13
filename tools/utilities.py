@@ -6,11 +6,13 @@ import os
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from logging import Logger
 from random import random
 
 import pandas as pd
 import requests
 from dateutil import parser
+from pandas import DataFrame
 from tqdm import tqdm
 from urllib3 import Retry
 
@@ -23,7 +25,26 @@ class Not200Error(Exception):
     pass
 
 
-def setup_logger(name: str, log_level=logging.DEBUG, log_format='%(name)s : %(message)s'):
+def standardize_columns(logfile: DataFrame) -> DataFrame:
+    """
+    Standardizes the column names in a logfile (Pandas DataFrame).
+    Returns the standardized DataFrame, edited in-place.
+
+    - date_submitted(UTC) etc. -> date_submitted
+    - submission -> is_submission
+    - content_resource_id -> lab_id
+    """
+    for column in logfile.columns:
+        if 'date_submitted' in column:
+            logfile.rename(columns={column: 'date_submitted'}, inplace=True)
+        elif 'submission' in column:
+            logfile.rename(columns={column: 'is_submission'}, inplace=True)
+        elif 'content_resource_id' in column:
+            logfile.rename(columns={column: 'lab_id'}, inplace=True)
+    return logfile
+
+
+def setup_logger(name: str, log_level=logging.DEBUG, log_format='%(name)s : %(message)s') -> Logger:
     """Set up a logger with a given name."""
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter(log_format))

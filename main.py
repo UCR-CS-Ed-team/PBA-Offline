@@ -16,6 +16,7 @@ from tools.utilities import (
     get_selected_labs,
     get_testcases,
     setup_logger,
+    standardize_columns,
     write_output_to_csv,
 )
 
@@ -27,15 +28,7 @@ if __name__ == '__main__':
     folder_path = os.path.split(file_path)[0]
     filename = os.path.basename(file_path).split('/')[-1]
     logfile = pd.read_csv(file_path)
-
-    # Standardize column names
-    for column in logfile.columns:
-        if 'date_submitted' in column:
-            logfile.rename(columns={column: 'date_submitted'}, inplace=True)
-        elif 'submission' in column:
-            logfile.rename(columns={column: 'is_submission'}, inplace=True)
-        elif 'content_resource_id' in column:
-            logfile.rename(columns={column: 'lab_id'}, inplace=True)
+    logfile = standardize_columns(logfile)
 
     # Locate solution in logfile and download its code
     solution_code = download_solution(logfile)
