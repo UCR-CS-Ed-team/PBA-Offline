@@ -116,6 +116,7 @@ def download_code(logfile):
     return logfile
 
 
+# TODO: validate input, what if input is non-integer?
 def get_selected_labs(logfile):
     """
     Function to get selected labs from the user entered input
@@ -209,6 +210,7 @@ def create_data_structure(logfile):
     return data
 
 
+# TODO: verify this works correctly for hardcoding
 def get_testcases(logfile):
     # Pick first student submission in logfile
     testcases = set()
@@ -227,6 +229,7 @@ def get_testcases(logfile):
     return testcases
 
 
+# TODO: remove this
 def set_code_in_logfile(logfile, code, percent):
     """For testing purposes"""
     for user_id, labs in logfile.items():

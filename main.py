@@ -57,19 +57,19 @@ if __name__ == '__main__':
         '8. Quit \n'
     )
 
-    while 1:
+    while True:
         print(prompt)
-        user_input = input()
         final_roster = {}
-        input_list = user_input.split(' ')
 
-        if user_input != 8 and submissions == {}:
-            logfile_with_code = download_code(logfile)
-            submissions = create_data_structure(logfile_with_code)
+        user_input = input()
+        input_list = user_input.split(' ')
 
         for i in input_list:
             user_input = int(i)
-
+            if user_input != 8 and submissions == {}:
+                logfile_with_code = download_code(logfile)
+                submissions = create_data_structure(logfile_with_code)
+            
             # Quick analysis for every lab
             if user_input == 1:
                 quick_analysis(logfile_with_code)
@@ -80,9 +80,6 @@ if __name__ == '__main__':
 
             # Anomalies for selected labs
             elif user_input == 3:
-                if submissions == {}:
-                    logfile_with_code = download_code(logfile_with_code)
-                    submissions = create_data_structure(logfile_with_code)
                 anomaly_detection_output = anomaly(submissions, selected_labs, 0)
                 for user_id in anomaly_detection_output:
                     for lab in anomaly_detection_output[user_id]:
@@ -106,9 +103,6 @@ if __name__ == '__main__':
 
             # Inc. development coding trails for all labs
             elif user_input == 4:
-                if submissions == {}:
-                    logfile_with_code = download_code(logfile_with_code)
-                    submissions = create_data_structure(logfile_with_code)
                 # Generate nested dict of IncDev results
                 incdev_output = incdev.run(submissions)
                 for user_id in incdev_output:
@@ -141,9 +135,6 @@ if __name__ == '__main__':
 
             # Style anomalies for selected labs using cpplint
             elif user_input == 5:
-                if submissions == {}:
-                    logfile_with_code = download_code(logfile_with_code)
-                    submissions = create_data_structure(logfile_with_code)
                 stylechecker_output = stylechecker(submissions, selected_labs)
                 for user_id in stylechecker_output:
                     for lab_id in stylechecker_output[user_id]:
@@ -165,10 +156,7 @@ if __name__ == '__main__':
 
             # Automatic anomaly detection for selected labs
             elif user_input == 6:
-                final_roster = {}  # Reset roster, fixme later
-                if submissions == {}:
-                    logfile_with_code = download_code(logfile_with_code)
-                    submissions = create_data_structure(logfile_with_code)
+                final_roster = {}  # TODO: reset roster, fix later
                 # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
                 anomaly_detection_output = anomaly(submissions, selected_labs, 1)
 
@@ -217,10 +205,6 @@ if __name__ == '__main__':
 
             # Hardcode detection for selected labs
             elif user_input == 7:
-                if submissions == {}:
-                    logfile_with_code = download_code(logfile_with_code)
-                    submissions = create_data_structure(logfile_with_code)
-
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile_with_code)
 
