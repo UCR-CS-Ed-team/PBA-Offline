@@ -14,11 +14,13 @@ def time_to_minutes_seconds(time_list):
     # Converts time to minutes and seconds (ex: 1m 30s) ignores anything over the 10 minute interval
     time_spent_by_user = 0
     for i in range(len(time_list) - 1):
-        d1 = get_valid_datetime(str(time_list[i]))
-        d2 = get_valid_datetime(str(time_list[i + 1]))
+        d1 = time_list[i]
+        d2 = time_list[i + 1]
         diff = d2 - d1
         diff_minutes = (diff.days * 24 * 60) + (diff.seconds / 60)
-        if diff_minutes <= 10:
+        if diff_minutes < 0:
+            raise ValueError('Negative time difference found!')
+        elif diff_minutes <= 10:
             time_spent_by_user += diff_minutes
     time_spent_seconds = time_spent_by_user * 60
     td = str(timedelta(seconds=time_spent_seconds))
@@ -162,7 +164,8 @@ def roster(dataframe, selected_labs):
             time_list = []  # Contains timestamps for that user
             if 'date_submitted' in user_df:
                 for time in user_df['date_submitted']:
-                    time_list.append(time)
+                    time_list.append(get_valid_datetime(time))
+            time_list.sort()  # Sort datetimes in ascending order
             time_spent_by_user = time_to_minutes_seconds(time_list)
 
             # Points per minute, Indicates if a student scores too many points too quickly, might have copied?
@@ -171,10 +174,9 @@ def roster(dataframe, selected_labs):
             # Normalization zi = (xi - min(x)) / (max(x) – min(x))  | We assumed max(x) = 10 and min(x) = 0
             ppm_normalized = ppm / 10
 
-            if (
-                user_id not in summary_roster
-            ):  # First time entry into the map, implemented it this way so we do not need to reiterate through it
-                # to get all the timestamps and get the time spent
+            # First time entry into the map, implemented it this way so we do not need to reiterate through it
+            # to get all the timestamps and get the time spent
+            if user_id not in summary_roster:
                 summary_roster[int(user_id)] = {
                     'User ID': user_id,
                     'Last Name': last_name,
