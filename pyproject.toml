@@ -1,10 +1,9 @@
 [tool.ruff]
 line-length = 120
-exclude = ["random.py", "__init__.py"]
+exclude = ["__init__.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N"]
-ignore = ["E101"]
 
 [tool.ruff.format]
 quote-style = "single"

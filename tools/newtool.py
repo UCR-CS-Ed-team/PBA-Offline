@@ -45,10 +45,10 @@ def newtool(data, selected_labs):
             num_submits = 0
             num_develops = 0
             if lab in data[user_id]:
-                for subObj in data[user_id][lab]:
+                for submission_object in data[user_id][lab]:
                     num_runs += 1
                     # print(int(subObj.submission[0]))
-                    if int(subObj.submission[0]) == 1:
+                    if int(submission_object.submission[0]) == 1:
                         num_submits += 1
                 num_develops = num_runs - num_submits
             newtool_output[user_id][lab] = [num_runs, num_develops, num_submits]
