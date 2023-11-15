@@ -24,10 +24,8 @@ if __name__ == '__main__':
     logger = setup_logger(__name__)  # DEBUGGING
 
     # Read logfile into a Pandas DataFrame
-    file_path = filedialog.askopenfilename()
-    folder_path = os.path.split(file_path)[0]
-    filename = os.path.basename(file_path).split('/')[-1]
-    logfile = pd.read_csv(file_path)
+    logfile_path = filedialog.askopenfilename()
+    logfile = pd.read_csv(logfile_path)
     logfile = standardize_columns(logfile)
 
     # Locate solution in logfile and download its code
