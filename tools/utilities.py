@@ -7,7 +7,6 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from logging import Logger
-from random import random
 
 import pandas as pd
 import requests
@@ -67,7 +66,7 @@ def get_valid_datetime(timestamp: str) -> datetime:
         raise parser.ParserError(f'Cannot recognize datetime format: {timestamp}')
 
 
-def download_solution(logfile):
+def download_solution(logfile: DataFrame) -> str | None:
     """Return solution code in a logfile, if present"""
     for row in logfile.itertuples():
         if row.user_id == -1:
@@ -80,7 +79,7 @@ def download_solution(logfile):
     return None
 
 
-def download_code_helper(url):
+def download_code_helper(url: str) -> tuple[str, str]:
     """
     Actual code which downloads the students code run using requests library
     """
@@ -115,7 +114,7 @@ def download_code_helper(url):
         return (url, result)
 
 
-def download_code(logfile):
+def download_code(logfile: DataFrame) -> DataFrame:
     """
     Iterates through the zybooks logfile dataframe, appends a new column "student_code" to the dataframe and returns it
 
@@ -138,7 +137,7 @@ def download_code(logfile):
 
 
 # TODO: validate input, what if input is non-integer?
-def get_selected_labs(logfile):
+def get_selected_labs(logfile: DataFrame) -> list[str]:
     """
     Function to get selected labs from the user entered input
     """
@@ -188,7 +187,7 @@ def write_output_to_csv(final_roster, file_name='roster.csv'):
         print(err)
 
 
-def create_data_structure(logfile):
+def create_data_structure(logfile: DataFrame) -> dict:
     """
     Creates a data structure which stores all submission objects of each student
 
@@ -232,7 +231,7 @@ def create_data_structure(logfile):
 
 
 # TODO: verify this works correctly for hardcoding
-def get_testcases(logfile):
+def get_testcases(logfile: DataFrame) -> set[tuple]:
     # Pick first student submission in logfile
     testcases = set()
     submissions = logfile[logfile['is_submission'] == 1]
@@ -248,13 +247,3 @@ def get_testcases(logfile):
                         testcases.add((input, output))
             break
     return testcases
-
-
-# TODO: remove this
-def set_code_in_logfile(logfile, code, percent):
-    """For testing purposes"""
-    for user_id, labs in logfile.items():
-        for lab, subs in labs.items():
-            for sub in subs:
-                if random() <= percent:
-                    sub.code = code

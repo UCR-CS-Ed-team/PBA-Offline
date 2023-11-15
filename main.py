@@ -1,4 +1,3 @@
-import os
 from tkinter import filedialog
 
 import pandas as pd
@@ -60,7 +59,7 @@ if __name__ == '__main__':
             if user_input != 8 and submissions == {}:
                 logfile_with_code = download_code(logfile)
                 submissions = create_data_structure(logfile_with_code)
-            
+
             # Quick analysis for every lab
             if user_input == 1:
                 quick_analysis(logfile_with_code)
