@@ -37,6 +37,7 @@ if __name__ == '__main__':
 
     submissions = {}
     final_roster = {}
+    output_file_name = 'roster.csv'
     prompt = (
         '\n1. Quick Analysis (averages for all labs) \n'
         '2. Basic statistics (roster for selected labs) \n'
@@ -62,14 +63,17 @@ if __name__ == '__main__':
 
             # Quick analysis for every lab
             if user_input == 1:
+                output_file_name = 'quick_analysis.csv'
                 quick_analysis(logfile_with_code)
 
             # Roster for selected labs
             elif user_input == 2:
+                output_file_name = 'roster.csv'
                 final_roster = roster(logfile_with_code, selected_labs)
 
             # Anomalies for selected labs
             elif user_input == 3:
+                output_file_name = 'anomalies.csv'
                 anomaly_detection_output = anomaly(submissions, selected_labs, 0)
                 for user_id in anomaly_detection_output:
                     for lab in anomaly_detection_output[user_id]:
@@ -93,6 +97,7 @@ if __name__ == '__main__':
 
             # Inc. development coding trails for all labs
             elif user_input == 4:
+                output_file_name = 'incdev.csv'
                 # Generate nested dict of IncDev results
                 incdev_output = incdev.run(submissions)
                 for user_id in incdev_output:
@@ -125,6 +130,7 @@ if __name__ == '__main__':
 
             # Style anomalies for selected labs using cpplint
             elif user_input == 5:
+                output_file_name = 'cpp_style.csv'
                 stylechecker_output = stylechecker(submissions, selected_labs)
                 for user_id in stylechecker_output:
                     for lab_id in stylechecker_output[user_id]:
@@ -146,6 +152,7 @@ if __name__ == '__main__':
 
             # Automatic anomaly detection for selected labs
             elif user_input == 6:
+                output_file_name = 'auto_anomaly.csv'
                 final_roster = {}  # TODO: reset roster, fix later
                 # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
                 anomaly_detection_output = anomaly(submissions, selected_labs, 1)
@@ -195,6 +202,8 @@ if __name__ == '__main__':
 
             # Hardcode detection for selected labs
             elif user_input == 7:
+                output_file_name = 'hardcoding.csv'
+                
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile_with_code)
 
@@ -243,4 +252,4 @@ if __name__ == '__main__':
                 print('Please select a valid option')
 
         if len(final_roster) != 0:
-            write_output_to_csv(final_roster)
+            write_output_to_csv(final_roster, output_file_name)
