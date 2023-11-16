@@ -36,7 +36,7 @@ if __name__ == '__main__':
     selected_labs = get_selected_labs(logfile)
 
     submissions = {}
-    final_roster = {}
+    tool_result = {}
     output_file_name = 'roster.csv'
     prompt = (
         '\n1. Quick Analysis (averages for all labs) \n'
@@ -49,9 +49,8 @@ if __name__ == '__main__':
     )
 
     while True:
+        tool_result = {}
         print(prompt)
-        final_roster = {}
-
         user_input = input()
         input_list = user_input.split(' ')
 
@@ -64,12 +63,12 @@ if __name__ == '__main__':
             # Quick analysis for every lab
             if user_input == 1:
                 output_file_name = 'quick_analysis.csv'
-                quick_analysis(logfile_with_code)
+                quick_analysis(logfile_with_code)   # TODO: this should return something
 
             # Roster for selected labs
             elif user_input == 2:
                 output_file_name = 'roster.csv'
-                final_roster = roster(logfile_with_code, selected_labs)
+                tool_result = roster(logfile_with_code, selected_labs)
 
             # Anomalies for selected labs
             elif user_input == 3:
@@ -79,12 +78,12 @@ if __name__ == '__main__':
                     for lab in anomaly_detection_output[user_id]:
                         anomalies_found = anomaly_detection_output[user_id][lab][0]
                         anomaly_score = anomaly_detection_output[user_id][lab][1]
-                        if user_id in final_roster:
-                            final_roster[user_id][f'Lab {lab} anomalies found'] = anomalies_found
-                            final_roster[user_id][f'Lab {lab} anomaly score'] = anomaly_score
-                            final_roster[user_id][f'{lab} Student code'] = anomaly_detection_output[user_id][lab][2]
+                        if user_id in tool_result:
+                            tool_result[user_id][f'Lab {lab} anomalies found'] = anomalies_found
+                            tool_result[user_id][f'Lab {lab} anomaly score'] = anomaly_score
+                            tool_result[user_id][f'{lab} Student code'] = anomaly_detection_output[user_id][lab][2]
                         else:
-                            final_roster[user_id] = {
+                            tool_result[user_id] = {
                                 'User ID': user_id,
                                 'Last Name': submissions[user_id][lab][0].last_name[0],
                                 'First Name': submissions[user_id][lab][0].first_name[0],
@@ -108,14 +107,14 @@ if __name__ == '__main__':
                         loc_trail = incdev_output[user_id][lab_id]['loc_trail']
                         time_trail = incdev_output[user_id][lab_id]['time_trail']
                         code = incdev_output[user_id][lab_id]['Highest_code']
-                        if user_id in final_roster:
-                            final_roster[user_id][lid + ' incdev_score'] = score
-                            final_roster[user_id][lid + ' incdev_score_trail'] = score_trail
-                            final_roster[user_id][lid + ' loc_trail'] = loc_trail
-                            final_roster[user_id][lid + ' time_trail'] = time_trail
-                            final_roster[user_id][str(lid) + ' Student code'] = code
+                        if user_id in tool_result:
+                            tool_result[user_id][lid + ' incdev_score'] = score
+                            tool_result[user_id][lid + ' incdev_score_trail'] = score_trail
+                            tool_result[user_id][lid + ' loc_trail'] = loc_trail
+                            tool_result[user_id][lid + ' time_trail'] = time_trail
+                            tool_result[user_id][str(lid) + ' Student code'] = code
                         else:
-                            final_roster[user_id] = {
+                            tool_result[user_id] = {
                                 'User ID': user_id,
                                 'Last Name': submissions[user_id][lab_id][0].last_name[0],
                                 'First Name': submissions[user_id][lab_id][0].first_name[0],
@@ -134,12 +133,12 @@ if __name__ == '__main__':
                 stylechecker_output = stylechecker(submissions, selected_labs)
                 for user_id in stylechecker_output:
                     for lab_id in stylechecker_output[user_id]:
-                        if user_id in final_roster:
-                            final_roster[user_id][f'{lab_id} Style score'] = stylechecker_output[user_id][lab_id][0]
-                            final_roster[user_id][f'{lab_id} Style output'] = stylechecker_output[user_id][lab_id][1]
-                            final_roster[user_id][f'{lab_id} Student code'] = stylechecker_output[user_id][lab_id][2]
+                        if user_id in tool_result:
+                            tool_result[user_id][f'{lab_id} Style score'] = stylechecker_output[user_id][lab_id][0]
+                            tool_result[user_id][f'{lab_id} Style output'] = stylechecker_output[user_id][lab_id][1]
+                            tool_result[user_id][f'{lab_id} Student code'] = stylechecker_output[user_id][lab_id][2]
                         else:
-                            final_roster[user_id] = {
+                            tool_result[user_id] = {
                                 'User ID': user_id,
                                 'Last Name': submissions[user_id][lab_id][0].last_name[0],
                                 'First Name': submissions[user_id][lab_id][0].first_name[0],
@@ -153,20 +152,20 @@ if __name__ == '__main__':
             # Automatic anomaly detection for selected labs
             elif user_input == 6:
                 output_file_name = 'auto_anomaly.csv'
-                final_roster = {}  # TODO: reset roster, fix later
+                tool_result = {}  # TODO: reset roster, fix later
                 # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
                 anomaly_detection_output = anomaly(submissions, selected_labs, 1)
 
                 # Populate anomaly counts for every user, for each lab
                 for user_id in anomaly_detection_output:
-                    if user_id not in final_roster:
-                        final_roster[user_id] = {'User ID': user_id}  # Populate column of user IDs
+                    if user_id not in tool_result:
+                        tool_result[user_id] = {'User ID': user_id}  # Populate column of user IDs
                     for lab in anomaly_detection_output[user_id]:
                         # Instance count of every anomaly for [user_id][lab]
                         anomalies_found = anomaly_detection_output[user_id][lab][0]
                         # Create a column for each anomaly with the anomaly's count
                         for found_anomaly in anomalies_found:
-                            final_roster[user_id][f'Lab {str(lab)} {found_anomaly}'] = anomalies_found[found_anomaly]
+                            tool_result[user_id][f'Lab {str(lab)} {found_anomaly}'] = anomalies_found[found_anomaly]
 
                 # Count of users that use each anomaly, per-lab
                 num_users_per_anomaly = {}
@@ -174,36 +173,36 @@ if __name__ == '__main__':
                     num_users_per_anomaly[found_anomaly] = {}
 
                 # Count the *number of students* that used each anomaly, per-lab
-                for user_id in final_roster:
+                for user_id in tool_result:
                     for lab in anomaly_detection_output[user_id]:
                         for found_anomaly in num_users_per_anomaly:
                             # Need to consider anomalies from every lab
                             if lab not in num_users_per_anomaly[found_anomaly]:
                                 num_users_per_anomaly[found_anomaly][lab] = 0
-                            anomaly_count = final_roster[user_id][f'Lab {str(lab)} {found_anomaly}']
+                            anomaly_count = tool_result[user_id][f'Lab {str(lab)} {found_anomaly}']
                             if anomaly_count > 0:
                                 num_users_per_anomaly[found_anomaly][lab] += 1
 
                 # Append a row at bottom for "totals"
-                final_roster['Status'] = {}
-                final_roster['Status']['User ID'] = 'Is Anomaly?'
+                tool_result['Status'] = {}
+                tool_result['Status']['User ID'] = 'Is Anomaly?'
                 for found_anomaly in num_users_per_anomaly:
                     for lab in num_users_per_anomaly[found_anomaly]:
                         anomaly_count = num_users_per_anomaly[found_anomaly][lab]
                         total_users = len(submissions)
                         # If a clear majority uses an "anomaly", it's not anomalous
                         if anomaly_count / total_users >= 0.8:
-                            final_roster['Status'][f'Lab {str(lab)} {found_anomaly}'] = 'No'
+                            tool_result['Status'][f'Lab {str(lab)} {found_anomaly}'] = 'No'
                         else:
-                            final_roster['Status'][f'Lab {str(lab)} {found_anomaly}'] = 'Yes'
+                            tool_result['Status'][f'Lab {str(lab)} {found_anomaly}'] = 'Yes'
 
                 # Outputs to its own file for now
-                write_output_to_csv(final_roster, 'anomaly_counts.csv')
+                write_output_to_csv(tool_result, 'anomaly_counts.csv')
 
             # Hardcode detection for selected labs
             elif user_input == 7:
                 output_file_name = 'hardcoding.csv'
-                
+
                 # Tuple of testcases: (output, input)
                 testcases = get_testcases(logfile_with_code)
 
@@ -231,11 +230,11 @@ if __name__ == '__main__':
                     for lab in hardcoding_results[user_id]:
                         hardcoding_score = hardcoding_results[user_id][lab][0]
                         student_code = hardcoding_results[user_id][lab][1]
-                        if user_id in final_roster:
-                            final_roster[user_id]['Lab ' + str(lab) + ' hardcoding score'] = hardcoding_score
-                            final_roster[user_id][str(lab) + ' Student code'] = student_code
+                        if user_id in tool_result:
+                            tool_result[user_id]['Lab ' + str(lab) + ' hardcoding score'] = hardcoding_score
+                            tool_result[user_id][str(lab) + ' Student code'] = student_code
                         else:
-                            final_roster[user_id] = {
+                            tool_result[user_id] = {
                                 'User ID': user_id,
                                 'Last Name': submissions[user_id][lab][0].last_name[0],
                                 'First Name': submissions[user_id][lab][0].first_name[0],
@@ -251,5 +250,5 @@ if __name__ == '__main__':
             else:
                 print('Please select a valid option')
 
-        if len(final_roster) != 0:
-            write_output_to_csv(final_roster, output_file_name)
+        if len(tool_result) != 0:
+            write_output_to_csv(tool_result, output_file_name)
