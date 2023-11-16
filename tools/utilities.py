@@ -100,7 +100,7 @@ def download_code_helper(url: str) -> tuple[str, str]:
             filenames = zfile.namelist()
             content = zfile.open(filenames[0], 'r').read()
             result = content.decode('utf-8')
-            with open(path, 'w') as file:
+            with open(path, 'w', encoding='utf-8') as file:
                 file.write(result)
             return (url, result)
         except Not200Error:
@@ -108,7 +108,6 @@ def download_code_helper(url: str) -> tuple[str, str]:
         except ConnectionError:
             return (url, 'Max retries met, cannot retrieve student code submission')
     else:
-        # print('not downloading')
         with open(path, 'r') as file:
             result = file.read()
         return (url, result)
