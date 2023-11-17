@@ -21,6 +21,13 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
 
     lines_in_scope = []
     brace_count = 0
+
+    # Handles first line being `} else if (...) {`
+    # Prevents only the first line being returned
+    first_line = code[start_index]
+    if first_line.strip().startswith('}'):
+        brace_count += 1
+
     for line in code[start_index:]:
         lines_in_scope.append(line)
         if '{' in line:

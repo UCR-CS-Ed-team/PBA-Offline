@@ -12,6 +12,17 @@ def get_first_if_index(code: list[str]) -> int:
     return -1
 
 
+def get_first_elif_index(code: list[str]) -> int:
+    """
+    Returns the index of the first line in code that contains an 'else if' statement.
+    Return -1 if there is no such line.
+    """
+    for i, line in enumerate(code):
+        if 'else if' in line:
+            return i
+    return -1
+
+
 class TestCheckIfWithLiteralAndCout:
     """
     Unit tests for the `check_if_with_literal_and_cout` function in the `hardcoding` module.
@@ -192,7 +203,7 @@ class TestGetHardcodeScoreWithSoln:
         """
         Tests the scenario where:
         - User hardcodes a testcase
-        - Solution does not hardcode the testcase
+        - Solution does not hardcode the same testcase
         - Solution does not use many testcases
         """
         code = """
@@ -221,9 +232,102 @@ class TestGetHardcodeScoreWithSoln:
             return 0;
         }
         """
-        testcases = set(('1980', 'No championship'))
+        testcases = set([('1980', 'No championship'), ('1998', 'Sixth championship')])
         result = hardcoding.get_hardcode_score_with_soln(code, testcases, solution)
         assert result == 1
+
+    def test_testcase_in_soln(self):
+        """
+        Tests the scenario where:
+        - User hardcodes a testcase
+        - Solution hardcodes the same testcase
+        - Solution does not use many testcases
+        """
+        code = """
+        int main() {
+            int year, num_championships;
+            cin >> year >> num_championships;
+
+            if (year == 1980) {
+                cout << "No championship" << endl;
+            }
+
+            return 0;
+        }
+        """
+        solution = """
+        int main() {
+            int userYear;
+            cin >> userYear;
+
+            if (userYear == 1980) {
+                cout << "No championship" << endl;
+            } else {
+                cout << userYear << endl;
+            }
+
+            return 0;
+        }
+        """
+        testcases = set([('1980', 'No championship'), ('1998', 'Sixth championship')])
+        result = hardcoding.get_hardcode_score_with_soln(code, testcases, solution)
+        assert result == 0
+
+    def test_soln_uses_many_testcases(self):
+        """
+        Tests the scenario where:
+        - User hardcodes a testcase
+        - Solution does not hardcode the same test case
+        - Solution uses many testcases
+        """
+        code = """
+        int main() {
+            int year, num_championships;
+            cin >> year >> num_championships;
+
+            if (year == 1980) {
+                cout << "No championship" << endl;
+            }
+
+            return 0;
+        }
+        """
+        solution = """
+        int main() {
+            int userYear;
+            cin >> userYear;
+
+            if (userYear == 1991) {
+                cout << "First championship" << endl;
+            } else if (userYear == 1992) {
+                cout << "Second championship" << endl;
+            } else if (userYear == 1993) {
+                cout << "Third championship" << endl;
+            } else if (userYear == 1996) {
+                cout << "Fourth championship" << endl;
+            } else if (userYear == 1997) {
+                cout << "Fifth championship" << endl;
+            } else if (userYear == 1998) {
+                cout << "Sixth championship" << endl;
+            } else {
+                cout << "No championship" << endl;
+            }
+
+            return 0;
+        }
+        """
+        testcases = set(
+            [
+                ('1998', 'Sixth championship'),
+                ('1996', 'Fourth championship'),
+                ('1992', 'Second championship'),
+                ('1991', 'First championship'),
+                ('2000', 'No championship'),
+                ('1980', 'No championship'),
+            ]
+        )
+        result = hardcoding.get_hardcode_score_with_soln(code, testcases, solution)
+        assert result == 0
 
 
 class TestGetLinesInIfScope:
@@ -259,7 +363,7 @@ class TestGetLinesInIfScope:
         """
         code_lines = code.splitlines()
         result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
-        result = [line.strip() for line in result]  # Strip whitespace from results
+        result = [line.strip() for line in result]
         assert result == ['if (x == 5) { cout << "x is 5" << endl; }']
 
     def test_code_with_if_on_next_line(self):
@@ -274,7 +378,7 @@ class TestGetLinesInIfScope:
         """
         code_lines = code.splitlines()
         result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
-        result = [line.strip() for line in result]  # Strip whitespace from results
+        result = [line.strip() for line in result]
         assert result == ['if (x == 5) {', 'cout << "x is " << x << endl;', '}']
 
     def test_code_with_nested_if(self):
@@ -292,9 +396,36 @@ class TestGetLinesInIfScope:
         """
         code_lines = code.splitlines()
         result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
-        result = [line.strip() for line in result]  # Strip whitespace from results
+        result = [line.strip() for line in result]
         assert result == [
             'if (x == 5) {',
+            'cout << "x is " << x << endl;',
+            'if (x == 10) {',
+            'cout << "x is 10" << endl;',
+            '}',
+            '}',
+        ]
+
+    def test_code_starting_with_else_if(self):
+        code = """
+        int main() {
+            int x = 10;
+            if (x == 10) {
+                cout << "x is 10" << endl;
+            } else if (x == 5) {
+                cout << "x is " << x << endl;
+                if (x == 10) {
+                    cout << "x is 10" << endl;
+                }
+            }
+            return 0;
+        }
+        """
+        code_lines = code.splitlines()
+        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_elif_index(code_lines))
+        result = [line.strip() for line in result]
+        assert result == [
+            '} else if (x == 5) {',
             'cout << "x is " << x << endl;',
             'if (x == 10) {',
             'cout << "x is 10" << endl;',
