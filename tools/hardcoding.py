@@ -59,12 +59,21 @@ def check_if_with_literal_and_cout(code: str) -> int:
 
 
 def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
+    """Checks whether a code submission hardcoded a testcase.
+
+    Returns 1 if the code:
+    - Has an if statement comparing to a literal, followed by cout
+    - The literal contains the input testcase, or a part of the testcase
+    - The cout outputs the output testcase
+
+    Args:
+        code (str): The student code to be evaluated
+        testcase (tuple): A testcase, represented by a tuple of expected input and output
+
+    Returns:
+        int: 1 indicates the testcase is hardcoded, 0 indicates no hardcoding
     """
-    Returns 1 if code:
-        - Has an if statement comparing to literals, followed by cout
-        - The literal contains the input testcase, or a part of the testcase
-    Used for cases 1 and 2: testcases and solution are available, or only testcases are available
-    """
+
     input = testcase[0]
     output = testcase[1]
 
@@ -93,16 +102,20 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 
 
 def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code: str) -> int:
-    """
-    Returns a score indicating whether student code used hardcoding, based on a logfile's testcases and solution.
+    """Gets a hardcoding score for a submission to a lab with a solution and testcases.
+
+    Returns 1 if the following are true for any testcase:
+    - Code hardcodes a testcase in an 'if' statement
+    - Solution code does not hardcode the same testcase
+    - Solution code does not hardcode most of the testcases (based on percent threshold)
 
     Args:
-        code (str): The student code to be evaluated.
-        testcases (set[tuple]): Set of testcases, each represented by a tuple of expected input and output.
-        solution_code (str): The solution code for comparison.
+        code (str): The student code to be evaluated
+        testcases (set[tuple]): Set of testcases, each represented by a tuple of expected input and output
+        solution_code (str): The assignment's solution code
 
     Returns:
-        int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding.
+        int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding
     """
 
     is_hardcoded = False
