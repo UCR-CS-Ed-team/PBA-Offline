@@ -99,13 +99,25 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
     """
 
     is_hardcoded = False
+    testcases_in_soln = set()
+    testcase_threshold = 0.5
 
+    # Track which testcases are used in the solution
+    for testcase in testcases:
+        testcase_in_soln = check_hardcoded_testcase(solution_code, testcase)
+        if testcase_in_soln:
+            testcases_in_soln.add(testcase)
+
+    percent_testcases_in_soln = len(testcases_in_soln) / len(testcases)
+    soln_uses_many_testcases = percent_testcases_in_soln >= testcase_threshold
+
+    # Check for hardcoding
     for testcase in testcases:
         testcase_in_code = check_hardcoded_testcase(code, testcase)
-        testcase_in_soln = check_hardcoded_testcase(solution_code, testcase)
-        if testcase_in_code and not testcase_in_soln:
+        testcase_in_soln = testcase in testcases_in_soln
+        if testcase_in_code and not testcase_in_soln and not soln_uses_many_testcases:
             logger.debug(f'is_hardcoded is True for testcase {testcase}.')
-            is_hardcoded = True
+            is_hardcoded = True  # TODO: return 1 here, True is for debugging
 
     if is_hardcoded:
         return 1

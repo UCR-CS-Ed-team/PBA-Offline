@@ -183,6 +183,49 @@ class TestCheckHardcodedTestcase:
         assert result == 1
 
 
+class TestGetHardcodeScoreWithSoln:
+    """
+    Unit tests for the `get_hardcode_score_with_soln` function in the `hardcoding` module.
+    """
+
+    def test_testcase_not_in_soln(self):
+        """
+        Tests the scenario where:
+        - User hardcodes a testcase
+        - Solution does not hardcode the testcase
+        - Solution does not use many testcases
+        """
+        code = """
+        int main() {
+            int year, num_championships;
+            cin >> year >> num_championships;
+
+            if (year == 1980) {
+                cout << "No championship" << endl;
+            }
+
+            return 0;
+        }
+        """
+        solution = """
+        int main() {
+            int userYear;
+            cin >> userYear;
+
+            if (userYear < 1991) {
+                cout << "No championship" << endl;
+            } else {
+                cout << userYear << endl;
+            }
+
+            return 0;
+        }
+        """
+        testcases = set(('1980', 'No championship'))
+        result = hardcoding.get_hardcode_score_with_soln(code, testcases, solution)
+        assert result == 1
+
+
 class TestGetLinesInIfScope:
     """
     Unit tests for the `get_lines_in_if_scope` function in the `hardcoding` module.

@@ -63,7 +63,7 @@ if __name__ == '__main__':
             # Quick analysis for every lab
             if user_input == 1:
                 output_file_name = 'quick_analysis.csv'
-                quick_analysis(logfile_with_code)   # TODO: this should return something
+                quick_analysis(logfile_with_code)  # TODO: this should return something
 
             # Roster for selected labs
             elif user_input == 2:
