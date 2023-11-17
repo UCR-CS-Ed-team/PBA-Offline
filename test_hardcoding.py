@@ -1,24 +1,13 @@
 from tools import hardcoding
 
 
-def get_first_if_index(code: list[str]) -> int:
+def get_first_index_of(code: list[str], substring: str) -> int:
     """
-    Returns the index of the first line in code that contains an 'if' statement.
-    Return -1 if there is no such line.
-    """
-    for i, line in enumerate(code):
-        if 'if' in line:
-            return i
-    return -1
-
-
-def get_first_elif_index(code: list[str]) -> int:
-    """
-    Returns the index of the first line in code that contains an 'else if' statement.
-    Return -1 if there is no such line.
+    Returns the index of the first line in code that contains 'substring'.
+    Returns -1 if there is no such line.
     """
     for i, line in enumerate(code):
-        if 'else if' in line:
+        if substring in line:
             return i
     return -1
 
@@ -338,7 +327,7 @@ class TestGetLinesInIfScope:
     def test_empty_code(self):
         code = ''
         code_lines = code.splitlines()
-        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_index_of(code_lines, 'if'))
         assert result == []
 
     def test_code_without_if(self):
@@ -350,7 +339,7 @@ class TestGetLinesInIfScope:
         }
         """
         code_lines = code.splitlines()
-        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_index_of(code_lines, 'if'))
         assert result == []
 
     def test_code_with_if_on_same_line(self):
@@ -362,7 +351,7 @@ class TestGetLinesInIfScope:
         }
         """
         code_lines = code.splitlines()
-        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_index_of(code_lines, 'if'))
         result = [line.strip() for line in result]
         assert result == ['if (x == 5) { cout << "x is 5" << endl; }']
 
@@ -377,7 +366,7 @@ class TestGetLinesInIfScope:
         }
         """
         code_lines = code.splitlines()
-        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_index_of(code_lines, 'if'))
         result = [line.strip() for line in result]
         assert result == ['if (x == 5) {', 'cout << "x is " << x << endl;', '}']
 
@@ -395,7 +384,7 @@ class TestGetLinesInIfScope:
         }
         """
         code_lines = code.splitlines()
-        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_if_index(code_lines))
+        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_index_of(code_lines, 'if'))
         result = [line.strip() for line in result]
         assert result == [
             'if (x == 5) {',
@@ -422,7 +411,7 @@ class TestGetLinesInIfScope:
         }
         """
         code_lines = code.splitlines()
-        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_elif_index(code_lines))
+        result = hardcoding.get_lines_in_if_scope(code_lines, get_first_index_of(code_lines, 'else if'))
         result = [line.strip() for line in result]
         assert result == [
             '} else if (x == 5) {',
