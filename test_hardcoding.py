@@ -182,6 +182,23 @@ class TestCheckHardcodedTestcase:
         result = hardcoding.check_hardcoded_testcase(code, testcase)
         assert result == 1
 
+    def test_if_condition_with_multiple_predicates(self):
+        code = """
+        int main() {
+            int num1, num2;
+            cin >> num1 >> num2;
+
+            if (num1 == -15 && num2 == 10) {
+                cout << "-15 -10 -5 0 5 10" << endl;
+            }
+
+            return 0;
+        }
+        """
+        testcase = ('-15 10', '-15 -10 -5 0 5 10')
+        result = hardcoding.check_hardcoded_testcase(code, testcase)
+        assert result == 1
+
 
 class TestGetHardcodeScoreWithSoln:
     """

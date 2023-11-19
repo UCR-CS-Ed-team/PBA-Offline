@@ -8,7 +8,8 @@ logger = setup_logger(__name__)  # DEBUGGING
 
 use_standalone = False
 
-IF_WITH_LITERAL_REGEX = r'(if\s*\(\s*\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)\s*\))'
+# Finds strings of the form 'if (... x == y ...)'
+IF_WITH_LITERAL_REGEX = r'(if\s*\(.*\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+).*\))'
 
 
 def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
