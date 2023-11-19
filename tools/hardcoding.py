@@ -8,7 +8,8 @@ logger = setup_logger(__name__)  # DEBUGGING
 
 use_standalone = False
 
-# Finds strings of the form 'if (... x == y ...)'
+IF_STATEMENT_REGEX = r'if\s*\((.*)\)'
+COMPARE_TO_LITERAL_REGEX = r'\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
 IF_WITH_LITERAL_REGEX = r'(if\s*\(.*\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+).*\))'
 
 
@@ -83,10 +84,19 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
-        if_with_literal_match = re.search(IF_WITH_LITERAL_REGEX, line)
-        if if_with_literal_match:
-            literal = if_with_literal_match.group(2)  # Isolate literal as a string
-            input_hardcoded = input in literal or any(word in literal for word in input.split())
+        literals_in_if = []
+        input_hardcoded = False
+        
+        if_statement_match = re.search(IF_STATEMENT_REGEX, line)
+        if if_statement_match:
+            # Find all comparisons to literals (e.g. x == 'y') and save the literals
+            literals_in_if = re.findall(COMPARE_TO_LITERAL_REGEX, if_statement_match.group())
+
+        if if_statement_match and literals_in_if:
+            for literal in literals_in_if:
+                # If input testcase (or any part of it) is in the literal 
+                if input in literal or any(word in literal for word in input.split()):
+                    input_hardcoded = True
 
             # Look at all lines in the scope of the `if` statement
             lines_in_if_scope = get_lines_in_if_scope(lines, i)
