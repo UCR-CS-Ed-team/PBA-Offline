@@ -13,7 +13,20 @@ COMPARE_TO_LITERAL_REGEX = r'\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
 IF_WITH_LITERAL_REGEX = r'(if\s*\(.*\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+).*\))'
 
 
-def get_code_with_max_score(user_id, lab, submissions):
+def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
+    """Returns the first highest-scoring code submission for a student for a lab.
+
+    The "first" highest-scoring submission means the oldest submission with the highest score.
+
+    Args:
+        user_id (int): Find the highest-scoring submission for the student with this ID.
+        lab (float): Find the highest-scoring submission for this lab, e.g. lab 3.12.
+        submissions (dict): All of the student's submissions for this lab.
+
+    Returns:
+        code (str): The code for the first highest-scoring submission.
+    """
+
     max_score = 0
     code = submissions[user_id][lab][-1].code  # Choose a default submission
     for sub in submissions[user_id][lab]:
@@ -24,10 +37,15 @@ def get_code_with_max_score(user_id, lab, submissions):
 
 
 def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
-    """
-    Returns the lines of code within the scope of an if statement.
+    """Returns the lines of code within the scope of an if statement.
+
     If 'if' is not in any line, return an empty list.
+
+    Args:
+        code (list[str]): A code submission split by newlines into a list of strings.
+        start_index (int): The line index of the target `if` statement in the code submission.
     """
+    
     if not any('if' in line for line in code):
         return []
 
