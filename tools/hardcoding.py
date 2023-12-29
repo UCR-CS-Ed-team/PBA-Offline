@@ -13,6 +13,16 @@ COMPARE_TO_LITERAL_REGEX = r'\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
 IF_WITH_LITERAL_REGEX = r'(if\s*\(.*\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+).*\))'
 
 
+def get_code_with_max_score(user_id, lab, submissions):
+    max_score = 0
+    code = submissions[user_id][lab][-1].code  # Choose a default submission
+    for sub in submissions[user_id][lab]:
+        if sub.max_score > max_score:
+            max_score = sub.max_score
+            code = sub.code
+    return code
+
+
 def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
     """
     Returns the lines of code within the scope of an if statement.
@@ -49,14 +59,23 @@ def check_if_with_literal_and_cout(code: str) -> int:
 
     # Remove lines that are empty or are only a left brace
     lines = code.splitlines()
-    lines = [line for line in lines if line.strip() not in ('', '{')]
+    lines = [line for line in lines if line.strip() != '']  # Remove empty lines
 
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
-        if re.search(IF_WITH_LITERAL_REGEX, line):
-            # Check for cout on same or next line
-            if 'cout' in line or 'cout' in lines[i + 1]:
-                return 1
+        literals_in_if = []
+
+        if_statement_match = re.search(IF_STATEMENT_REGEX, line)
+        if if_statement_match:
+            # Find all comparisons to literals (e.g. x == 'y') and save the literals
+            literals_in_if = re.findall(COMPARE_TO_LITERAL_REGEX, if_statement_match.group())
+
+        if if_statement_match and literals_in_if:
+            # Look at all lines in the scope of the `if` statement
+            lines_in_if_scope = get_lines_in_if_scope(lines, i)
+            for if_line in lines_in_if_scope:
+                if 'cout' in if_line:
+                    return 1
     return 0
 
 
@@ -86,7 +105,7 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
     for i, line in enumerate(lines):
         literals_in_if = []
         input_hardcoded = False
-        
+
         if_statement_match = re.search(IF_STATEMENT_REGEX, line)
         if if_statement_match:
             # Find all comparisons to literals (e.g. x == 'y') and save the literals
@@ -94,7 +113,7 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 
         if if_statement_match and literals_in_if:
             for literal in literals_in_if:
-                # If input testcase (or any part of it) is in the literal 
+                # If input testcase (or any part of it) is in the literal
                 if input in literal or any(word in literal for word in input.split()):
                     input_hardcoded = True
 
@@ -153,16 +172,6 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
     if is_hardcoded:
         return 1
     return 0
-
-
-def get_code_with_max_score(user_id, lab, submissions):
-    max_score = 0
-    code = submissions[user_id][lab][-1].code  # Choose a default submission
-    for sub in submissions[user_id][lab]:
-        if sub.max_score > max_score:
-            max_score = sub.max_score
-            code = sub.code
-    return code
 
 
 def hardcoding_analysis_1(data, selected_labs, testcases, solution_code):

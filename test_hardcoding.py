@@ -65,6 +65,37 @@ class TestCheckIfWithLiteralAndCout:
         result = hardcoding.check_if_with_literal_and_cout(code)
         assert result == 1
 
+    def test_code_with_multiple_literals(self):
+        code = """
+        int main() {
+            int x = 10;
+            int y = -1;
+            if (x == 5 && y == 6) {
+                cout << "x is " << x << endl;
+            }
+            return 0;
+        }
+        """
+        result = hardcoding.check_if_with_literal_and_cout(code)
+        assert result == 1
+
+    def test_code_with_cout_in_middle_of_if_scope(self):
+        code = """
+        int main() {
+            int x = 10;
+            int y = -1;
+            if (x == 5 && y == 6) {
+                x = 0;
+                // Some code here
+                cout << "x is " << x << endl;
+                // Other code here
+            }
+            return 0;
+        }
+        """
+        result = hardcoding.check_if_with_literal_and_cout(code)
+        assert result == 1
+
 
 class TestCheckHardcodedTestcase:
     """
