@@ -69,7 +69,6 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
 
     first_line = code[start_index]
     lines_in_scope = []
-    brace_count = 0
     if_depth = 0
 
     # Handles first line being `} else if (...) {`
@@ -85,12 +84,9 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
         # Exclude lines in nested `if` statements that compare to literals
         if if_depth == 1:
             lines_in_scope.append(line)
-        if '{' in line:
-            brace_count += 1
         if '}' in line:
-            brace_count -= 1
             if_depth -= 1
-        if brace_count == 0:
+        if if_depth == 0:
             break
     return lines_in_scope
 
