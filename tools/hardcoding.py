@@ -10,7 +10,6 @@ use_standalone = False
 
 IF_STATEMENT_REGEX = r'if\s*\((.*)\)'
 COMPARE_TO_LITERAL_REGEX = r'\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
-IF_WITH_LITERAL_REGEX = r'(if\s*\(.*\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+).*\))'
 
 
 def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
@@ -36,6 +35,25 @@ def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
     return code
 
 
+def get_literals_in_if_statement(line: str) -> list:
+    """Returns the literals in an `if` statement's condition.
+
+    Args:
+        line (str): The line of code to check for `if` statement literals.
+
+    Returns:
+        list: A list of literals found in the if statement.
+              If the line doesn't have an `if` statement, returns an empty list.
+    """
+
+    literals_in_if = []
+    if_statement_match = re.search(IF_STATEMENT_REGEX, line)
+    if if_statement_match:
+        # Find all comparisons to literals (e.g. x == 'y') and save the literals
+        literals_in_if = re.findall(COMPARE_TO_LITERAL_REGEX, if_statement_match.group())
+    return literals_in_if
+
+
 def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
     """Returns the lines of code within the scope of an if statement.
 
@@ -45,7 +63,7 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
         code (list[str]): A code submission split by newlines into a list of strings.
         start_index (int): The line index of the target `if` statement in the code submission.
     """
-    
+
     if not any('if' in line for line in code):
         return []
 
@@ -81,14 +99,8 @@ def check_if_with_literal_and_cout(code: str) -> int:
 
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
-        literals_in_if = []
-
-        if_statement_match = re.search(IF_STATEMENT_REGEX, line)
-        if if_statement_match:
-            # Find all comparisons to literals (e.g. x == 'y') and save the literals
-            literals_in_if = re.findall(COMPARE_TO_LITERAL_REGEX, if_statement_match.group())
-
-        if if_statement_match and literals_in_if:
+        literals_in_if = get_literals_in_if_statement(line)
+        if literals_in_if:
             # Look at all lines in the scope of the `if` statement
             lines_in_if_scope = get_lines_in_if_scope(lines, i)
             for if_line in lines_in_if_scope:
@@ -121,15 +133,10 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
-        literals_in_if = []
         input_hardcoded = False
+        literals_in_if = get_literals_in_if_statement(line)
 
-        if_statement_match = re.search(IF_STATEMENT_REGEX, line)
-        if if_statement_match:
-            # Find all comparisons to literals (e.g. x == 'y') and save the literals
-            literals_in_if = re.findall(COMPARE_TO_LITERAL_REGEX, if_statement_match.group())
-
-        if if_statement_match and literals_in_if:
+        if literals_in_if:
             for literal in literals_in_if:
                 # If input testcase (or any part of it) is in the literal
                 if input in literal or any(word in literal for word in input.split()):

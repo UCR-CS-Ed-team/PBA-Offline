@@ -469,3 +469,29 @@ class TestGetLinesInIfScope:
             '}',
             '}',
         ]
+
+
+class TestGetLiteralsInIfStatement:
+    """
+    Unit tests for the `get_literals_in_if_statement` function in the `hardcoding` module.
+    """
+
+    def test_empty_code(self):
+        code = ''
+        result = hardcoding.get_literals_in_if_statement(code)
+        assert result == []
+
+    def test_one_numeric_literal(self):
+        code = 'if (x == 1) {'
+        result = hardcoding.get_literals_in_if_statement(code)
+        assert result == ['1']
+
+    def test_one_string_literal(self):
+        code = 'if (x == "abc") {'
+        result = hardcoding.get_literals_in_if_statement(code)
+        assert result == ['"abc"']
+
+    def test_multiple_literals(self):
+        code = 'if (x == 1 && y == w && z == "abc") {'
+        result = hardcoding.get_literals_in_if_statement(code)
+        assert result == ['1', '"abc"']
