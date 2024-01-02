@@ -437,18 +437,15 @@ class TestGetLinesInIfScope:
         assert result == [
             'if (x == 5) {',
             'cout << "x is " << x << endl;',
-            'if (x == 10) {',
-            'cout << "x is 10" << endl;',
-            '}',
             '}',
         ]
 
     def test_code_starting_with_else_if(self):
+        """Ignores the nested `if` statement and the closing brace in front of `else if`."""
         code = """
         int main() {
             int x = 10;
-            if (x == 10) {
-                cout << "x is 10" << endl;
+            // Other code...
             } else if (x == 5) {
                 cout << "x is " << x << endl;
                 if (x == 10) {
@@ -462,11 +459,8 @@ class TestGetLinesInIfScope:
         result = hardcoding.get_lines_in_if_scope(code_lines, get_first_index_of(code_lines, 'else if'))
         result = [line.strip() for line in result]
         assert result == [
-            '} else if (x == 5) {',
+            'else if (x == 5) {',
             'cout << "x is " << x << endl;',
-            'if (x == 10) {',
-            'cout << "x is 10" << endl;',
-            '}',
             '}',
         ]
 

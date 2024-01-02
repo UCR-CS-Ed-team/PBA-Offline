@@ -64,24 +64,32 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
         start_index (int): The line index of the target `if` statement in the code submission.
     """
 
-    if not any('if' in line for line in code):
+    if start_index < 0 or 'if' not in code[start_index]:
         return []
 
+    first_line = code[start_index]
     lines_in_scope = []
     brace_count = 0
+    if_depth = 0
 
     # Handles first line being `} else if (...) {`
     # Prevents only the first line being returned
-    first_line = code[start_index]
-    if first_line.strip().startswith('}'):
-        brace_count += 1
+    if first_line.lstrip().startswith('}'):
+        code[start_index] = first_line.lstrip(' }')
 
     for line in code[start_index:]:
-        lines_in_scope.append(line)
+        # If the line is an `if` comparing to literals, increase depth
+        literals_in_if = get_literals_in_if_statement(line)
+        if literals_in_if:
+            if_depth += 1
+        # Exclude lines in nested `if` statements that compare to literals
+        if if_depth == 1:
+            lines_in_scope.append(line)
         if '{' in line:
             brace_count += 1
         if '}' in line:
             brace_count -= 1
+            if_depth -= 1
         if brace_count == 0:
             break
     return lines_in_scope
