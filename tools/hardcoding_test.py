@@ -25,5 +25,6 @@ def test(data: dict, selected_labs: list[float]) -> dict:
                 output[user_id] = {}
             if lab in data[user_id]:
                 code = get_code_with_max_score(user_id, lab, data)
-                output[user_id][lab] = ask_user(code, user_id, lab, i)
+                user_hardcoded = ask_user(code, user_id, lab, i)
+                output[user_id][lab] = [user_hardcoded, code]
     return output

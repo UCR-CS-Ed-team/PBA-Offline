@@ -46,8 +46,8 @@ if __name__ == '__main__':
         '4. Coding Trails (all labs) \n'
         '6. Automatic anomaly detection (selected labs) \n'
         '7. Hardcoding detection (selected labs) \n'
-        '8. Quit \n'
-        '9. Manual hardcoding test'
+        '8. Manual hardcoding test \n'
+        '9. Quit \n'
     )
 
     while True:
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
         for i in input_list:
             user_input = int(i)
-            if user_input != 8 and submissions == {}:
+            if user_input != 9 and submissions == {}:
                 logfile_with_code = download_code(logfile)
                 submissions = create_data_structure(logfile_with_code)
 
@@ -247,17 +247,16 @@ if __name__ == '__main__':
                             }
 
             elif user_input == 8:
-                exit(0)
-
-            elif user_input == 9:
                 output_file_name = 'hardcoding-test.csv'
                 test_results = tools.hardcoding_test.test(submissions, selected_labs)
 
                 for user_id in test_results:
                     for lab in test_results[user_id]:
-                        hardcoding_score = test_results[user_id][lab]
+                        hardcoding_score = test_results[user_id][lab][0]
+                        student_code = test_results[user_id][lab][1]
                         if user_id in tool_result:
                             tool_result[user_id]['Lab ' + str(lab) + ' hardcoded?'] = hardcoding_score
+                            tool_result[user_id][str(lab) + ' Student code'] = student_code
                         else:
                             tool_result[user_id] = {
                                 'User ID': user_id,
@@ -266,7 +265,11 @@ if __name__ == '__main__':
                                 'Email': submissions[user_id][lab][0].email[0],
                                 'Role': 'Student',
                                 'Lab ' + str(lab) + ' hardcoded?': hardcoding_score,
+                                str(lab) + ' Student code': student_code,
                             }
+
+            elif user_input == 9:
+                exit(0)
 
             else:
                 print('Please select a valid option')
