@@ -3,6 +3,7 @@ from tkinter import filedialog
 import pandas as pd
 
 import tools.hardcoding
+import tools.hardcoding_test
 from tools import incdev
 from tools.anomaly import anomaly
 from tools.quickanalysis import quick_analysis
@@ -46,6 +47,7 @@ if __name__ == '__main__':
         '6. Automatic anomaly detection (selected labs) \n'
         '7. Hardcoding detection (selected labs) \n'
         '8. Quit \n'
+        '9. Manual hardcoding test'
     )
 
     while True:
@@ -246,6 +248,25 @@ if __name__ == '__main__':
 
             elif user_input == 8:
                 exit(0)
+
+            elif user_input == 9:
+                output_file_name = 'hardcoding-test.csv'
+                test_results = tools.hardcoding_test.test(submissions, selected_labs)
+
+                for user_id in test_results:
+                    for lab in test_results[user_id]:
+                        hardcoding_score = hardcoding_results[user_id][lab]
+                        if user_id in tool_result:
+                            tool_result[user_id]['Lab ' + str(lab) + ' hardcoded?'] = hardcoding_score
+                        else:
+                            tool_result[user_id] = {
+                                'User ID': user_id,
+                                'Last Name': submissions[user_id][lab][0].last_name[0],
+                                'First Name': submissions[user_id][lab][0].first_name[0],
+                                'Email': submissions[user_id][lab][0].email[0],
+                                'Role': 'Student',
+                                'Lab ' + str(lab) + ' hardcoded?': hardcoding_score,
+                            }
 
             else:
                 print('Please select a valid option')
