@@ -255,7 +255,7 @@ if __name__ == '__main__':
 
                 for user_id in test_results:
                     for lab in test_results[user_id]:
-                        hardcoding_score = hardcoding_results[user_id][lab]
+                        hardcoding_score = test_results[user_id][lab]
                         if user_id in tool_result:
                             tool_result[user_id]['Lab ' + str(lab) + ' hardcoded?'] = hardcoding_score
                         else:
