@@ -17,7 +17,7 @@ def ask_user(code: str, user_id: int, lab: str, index: int) -> int:
     return 0
 
 
-def test(data: dict, selected_labs: list[float]) -> dict:
+def manual_test(data: dict, selected_labs: list[float]) -> dict:
     output = {}
     for lab in selected_labs:
         for i, user_id in enumerate(data):

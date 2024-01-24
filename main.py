@@ -248,7 +248,7 @@ if __name__ == '__main__':
 
             elif user_input == 8:
                 output_file_name = 'hardcoding-test.csv'
-                test_results = tools.hardcoding_test.test(submissions, selected_labs)
+                test_results = tools.hardcoding_test.manual_test(submissions, selected_labs)
 
                 for user_id in test_results:
                     for lab in test_results[user_id]:
