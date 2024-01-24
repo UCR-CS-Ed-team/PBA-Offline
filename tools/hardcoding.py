@@ -35,6 +35,23 @@ def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
     return code
 
 
+def remove_quotes(s: str) -> str:
+    """Removes the surrounding quotes from a string if present.
+
+    Args:
+        s (str): The input string.
+
+    Returns:
+        str: The string with the surrounding quotes removed, if present.
+    """
+    
+    single_quotes = s.startswith("'") and s.endswith("'")
+    double_quotes = s.startswith('"') and s.endswith('"')
+    if single_quotes or double_quotes:
+        return s[1:-1]
+    return s
+
+
 def get_literals_in_if_statement(line: str) -> list:
     """Returns the literals in an `if` statement's condition.
 
@@ -142,9 +159,11 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 
         if literals_in_if:
             for literal in literals_in_if:
+                literal_no_quote = remove_quotes(literal)
                 # If input testcase (or any part of it) is in the literal
-                if input in literal or any(word in literal for word in input.split()):
+                if input == literal_no_quote or any(word == literal_no_quote for word in input.split()):
                     input_hardcoded = True
+                    break
 
             # Look at all lines in the scope of the `if` statement
             lines_in_if_scope = get_lines_in_if_scope(lines, i)

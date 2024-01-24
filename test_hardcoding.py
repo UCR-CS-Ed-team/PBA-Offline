@@ -489,3 +489,29 @@ class TestGetLiteralsInIfStatement:
         code = 'if (x == 1 && y == w && z == "abc") {'
         result = hardcoding.get_literals_in_if_statement(code)
         assert result == ['1', '"abc"']
+
+
+class TestRemoveQuotes:
+    """
+    Unit tests for the `remove_quotes` function in the `hardcoding` module.
+    """
+
+    def test_empty_code(self):
+        code = ''
+        result = hardcoding.remove_quotes(code)
+        assert result == ''
+
+    def test_no_quotes(self):
+        code = 'a b c'
+        result = hardcoding.remove_quotes(code)
+        assert result == 'a b c'
+
+    def test_single_quotes(self):
+        code = "'a b c'"
+        result = hardcoding.remove_quotes(code)
+        assert result == 'a b c'
+
+    def test_double_quotes(self):
+        code = '"a b c"'
+        result = hardcoding.remove_quotes(code)
+        assert result == 'a b c'
