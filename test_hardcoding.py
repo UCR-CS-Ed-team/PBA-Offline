@@ -240,9 +240,10 @@ class TestGetHardcodeScoreWithSoln:
         """
         Tests the scenario where:
         - User hardcodes a testcase
-        - Solution does not hardcode the same testcase
+        - Solution does not hardcode a testcase output
         - Solution does not use many testcases
         """
+
         code = """
         int main() {
             int year, num_championships;
@@ -260,9 +261,7 @@ class TestGetHardcodeScoreWithSoln:
             int userYear;
             cin >> userYear;
 
-            if (userYear < 1991) {
-                cout << "No championship" << endl;
-            } else {
+            if (userYear > 1980) {
                 cout << userYear << endl;
             }
 
@@ -277,9 +276,10 @@ class TestGetHardcodeScoreWithSoln:
         """
         Tests the scenario where:
         - User hardcodes a testcase
-        - Solution hardcodes the same testcase
+        - Solution hardcodes a testcase output
         - Solution does not use many testcases
         """
+
         code = """
         int main() {
             int year, num_championships;
@@ -317,6 +317,7 @@ class TestGetHardcodeScoreWithSoln:
         - Solution does not hardcode the same test case
         - Solution uses many testcases
         """
+
         code = """
         int main() {
             int year, num_championships;

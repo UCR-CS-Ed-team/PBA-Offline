@@ -44,7 +44,7 @@ def remove_quotes(s: str) -> str:
     Returns:
         str: The string with the surrounding quotes removed, if present.
     """
-    
+
     single_quotes = s.startswith("'") and s.endswith("'")
     double_quotes = s.startswith('"') and s.endswith('"')
     if single_quotes or double_quotes:
@@ -95,7 +95,7 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
 
     for line in code[start_index:]:
         # If the line is an `if` comparing to literals, increase depth
-        literals_in_if = get_literals_in_if_statement(line)
+        literals_in_if = get_literals_in_if_statement(line)  # TODO: should this check for any `if` statement?
         if literals_in_if:
             if_depth += 1
         # Exclude lines in nested `if` statements that compare to literals
@@ -114,7 +114,6 @@ def check_if_with_literal_and_cout(code: str) -> int:
     Used for case 3: no testcases or solution
     """
 
-    # Remove lines that are empty or are only a left brace
     lines = code.splitlines()
     lines = [line for line in lines if line.strip() != '']  # Remove empty lines
 
@@ -127,6 +126,29 @@ def check_if_with_literal_and_cout(code: str) -> int:
             for if_line in lines_in_if_scope:
                 if 'cout' in if_line:
                     return 1
+    return 0
+
+
+def check_testcase_output(code: str, testcase: tuple) -> int:
+    """Checks whether a code submission hardcodes the output of a testcase.
+
+    Returns 1 if the code has a line `cout << x` where x is the testcase output.
+    Does not consider any testcase inputs.
+
+    Args:
+        code (str): The student code to be evaluated
+        testcase (tuple): A testcase, represented by a tuple of expected input and output
+
+    Returns:
+        int: 1 indicates the testcase output was hardcoded, else 0
+    """
+
+    output = testcase[1]
+    
+    for line in code.splitlines():
+        cout_index = line.find('cout')
+        if (cout_index != -1) and (line.find(output) > cout_index):
+            return 1
     return 0
 
 
@@ -184,7 +206,7 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
 
     Returns 1 if the following are true for any testcase:
     - Code hardcodes a testcase in an 'if' statement
-    - Solution code does not hardcode the same testcase
+    - Solution code does not hardcode the same testcase's output
     - Solution code does not hardcode most of the testcases (based on percent threshold)
 
     Args:
@@ -200,9 +222,9 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
     testcases_in_soln = set()
     testcase_threshold = 0.5
 
-    # Track which testcases are used in the solution
+    # Track which testcase outputs are used in the solution
     for testcase in testcases:
-        testcase_in_soln = check_hardcoded_testcase(solution_code, testcase)
+        testcase_in_soln = check_testcase_output(solution_code, testcase)
         if testcase_in_soln:
             testcases_in_soln.add(testcase)
 

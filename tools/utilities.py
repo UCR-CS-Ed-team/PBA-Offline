@@ -108,7 +108,7 @@ def download_code_helper(url: str) -> tuple[str, str]:
         except ConnectionError:
             return (url, 'Max retries met, cannot retrieve student code submission')
     else:
-        with open(path, 'r') as file:
+        with open(path, 'r', errors='replace') as file:
             result = file.read()
         return (url, result)
 
@@ -177,7 +177,7 @@ def write_output_to_csv(final_roster, file_name='roster.csv'):
                 csv_columns.append(column)
     try:
         csv_file = f'output/{file_name}'
-        with open(csv_file, 'w', newline='') as f1:
+        with open(csv_file, 'w', newline='', encoding='utf-8') as f1:
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for user_id in final_roster.keys():
@@ -236,7 +236,10 @@ def get_testcases(logfile: DataFrame) -> set[tuple]:
     submissions = logfile[logfile['is_submission'] == 1]
     for row in submissions.itertuples():
         if not pd.isnull(row.result):  # Check that 'results' column isn't empty
-            result = json.loads(row.result)
+            try:
+                result = json.loads(row.result)
+            except json.JSONDecodeError:  # If `results` is malformed, try next submission
+                continue
             for test in result['config']['test_bench']:
                 if test.get('options'):  # Check that the entry has the ['options'] fields
                     # Save input/output for each test case
