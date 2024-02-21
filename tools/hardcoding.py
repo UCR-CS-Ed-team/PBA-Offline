@@ -9,7 +9,7 @@ logger = setup_logger(__name__)  # DEBUGGING
 use_standalone = False
 
 IF_STATEMENT_REGEX = r'if\s*\((.*)\)'
-COMPARE_TO_LITERAL_REGEX = r'\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
+COMPARE_TO_LITERAL_REGEX = r'(\w+)\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
 
 
 def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
@@ -108,6 +108,28 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
     return lines_in_scope
 
 
+def get_cout_output_with_var(if_lines: list[str], var_assignments: tuple[str, str], output: str) -> str:
+    # TODO: Add documentation here
+    for if_line in if_lines:
+        cout_index = if_line.find('cout')
+        if cout_index > -1:  # If line is a 'cout' statement
+            for var in var_assignments:
+                var_name = var[0]
+                var_value = var[1]
+                if if_line.find(var_name) > cout_index:  # If line outputs the variable
+                    if_line = if_line.replace(var_name, var_value)
+                    if_line = if_line.replace('<<', ' ')
+                    if_line = if_line.replace('"', ' ').replace("'", ' ')
+                    if_line = if_line.replace('cout', '').replace('endl', '')
+                    if_line = if_line.rstrip(';')
+                    cout_output = []
+                    for word in if_line.split():
+                        if word in output:
+                            cout_output.append(word)
+                    return ' '.join(cout_output)
+    return ''
+
+
 def check_if_with_literal_and_cout(code: str) -> int:
     """
     Returns 1 if code has an if statement comparing to literals, followed by cout.
@@ -144,7 +166,7 @@ def check_testcase_output(code: str, testcase: tuple) -> int:
     """
 
     output = testcase[1]
-    
+
     for line in code.splitlines():
         cout_index = line.find('cout')
         if (cout_index != -1) and (line.find(output) > cout_index):
@@ -153,6 +175,7 @@ def check_testcase_output(code: str, testcase: tuple) -> int:
 
 
 def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
+    # TODO: Update documentation with changes
     """Checks whether a code submission hardcoded a testcase.
 
     Returns 1 if the code:
@@ -176,28 +199,23 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
-        input_hardcoded = False
         literals_in_if = get_literals_in_if_statement(line)
 
         if literals_in_if:
+            var_assignments = []  # Track variable assignments as (name, value)
             for literal in literals_in_if:
-                literal_no_quote = remove_quotes(literal)
+                var_name = literal[0]  # Variable won't have quotes
+                var_value = remove_quotes(literal[1])
                 # If input testcase (or any part of it) is in the literal
-                if input == literal_no_quote or any(word == literal_no_quote for word in input.split()):
-                    input_hardcoded = True
-                    break
+                if input == var_value or any(word == var_value for word in input.split()):
+                    var_assignments.append((var_name, var_value))
 
             # Look at all lines in the scope of the `if` statement
-            lines_in_if_scope = get_lines_in_if_scope(lines, i)
-            for if_line in lines_in_if_scope:
-                # Ensure the output testcase occurs after "cout" in the line
-                cout_index = if_line.find('cout')
-                output_hardcoded = (cout_index != -1) and (if_line.find(output) > cout_index)
-                if output_hardcoded:
-                    break
-
-            if input_hardcoded and output_hardcoded:
-                return 1
+            if len(var_assignments) > 0:
+                lines_in_if_scope = get_lines_in_if_scope(lines, i)
+                cout_output = get_cout_output_with_var(lines_in_if_scope, var_assignments, output)
+                if cout_output == output:
+                    return 1
     return 0
 
 
@@ -233,7 +251,7 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
 
     # Check for hardcoding
     for testcase in testcases:
-        testcase_in_code = check_hardcoded_testcase(code, testcase)
+        testcase_in_code = check_hardcoded_testcase(code, testcase) or check_testcase_output(code, testcase)
         testcase_in_soln = testcase in testcases_in_soln
         if testcase_in_code and not testcase_in_soln and not soln_uses_many_testcases:
             logger.debug(f'is_hardcoded is True for testcase {testcase}.')
