@@ -12,9 +12,9 @@ def get_first_index_of(code: list[str], substring: str) -> int:
     return -1
 
 
-class TestCheckIfWithLiteralAndCout:
+class TestHasIfWithLiteralAndCout:
     """
-    Unit tests for the `check_if_with_literal_and_cout` function in the `hardcoding` module.
+    Unit tests for the `has_if_with_literal_and_cout` function in the `hardcoding` module.
     """
 
     def test_code_without_if_literal(self):
@@ -25,7 +25,7 @@ class TestCheckIfWithLiteralAndCout:
             return 0;
         }
         """
-        result = hardcoding.check_if_with_literal_and_cout(code)
+        result = hardcoding.has_if_with_literal_and_cout(code)
         assert result == 0
 
     def test_code_with_if_literal_without_cout(self):
@@ -38,7 +38,7 @@ class TestCheckIfWithLiteralAndCout:
             return 0;
         }
         """
-        result = hardcoding.check_if_with_literal_and_cout(code)
+        result = hardcoding.has_if_with_literal_and_cout(code)
         assert result == 0
 
     def test_code_with_if_literal_and_cout_on_same_line(self):
@@ -49,7 +49,7 @@ class TestCheckIfWithLiteralAndCout:
             return 0;
         }
         """
-        result = hardcoding.check_if_with_literal_and_cout(code)
+        result = hardcoding.has_if_with_literal_and_cout(code)
         assert result == 1
 
     def test_code_with_if_literal_and_cout_on_next_line(self):
@@ -62,7 +62,7 @@ class TestCheckIfWithLiteralAndCout:
             return 0;
         }
         """
-        result = hardcoding.check_if_with_literal_and_cout(code)
+        result = hardcoding.has_if_with_literal_and_cout(code)
         assert result == 1
 
     def test_code_with_multiple_literals(self):
@@ -76,7 +76,7 @@ class TestCheckIfWithLiteralAndCout:
             return 0;
         }
         """
-        result = hardcoding.check_if_with_literal_and_cout(code)
+        result = hardcoding.has_if_with_literal_and_cout(code)
         assert result == 1
 
     def test_code_with_cout_in_middle_of_if_scope(self):
@@ -93,142 +93,91 @@ class TestCheckIfWithLiteralAndCout:
             return 0;
         }
         """
-        result = hardcoding.check_if_with_literal_and_cout(code)
+        result = hardcoding.has_if_with_literal_and_cout(code)
         assert result == 1
 
 
-class TestCheckHardcodedTestcase:
+class TestIsTestcaseHardcodedInIf:
     """
-    Unit tests for the `check_hardcoded_testcase` function in the `hardcoding` module.
+    Unit tests for the `is_testcase_hardcoded_in_if` function in the `hardcoding` module.
     """
 
     def test_empty_code(self):
         code = ''
         testcase = ('5 1 8', '1 7')
-        result = hardcoding.check_hardcoded_testcase(code, testcase)
+        result = hardcoding.is_testcase_hardcoded_in_if(code, testcase)
         assert result == 0
-
-    def test_testcase_found_with_cout_on_same_line(self):
-        code = """
-        int main() {
-            string a;
-            getline(cin, a);
-
-            if (a == "5 1 8") { cout << "1 7" << endl; }
-            
-            return 0;
-        }
-        """
-        testcase = ('5 1 8', '1 7')
-        result = hardcoding.check_hardcoded_testcase(code, testcase)
-        assert result == 1
 
     def test_testcase_found_with_cout_on_next_line(self):
         code = """
         int main() {
-            int n;
-            string a;
-            cin >> n >> a;
+            int x;
+            cin >> x;
 
-            if (a == "Joe,123-5432") { 
-                cout << "867-5309" << endl; 
+            if (x == 1900) { 
+                cout << x << " is not a leap year." << endl; 
             }
 
             return 0;
         }
         """
-        testcase = ('3 Joe,123-5432 Frank,867-5309 Frank', '867-5309')
-        result = hardcoding.check_hardcoded_testcase(code, testcase)
+        testcase = ('1900', '1900 is not a leap year.')
+        result = hardcoding.is_testcase_hardcoded_in_if(code, testcase)
         assert result == 1
 
-    def test_testcase_found_compare_to_input_prefix(self):
+    def test_testcase_found_with_cout_in_middle(self):
         code = """
         int main() {
-            int n;
-            cin >> n;
+            int num;
+            cin >> num;
 
-            if (n == 5) { 
-                cout << "1 7" << endl; 
+            if (num == 3) {
+                // Other code here
+                cout << "Index " << num << " is odd.";
+                cout << endl;
             }
 
             return 0;
         }
         """
-        testcase = ('5 1 8', '1 7')
-        result = hardcoding.check_hardcoded_testcase(code, testcase)
+        testcase = ('3', 'Index 3 is odd.')
+        result = hardcoding.is_testcase_hardcoded_in_if(code, testcase)
         assert result == 1
 
-    def test_testcase_found_compare_to_input_middle(self):
+    def test_testcase_found_with_partial_input_match(self):
         code = """
         int main() {
-            int a, b;
-            cin >> a >> b;
+            int n, first;
+            cin >> n >> first;
 
-            if (b == 1) { 
-                cout << "1 7" << endl; 
+            if (first == "abc") {
+                // Other code here
+                cout << first << " matches with def." << endl;
             }
 
             return 0;
         }
         """
-        testcase = ('5 1 8', '1 7')
-        result = hardcoding.check_hardcoded_testcase(code, testcase)
+        testcase = ('2 abc def', 'abc matches with def.')
+        result = hardcoding.is_testcase_hardcoded_in_if(code, testcase)
         assert result == 1
 
     def test_testcase_not_found(self):
         code = """
         int main() {
-            int x, y;
-            cin >> x >> y;
+            int val;
+            cin >> val;
 
-            if (x == 10) {
-                cout << "x is 10" << endl;
+            if (val == 123) {
+                cout << "Some other output!" << endl;
             }
 
             return 0;
         }
         """
-        testcase = ('5 1 8', '1 7')
-        result = hardcoding.check_hardcoded_testcase(code, testcase)
+        testcase = ('3', 'Index 3 is odd.')
+        result = hardcoding.is_testcase_hardcoded_in_if(code, testcase)
         assert result == 0
-
-    def test_testcase_found_cout_multiple_lines_down(self):
-        code = """
-        int main() {
-            int n;
-            string a;
-            cin >> n >> a;
-
-            if (a == "Joe,123-5432") {
-                n = n + 1;
-                // Some more lines here
-                cout << "867-5309" << endl;
-                a = ""; 
-            }
-
-            return 0;
-        }
-        """
-        testcase = ('3 Joe,123-5432 Frank,867-5309 Frank', '867-5309')
-        result = hardcoding.check_hardcoded_testcase(code, testcase)
-        assert result == 1
-
-    def test_if_condition_with_multiple_predicates(self):
-        code = """
-        int main() {
-            int num1, num2;
-            cin >> num1 >> num2;
-
-            if (num1 == -15 && num2 == 10) {
-                cout << "-15 -10 -5 0 5 10" << endl;
-            }
-
-            return 0;
-        }
-        """
-        testcase = ('-15 10', '-15 -10 -5 0 5 10')
-        result = hardcoding.check_hardcoded_testcase(code, testcase)
-        assert result == 1
 
 
 class TestGetHardcodeScoreWithSoln:
@@ -241,7 +190,6 @@ class TestGetHardcodeScoreWithSoln:
         Tests the scenario where:
         - User hardcodes a testcase
         - Solution does not hardcode a testcase output
-        - Solution does not use many testcases
         """
 
         code = """
@@ -277,7 +225,6 @@ class TestGetHardcodeScoreWithSoln:
         Tests the scenario where:
         - User hardcodes a testcase
         - Solution hardcodes a testcase output
-        - Solution does not use many testcases
         """
 
         code = """
@@ -307,63 +254,6 @@ class TestGetHardcodeScoreWithSoln:
         }
         """
         testcases = set([('1980', 'No championship'), ('1998', 'Sixth championship')])
-        result = hardcoding.get_hardcode_score_with_soln(code, testcases, solution)
-        assert result == 0
-
-    def test_soln_uses_many_testcases(self):
-        """
-        Tests the scenario where:
-        - User hardcodes a testcase
-        - Solution does not hardcode the same test case
-        - Solution uses many testcases
-        """
-
-        code = """
-        int main() {
-            int year, num_championships;
-            cin >> year >> num_championships;
-
-            if (year == 1980) {
-                cout << "No championship" << endl;
-            }
-
-            return 0;
-        }
-        """
-        solution = """
-        int main() {
-            int userYear;
-            cin >> userYear;
-
-            if (userYear == 1991) {
-                cout << "First championship" << endl;
-            } else if (userYear == 1992) {
-                cout << "Second championship" << endl;
-            } else if (userYear == 1993) {
-                cout << "Third championship" << endl;
-            } else if (userYear == 1996) {
-                cout << "Fourth championship" << endl;
-            } else if (userYear == 1997) {
-                cout << "Fifth championship" << endl;
-            } else if (userYear == 1998) {
-                cout << "Sixth championship" << endl;
-            } else {
-                cout << "No championship" << endl;
-            }
-
-            return 0;
-        }
-        """
-        testcases = set(
-            [
-                ('1998', 'Sixth championship'),
-                ('1996', 'Fourth championship'),
-                ('1992', 'Second championship'),
-                ('1991', 'First championship'),
-                ('2000', 'No championship'),
-                ('1980', 'No championship'),
-            ]
-        )
         result = hardcoding.get_hardcode_score_with_soln(code, testcases, solution)
         assert result == 0
 
@@ -490,6 +380,32 @@ class TestGetLiteralsInIfStatement:
         code = 'if (x == 1 && y == w && z == "abc") {'
         result = hardcoding.get_literals_in_if_statement(code)
         assert result == ['1', '"abc"']
+
+
+class TestGetVarsInIfStatement:
+    """
+    Unit tests for the `get_literals_in_if_statement` function in the `hardcoding` module.
+    """
+
+    def test_empty_code(self):
+        code = ''
+        result = hardcoding.get_vars_in_if_statement(code)
+        assert result == []
+
+    def test_one_numeric_literal(self):
+        code = 'if (x == 1) {'
+        result = hardcoding.get_vars_in_if_statement(code)
+        assert result == ['x']
+
+    def test_one_string_literal(self):
+        code = 'if (val == "abc") {'
+        result = hardcoding.get_vars_in_if_statement(code)
+        assert result == ['val']
+
+    def test_multiple_literals(self):
+        code = 'if (x == 1 && y == w && z == "abc") {'
+        result = hardcoding.get_vars_in_if_statement(code)
+        assert result == ['x', 'z']
 
 
 class TestRemoveQuotes:

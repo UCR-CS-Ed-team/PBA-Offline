@@ -9,7 +9,8 @@ logger = setup_logger(__name__)  # DEBUGGING
 use_standalone = False
 
 IF_STATEMENT_REGEX = r'if\s*\((.*)\)'
-COMPARE_TO_LITERAL_REGEX = r'(\w+)\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
+LITERAL_VALUE_IN_COMP_REGEX = r'\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
+VAR_NAME_IN_COMP_REGEX = r"(\w+)\s*==\s*(?:[\"\'][^\"\']*[\"\']|\d+)"
 
 
 def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
@@ -52,14 +53,32 @@ def remove_quotes(s: str) -> str:
     return s
 
 
+def get_vars_in_if_statement(line: str) -> list:
+    """Returns the names of variables being compared to literals in an `if` statement's condition.
+
+    Args:
+        line (str): The line of code to check for `if` statement literal comparisons.
+
+    Returns:
+        list: A list of names of variables being compared to literals, e.g. `x == 2` returns 'x'.
+              If the line doesn't have an `if` statement, returns an empty list.
+    """
+    vars_in_if = []
+    if_statement_match = re.search(IF_STATEMENT_REGEX, line)
+    if if_statement_match:
+        # Find all comparisons to literals (e.g. x == 'y') and save the var name
+        vars_in_if = re.findall(VAR_NAME_IN_COMP_REGEX, if_statement_match.group(1))
+    return vars_in_if
+
+
 def get_literals_in_if_statement(line: str) -> list:
-    """Returns the literals in an `if` statement's condition.
+    """Returns the literal values being compared to variables in an `if` statement's condition.
 
     Args:
         line (str): The line of code to check for `if` statement literals.
 
     Returns:
-        list: A list of literals found in the if statement.
+        list: A list of literal values found in the if statement.
               If the line doesn't have an `if` statement, returns an empty list.
     """
 
@@ -67,7 +86,7 @@ def get_literals_in_if_statement(line: str) -> list:
     if_statement_match = re.search(IF_STATEMENT_REGEX, line)
     if if_statement_match:
         # Find all comparisons to literals (e.g. x == 'y') and save the literals
-        literals_in_if = re.findall(COMPARE_TO_LITERAL_REGEX, if_statement_match.group())
+        literals_in_if = re.findall(LITERAL_VALUE_IN_COMP_REGEX, if_statement_match.group(1))
     return literals_in_if
 
 
@@ -108,21 +127,34 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
     return lines_in_scope
 
 
-def get_cout_output_with_var(if_lines: list[str], var_assignments: tuple[str, str], output: str) -> str:
-    # TODO: Add documentation here
+def get_cout_output_with_var(if_lines: list[str], var_assignments: list[tuple[str, str]], output: str) -> str:
+    """Finds a cout statement within `if_lines` involving variables and returns the statement's output.
+
+    The function substitutes the value of the variable from `var_assignments` to find the output.
+
+    Args:
+        if_lines (list[str]): A list of lines of C++ code that are within an 'if' statement.
+        var_assignments (list[tuple[str, str]]): A list of variable names and values.
+        output (str): The output of a testcase.
+
+    Returns:
+        str: The output of the 'cout' statement.
+    """
+
     for if_line in if_lines:
         cout_index = if_line.find('cout')
         if cout_index > -1:  # If line is a 'cout' statement
             for var in var_assignments:
                 var_name = var[0]
                 var_value = var[1]
-                if if_line.find(var_name) > cout_index:  # If line outputs the variable
+                if if_line.rfind(var_name) > cout_index:  # If line outputs a variable
+                    # Substitute variable's value, remove extraneous parts of the line
                     if_line = if_line.replace(var_name, var_value)
                     if_line = if_line.replace('<<', ' ')
                     if_line = if_line.replace('"', ' ').replace("'", ' ')
                     if_line = if_line.replace('cout', '').replace('endl', '')
-                    if_line = if_line.rstrip(';')
-                    cout_output = []
+                    if_line = if_line.rstrip(' ;')
+                    cout_output = []  # Only consider words in the testcase output
                     for word in if_line.split():
                         if word in output:
                             cout_output.append(word)
@@ -130,7 +162,7 @@ def get_cout_output_with_var(if_lines: list[str], var_assignments: tuple[str, st
     return ''
 
 
-def check_if_with_literal_and_cout(code: str) -> int:
+def has_if_with_literal_and_cout(code: str) -> int:
     """
     Returns 1 if code has an if statement comparing to literals, followed by cout.
     Used for case 3: no testcases or solution
@@ -151,7 +183,7 @@ def check_if_with_literal_and_cout(code: str) -> int:
     return 0
 
 
-def check_testcase_output(code: str, testcase: tuple) -> int:
+def is_testcase_hardcoded(code: str, testcase: tuple) -> int:
     """Checks whether a code submission hardcodes the output of a testcase.
 
     Returns 1 if the code has a line `cout << x` where x is the testcase output.
@@ -174,14 +206,20 @@ def check_testcase_output(code: str, testcase: tuple) -> int:
     return 0
 
 
-def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
-    # TODO: Update documentation with changes
-    """Checks whether a code submission hardcoded a testcase.
+def is_testcase_hardcoded_in_if(code: str, testcase: tuple) -> int:
+    """Checks if a code submission hardcoded a testcase inside an `if` statement.
 
     Returns 1 if the code:
     - Has an if statement comparing to a literal, followed by cout
     - The literal contains the input testcase, or a part of the testcase
-    - The cout outputs the output testcase
+    - The cout statement outputs the testcase's output using a variable
+
+    E.g. this function finds snippets like this:
+        ```
+        if (x == 2) {
+            cout << x << " is even" << endl;
+        }
+        ```
 
     Args:
         code (str): The student code to be evaluated
@@ -199,19 +237,20 @@ def check_hardcoded_testcase(code: str, testcase: tuple) -> int:
 
     # Search every line for an 'if' comparing to a literal
     for i, line in enumerate(lines):
+        var_names_in_if = get_vars_in_if_statement(line)
         literals_in_if = get_literals_in_if_statement(line)
 
         if literals_in_if:
             var_assignments = []  # Track variable assignments as (name, value)
-            for literal in literals_in_if:
-                var_name = literal[0]  # Variable won't have quotes
-                var_value = remove_quotes(literal[1])
+            for j, literal in enumerate(literals_in_if):
+                var_name = var_names_in_if[j]  # Variable won't have quotes
+                var_value = remove_quotes(literal)
                 # If input testcase (or any part of it) is in the literal
                 if input == var_value or any(word == var_value for word in input.split()):
                     var_assignments.append((var_name, var_value))
 
-            # Look at all lines in the scope of the `if` statement
             if len(var_assignments) > 0:
+                # Look at all lines in the scope of the `if` statement
                 lines_in_if_scope = get_lines_in_if_scope(lines, i)
                 cout_output = get_cout_output_with_var(lines_in_if_scope, var_assignments, output)
                 if cout_output == output:
@@ -223,9 +262,8 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
     """Gets a hardcoding score for a submission to a lab with a solution and testcases.
 
     Returns 1 if the following are true for any testcase:
-    - Code hardcodes a testcase in an 'if' statement
+    - Code hardcodes a testcase with a cout statement
     - Solution code does not hardcode the same testcase's output
-    - Solution code does not hardcode most of the testcases (based on percent threshold)
 
     Args:
         code (str): The student code to be evaluated
@@ -238,22 +276,18 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
 
     is_hardcoded = False
     testcases_in_soln = set()
-    testcase_threshold = 0.5
 
     # Track which testcase outputs are used in the solution
     for testcase in testcases:
-        testcase_in_soln = check_testcase_output(solution_code, testcase)
+        testcase_in_soln = is_testcase_hardcoded(solution_code, testcase)
         if testcase_in_soln:
             testcases_in_soln.add(testcase)
 
-    percent_testcases_in_soln = len(testcases_in_soln) / len(testcases)
-    soln_uses_many_testcases = percent_testcases_in_soln >= testcase_threshold
-
     # Check for hardcoding
     for testcase in testcases:
-        testcase_in_code = check_hardcoded_testcase(code, testcase) or check_testcase_output(code, testcase)
+        testcase_in_code = is_testcase_hardcoded_in_if(code, testcase) or is_testcase_hardcoded(code, testcase)
         testcase_in_soln = testcase in testcases_in_soln
-        if testcase_in_code and not testcase_in_soln and not soln_uses_many_testcases:
+        if testcase_in_code and not testcase_in_soln:
             logger.debug(f'is_hardcoded is True for testcase {testcase}.')
             is_hardcoded = True  # TODO: return 1 here, True is for debugging
 
@@ -291,7 +325,7 @@ def hardcoding_analysis_2(data, selected_labs, testcases):
                 code = get_code_with_max_score(user_id, lab, data)
                 output[user_id][lab] = [0, code, set()]
                 for testcase in testcases:  # Track num times students hardcode testcases
-                    hardcode_score = check_hardcoded_testcase(code, testcase)
+                    hardcode_score = is_testcase_hardcoded_in_if(code, testcase)
                     output[user_id][lab][0] = hardcode_score
                     if hardcode_score > 0:
                         output[user_id][lab][2].add(testcase)
@@ -321,7 +355,7 @@ def hardcoding_analysis_3(data, selected_labs):
                 output[user_id] = {}
             if lab in data[user_id]:
                 code = get_code_with_max_score(user_id, lab, data)
-                hardcode_score = check_if_with_literal_and_cout(code)
+                hardcode_score = has_if_with_literal_and_cout(code)
                 output[user_id][lab] = [hardcode_score, code]
                 if_literal_use_count += hardcode_score
         hardcoding_percentage = if_literal_use_count / num_students
