@@ -10,7 +10,7 @@ use_standalone = False
 
 IF_STATEMENT_REGEX = r'if\s*\((.*)\)'
 LITERAL_VALUE_IN_COMP_REGEX = r'\w+\s*==\s*((?:[\"\'][^\"\']*[\"\'])|\d+)'
-VAR_NAME_IN_COMP_REGEX = r"(\w+)\s*==\s*(?:[\"\'][^\"\']*[\"\']|\d+)"
+VAR_NAME_IN_COMP_REGEX = r'(\w+)\s*==\s*(?:[\"\'][^\"\']*[\"\']|\d+)'
 
 
 def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:

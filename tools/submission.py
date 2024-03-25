@@ -1,4 +1,4 @@
-""""
+""" "
 Submission object to represent student code submissions containing all sorts of data
 """
 
