@@ -110,3 +110,42 @@ class TestInfiniteLoopAnomaly:
         code = 'for (int i = 0; i < 10; ++i) {'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestAtypicalIncludesAnomaly:
+    a = StyleAnomaly('Atypical Includes', anomaly.ATYPICAL_INCLUDE_REGEX, True, 0.1, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = '#include <iomanip>'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match2(self):
+        code = '#include<algorithm>'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            #include <iomanip>
+            #include<algorithm>
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.2)
+
+    def test_no_match1(self):
+        code = '#include <iostream>'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = '#include <cmath>'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
