@@ -210,18 +210,16 @@ style_anomalies = [
 ]
 
 
-def anomaly_score(code: str) -> Tuple[int, int]:
+def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, int]:
     anomaly_score = 0
     num_anomalies_found = 0
     lines = code.splitlines()
 
-    for a in style_anomalies:
-        if a.name == 'Line Spacing':  # Line Spacing anomaly requires additional logic
-            line_spacing_num_found, line_spacing_score = get_line_spacing_score(lines, a)
-            num_anomalies_found += line_spacing_num_found
-            anomaly_score += line_spacing_score
-            continue
-
+    if a.name == 'Line Spacing':  # Line Spacing anomaly requires additional logic
+        line_spacing_num_found, line_spacing_score = get_line_spacing_score(lines, a)
+        num_anomalies_found += line_spacing_num_found
+        anomaly_score += line_spacing_score
+    else:
         for line in lines:
             # If the anomaly is active and we find a match
             if a.is_active and a.regex.search(line):
@@ -229,6 +227,18 @@ def anomaly_score(code: str) -> Tuple[int, int]:
                     anomaly_score += a.weight  # Anomaly score reflects anomaly's max # of instances
                 a.num_instances += 1
                 num_anomalies_found += 1
+
+    return num_anomalies_found, anomaly_score
+
+
+def get_total_anomaly_score(code: str) -> Tuple[int, int]:
+    anomaly_score = 0
+    num_anomalies_found = 0
+
+    for a in style_anomalies:
+        found, score = get_single_anomaly_score(code, a)
+        num_anomalies_found += found
+        anomaly_score += score
 
     return num_anomalies_found, anomaly_score
 
@@ -852,10 +862,10 @@ if use_standalone:
     for user_id in anomaly_detection_output:
         for lab in anomaly_detection_output[user_id]:
             anomalies_found = anomaly_detection_output[user_id][lab][0]
-            anomaly_score = anomaly_detection_output[user_id][lab][1]
+            get_total_anomaly_score = anomaly_detection_output[user_id][lab][1]
             if user_id in final_roster:
                 final_roster[user_id]['Lab ' + str(lab) + ' anomalies found'] = anomalies_found
-                final_roster[user_id]['Lab ' + str(lab) + ' anomaly score'] = anomaly_score
+                final_roster[user_id]['Lab ' + str(lab) + ' anomaly score'] = get_total_anomaly_score
                 final_roster[user_id]['Lab ' + str(lab) + ' student code'] = anomaly_detection_output[user_id][lab][2]
             else:
                 final_roster[user_id] = {
@@ -865,7 +875,7 @@ if use_standalone:
                     'Email': data[user_id][lab][0].email[0],
                     'Role': 'Student',
                     'Lab ' + str(lab) + ' anomalies found': anomalies_found,
-                    'Lab ' + str(lab) + ' anomaly score': anomaly_score,
+                    'Lab ' + str(lab) + ' anomaly score': get_total_anomaly_score,
                     'Lab ' + str(lab) + ' student code': anomaly_detection_output[user_id][lab][2],
                 }
     write_output_to_csv(final_roster)
