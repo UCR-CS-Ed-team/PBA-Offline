@@ -1,6 +1,7 @@
 import os
 import re
 from tkinter import filedialog
+from typing import Tuple
 
 import pandas as pd
 
@@ -90,7 +91,6 @@ class StyleAnomaly:
         self.regex = re.compile(regex)
         self.is_active = is_active
         self.weight = weight
-        self.count_all_instances = True
         self.num_instances = 0
         self.max_instances = max_instances
 
@@ -127,6 +127,24 @@ style_anomalies = [
     StyleAnomaly('Swap Function', SWAP_FUNCTION_REGEX, True, 0.6, -1),
     StyleAnomaly('Cin Inside While', CIN_INSIDE_WHILE_REGEX, True, 0.6, -1),
 ]
+
+
+def anomaly_score(code: str) -> Tuple[int, int]:
+    anomaly_score = 0
+    num_anomalies_found = 0
+    lines = code.splitlines()
+
+    for line in lines:
+        for a in style_anomalies:
+            # If the anomaly is active and we find a match
+            if a.is_active and a.regex.search(line):
+                # If we're counting all instances of this anomaly, or this is the first instance
+                if a.max_instances == -1 or (a.max_instances > -1 and a.num_instances < a.max_instances):
+                    anomaly_score += a.weight  # Anomaly score reflects anomaly's max # of instances
+                a.num_instances += 1
+                num_anomalies_found += 1
+
+    return num_anomalies_found, anomaly_score
 
 
 def get_anomaly_score(code, auto=0):
