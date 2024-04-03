@@ -84,11 +84,15 @@ class StyleAnomaly:
         is_active (bool): Whether to check for the anomaly in code.
         weight (int): The points per instance of anomaly.
         max_instances (int): The maximum number of instances of the anomaly. -1 means no limit.
+        verbose (bool): Whether to compile the anomaly's regex with the verbose flag or not.
+                        Multi-line regular expressions need this to be true.
     """
 
-    def __init__(self, name: str, regex: str, is_active: bool, weight: int, max_instances: int) -> None:
+    def __init__(
+        self, name: str, regex: str, is_active: bool, weight: float, max_instances: int, verbose: bool = False
+    ) -> None:
         self.name = name
-        self.regex = re.compile(regex)
+        self.regex = re.compile(regex, re.VERBOSE if verbose else 0)
         self.is_active = is_active
         self.weight = weight
         self.num_instances = 0
@@ -104,7 +108,7 @@ class StyleAnomaly:
         return self.max_instances == -1 or (self.max_instances > -1 and self.num_instances < self.max_instances)
 
 
-def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, int]:
+def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[float, int]:
     """Computes number of anomalies and anomaly score for the Line Spacing anomaly.
 
     Line Spacing requires additional logic to determine where main() and user functions are.
@@ -180,10 +184,10 @@ style_anomalies = [
     StyleAnomaly('Pointers', POINTERS_REGEX, True, 0.9, -1),
     StyleAnomaly('Infinite Loop', INFINITE_LOOP_REGEX, True, 0.9, -1),
     StyleAnomaly('Atypical Includes', ATYPICAL_INCLUDE_REGEX, True, 0.1, -1),
-    StyleAnomaly('Atypical Keywords', ATYPICAL_KEYWORD_REGEX, True, 0.3, -1),
+    StyleAnomaly('Atypical Keywords', ATYPICAL_KEYWORD_REGEX, True, 0.3, -1, True),
     StyleAnomaly('Array Accesses', ARRAY_ACCESSES_REGEX, True, 0.9, -1),
     StyleAnomaly('Namespace Std', NAMESPACE_STD_REGEX, True, 0.1, -1),
-    StyleAnomaly('Brace Styling', BRACE_STYLING_REGEX, True, 0.1, -1),
+    StyleAnomaly('Brace Styling', BRACE_STYLING_REGEX, True, 0.1, -1, True),
     StyleAnomaly('Escaped Newline', ESCAPED_NEWLINE_REGEX, True, 0.1, -1),
     StyleAnomaly('User-Defined Functions', USER_DEFINED_FUNCTIONS_REGEX, True, 0.8, -1),
     StyleAnomaly('Ternary Operator', TERNARY_OPERATOR_REGEX, True, 0.2, -1),
@@ -199,7 +203,7 @@ style_anomalies = [
     StyleAnomaly('Spaceless Operator', SPACELESS_OPERATOR_REGEX, True, 0.1, -1),
     StyleAnomaly('Control Statement Spacing', CONTROL_STATEMENT_SPACING_REGEX, True, 0.1, -1),
     StyleAnomaly('Main Void', MAIN_VOID_REGEX, True, 0.5, -1),
-    StyleAnomaly('Access And Increment', ACCESS_AND_INCREMENT_REGEX, True, 0.2, -1),
+    StyleAnomaly('Access And Increment', ACCESS_AND_INCREMENT_REGEX, True, 0.2, -1, True),
     StyleAnomaly('Auto', AUTO_REGEX, True, 0.3, -1),
     StyleAnomaly('zyBooks Set Precision', SET_PRECISION_REGEX, True, 0.2, -1),
     StyleAnomaly('Ranged-Based For Loop', RANGED_BASED_LOOP_REGEX, True, 0.6, -1),
@@ -210,7 +214,7 @@ style_anomalies = [
 ]
 
 
-def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, int]:
+def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[float, int]:
     anomaly_score = 0
     num_anomalies_found = 0
     lines = code.splitlines()
@@ -221,8 +225,7 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, int]:
         anomaly_score += line_spacing_score
     else:
         for line in lines:
-            # If the anomaly is active and we find a match
-            if a.is_active and a.regex.search(line):
+            if a.is_active and a.regex.search(line):  # If the anomaly is active and we find a match
                 if a.should_inc_score():  # Should we increment anomaly score? Based on current and max # instances
                     anomaly_score += a.weight  # Anomaly score reflects anomaly's max # of instances
                 a.num_instances += 1
@@ -231,7 +234,7 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, int]:
     return num_anomalies_found, anomaly_score
 
 
-def get_total_anomaly_score(code: str) -> Tuple[int, int]:
+def get_total_anomaly_score(code: str) -> Tuple[float, int]:
     anomaly_score = 0
     num_anomalies_found = 0
 

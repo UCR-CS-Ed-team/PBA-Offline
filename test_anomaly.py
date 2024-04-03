@@ -149,3 +149,53 @@ class TestAtypicalIncludesAnomaly:
         code = '#include <cmath>'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestAtypicalKeywordsAnomaly:
+    a = StyleAnomaly('Atypical Keywords', anomaly.ATYPICAL_KEYWORD_REGEX, True, 0.3, -1, True)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'break;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_match2(self):
+        code = 'cout << sizeof(x) << endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_match3(self):
+        code = 'case 1:'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            switch (var) {
+            continue;
+            case 'q':
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (3, 0.9)
+
+    def test_no_match1(self):
+        code = 'if (switchVar) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'cout << continueVar << endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match3(self):
+        code = 'string test = "Just in case!";'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
