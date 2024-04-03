@@ -199,3 +199,53 @@ class TestAtypicalKeywordsAnomaly:
         code = 'string test = "Just in case!";'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestArrayAccessesAnomaly:
+    a = StyleAnomaly('Array Accesses', anomaly.ARRAY_ACCESSES_REGEX, True, 0.9, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'int arr[];'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.9)
+
+    def test_match2(self):
+        code = 'cout << stringArr[i] << endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.9)
+
+    def test_match3(self):
+        code = 'if (input[cnt + (cnt - 1)])'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.9)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            listTwo.push_back(list[i]);
+            cin >> arr[i];
+            res = res + to_string(temp[i]) + ", ";
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (3, 2.7)
+
+    def test_no_match1(self):
+        code = 'cout << res.substr(0, res.size() - 2) << endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'cin >> x;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match3(self):
+        code = 'newVector.push_back(inputVector.at(i));'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
