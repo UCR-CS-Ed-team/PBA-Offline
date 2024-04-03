@@ -74,6 +74,61 @@ RIGHT_BRACE_REGEX = r'(})'
 FORWARD_DEC_REGEX = r'(^(?:(?:unsigned|signed|long|short)\s)?(?:int|char|string|void|bool|float|double)\s\w+\(.*\);)'
 
 
+class StyleAnomaly:
+    """Represents a style anomaly.
+
+    Attributes:
+        name (str): The name of the style anomaly.
+        regex (str): The regular expression used to match the anomaly in code.
+        is_active (bool): Whether to check for the anomaly in code.
+        weight (int): The points per instance of anomaly.
+        max_instances (int): The maximum number of instances of the anomaly. -1 means no limit.
+    """
+
+    def __init__(self, name: str, regex: str, is_active: bool, weight: int, max_instances: int) -> None:
+        self.name = name
+        self.regex = re.compile(regex)
+        self.is_active = is_active
+        self.weight = weight
+        self.count_all_instances = True
+        self.num_instances = 0
+        self.max_instances = max_instances
+
+
+style_anomalies = [
+    StyleAnomaly('Pointers', POINTERS_REGEX, True, 0.9, -1),
+    StyleAnomaly('Infinite Loop', INFINITE_LOOP_REGEX, True, 0.9, -1),
+    StyleAnomaly('Atypical Includes', ATYPICAL_INCLUDE_REGEX, True, 0.1, -1),
+    StyleAnomaly('Atypical Keywords', ATYPICAL_KEYWORD_REGEX, True, 0.3, -1),
+    StyleAnomaly('Array Accesses', ARRAY_ACCESSES_REGEX, True, 0.9, -1),
+    StyleAnomaly('Namespace Std', NAMESPACE_STD_REGEX, True, 0.1, -1),
+    StyleAnomaly('Brace Styling', BRACE_STYLING_REGEX, True, 0.1, -1),
+    StyleAnomaly('Escaped Newline', ESCAPED_NEWLINE_REGEX, True, 0.1, -1),
+    StyleAnomaly('User-Defined Functions', USER_DEFINED_FUNCTIONS_REGEX, True, 0.8, -1),
+    StyleAnomaly('Ternary Operator', TERNARY_OPERATOR_REGEX, True, 0.2, -1),
+    StyleAnomaly('Command-Line Arguments', COMMAND_LINE_ARGUMENTS_REGEX, True, 0.8, -1),
+    StyleAnomaly('Nulls', NULLS_REGEX, True, 0.4, -1),
+    StyleAnomaly('Scope Operator', SCOPE_OPERATOR_REGEX, True, 0.25, -1),
+    StyleAnomaly('Line Spacing', LINE_SPACING_REGEX, True, 0.1, -1),
+    StyleAnomaly('Multiple Declarations Same Line', MULTIPLE_DECLARATIONS_REGEX, True, 0.3, -1),
+    StyleAnomaly('Multiple Cin Same Line', MULTIPLE_CIN_SAME_LINE_REGEX, True, 0.3, -1),
+    StyleAnomaly('and & or', AND_OR_REGEX, True, 0.1, -1),
+    StyleAnomaly('List Initialization', LIST_INIT_REGEX, True, 0.8, -1),
+    StyleAnomaly('Vector Name Spacing', VECTOR_NAME_SPACING_REGEX, True, 0.1, -1),
+    StyleAnomaly('Spaceless Operator', SPACELESS_OPERATOR_REGEX, True, 0.1, -1),
+    StyleAnomaly('Control Statement Spacing', CONTROL_STATEMENT_SPACING_REGEX, True, 0.1, -1),
+    StyleAnomaly('Main Void', MAIN_VOID_REGEX, True, 0.5, -1),
+    StyleAnomaly('Access And Increment', ACCESS_AND_INCREMENT_REGEX, True, 0.2, -1),
+    StyleAnomaly('Auto', AUTO_REGEX, True, 0.3, -1),
+    StyleAnomaly('zyBooks Set Precision', SET_PRECISION_REGEX, True, 0.2, -1),
+    StyleAnomaly('Ranged-Based For Loop', RANGED_BASED_LOOP_REGEX, True, 0.6, -1),
+    StyleAnomaly('Iterator Functions', ITERATOR_FUNCTIONS_REGEX, True, 0.3, -1),
+    StyleAnomaly('Max Min Macros', MAX_MIN_MACRO_REGEX, True, 0.3, -1),
+    StyleAnomaly('Swap Function', SWAP_FUNCTION_REGEX, True, 0.6, -1),
+    StyleAnomaly('Cin Inside While', CIN_INSIDE_WHILE_REGEX, True, 0.6, -1),
+]
+
+
 def get_anomaly_score(code, auto=0):
     # Below is the format for the anomaly in question
     # [Count_instances, points/instance, anomaly on/off, regex, count of instances, instance cap (-1 for no cap)]
