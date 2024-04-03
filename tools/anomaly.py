@@ -108,7 +108,7 @@ class StyleAnomaly:
         return self.max_instances == -1 or (self.max_instances > -1 and self.num_instances < self.max_instances)
 
 
-def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[float, int]:
+def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     """Computes number of anomalies and anomaly score for the Line Spacing anomaly.
 
     Line Spacing requires additional logic to determine where main() and user functions are.
@@ -177,7 +177,7 @@ def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[float, int]:
             a.num_instances += 1
             num_anomalies_found += 1
 
-    return num_anomalies_found, anomaly_score
+    return num_anomalies_found, round(anomaly_score, 1)
 
 
 style_anomalies = [
@@ -214,7 +214,7 @@ style_anomalies = [
 ]
 
 
-def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[float, int]:
+def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     anomaly_score = 0
     num_anomalies_found = 0
     lines = code.splitlines()
@@ -231,7 +231,7 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[float, int]:
                 a.num_instances += 1
                 num_anomalies_found += 1
 
-    return num_anomalies_found, anomaly_score
+    return num_anomalies_found, round(anomaly_score, 1)
 
 
 def get_total_anomaly_score(code: str) -> Tuple[float, int]:
