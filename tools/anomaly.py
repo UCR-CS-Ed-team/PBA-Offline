@@ -94,6 +94,65 @@ class StyleAnomaly:
         self.num_instances = 0
         self.max_instances = max_instances
 
+    def should_inc_score(self) -> bool:
+        return self.max_instances == -1 or (self.max_instances > -1 and self.num_instances < self.max_instances)
+
+
+def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, int]:
+    anomaly_score = 0
+    num_anomalies_found = 0
+    left_brace_count = 0
+    right_brace_count = 0
+    check_line_spacing = False  # Don't check for anomaly until we're in a function
+    opening_brace = False  # Indicates if `line` is the opening brace for the function on its own line
+    lines = code.splitlines()
+
+    for i, line in enumerate(lines):
+        # "Line Spacing" should only check lines inside main() and user functions
+        line_is_main = re.search(INT_MAIN_REGEX, line)
+        line_is_user_func = re.search(USER_DEFINED_FUNCTIONS_REGEX, line)
+        line_is_forward_dec = re.search(FORWARD_DEC_REGEX, line)
+        if (line_is_main or line_is_user_func) and not line_is_forward_dec:
+            check_line_spacing = True
+
+        # Keep track of how many left and right braces we've seen
+        if check_line_spacing:
+            if re.search(LEFT_BRACE_REGEX, line):
+                left_brace_count += 1
+            if re.search(RIGHT_BRACE_REGEX, line):
+                right_brace_count += 1
+
+        # If brace counts match, we've seen the whole main() or user function
+        if (left_brace_count == right_brace_count) and left_brace_count > 0:
+            check_line_spacing = False
+            left_brace_count = 0
+            right_brace_count = 0
+
+        # Check if we're looking at the opening brace for a function on its own line
+        # If we are, skip it. It's a Brace Styling anomaly, not a Line Spacing anomaly
+        if re.search(LEFT_BRACE_REGEX, line) and (
+            re.search(INT_MAIN_REGEX, lines[i - 1]) or re.search(USER_DEFINED_FUNCTIONS_REGEX, lines[i - 1])
+        ):
+            opening_brace = True
+        else:
+            opening_brace = False
+
+        if (
+            a.is_active
+            and check_line_spacing
+            and not line_is_main
+            and not line_is_user_func
+            and not opening_brace
+            and (left_brace_count >= 1)
+            and a.regex.search(line)
+        ):
+            if a.should_inc_score():
+                anomaly_score += a.weight
+            a.num_instances += 1
+            num_anomalies_found += 1
+
+    return num_anomalies_found, anomaly_score
+
 
 style_anomalies = [
     StyleAnomaly('Pointers', POINTERS_REGEX, True, 0.9, -1),
@@ -138,11 +197,17 @@ def anomaly_score(code: str) -> Tuple[int, int]:
         for a in style_anomalies:
             # If the anomaly is active and we find a match
             if a.is_active and a.regex.search(line):
-                # If we're counting all instances of this anomaly, or this is the first instance
-                if a.max_instances == -1 or (a.max_instances > -1 and a.num_instances < a.max_instances):
+                if a.should_inc_score():  # Should we increment anomaly score? Based on current and max # instances
                     anomaly_score += a.weight  # Anomaly score reflects anomaly's max # of instances
                 a.num_instances += 1
                 num_anomalies_found += 1
+
+    # Line Spacing anomaly requires additional logic
+    style_anomalies_dict = {a.name: a for a in style_anomalies}
+    line_spacing_anomaly = style_anomalies_dict['Line Spacing']
+    line_spacing_num_found, line_spacing_score = get_line_spacing_score(lines, line_spacing_anomaly)
+    num_anomalies_found += line_spacing_num_found
+    anomaly_score += line_spacing_score
 
     return num_anomalies_found, anomaly_score
 
