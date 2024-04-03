@@ -95,10 +95,32 @@ class StyleAnomaly:
         self.max_instances = max_instances
 
     def should_inc_score(self) -> bool:
+        """Determines whether an anomaly score should be incremented by an anomaly's weight.
+
+        Returns:
+            bool: True if the anomaly is configured to count all instances,
+                  OR if we have not yet counted the maximum number of instances of this anomaly. Else, false.
+        """
         return self.max_instances == -1 or (self.max_instances > -1 and self.num_instances < self.max_instances)
 
 
 def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, int]:
+    """Computes number of anomalies and anomaly score for the Line Spacing anomaly.
+
+    Line Spacing requires additional logic to determine where main() and user functions are.
+    Because of this, we use a separate function just for this anomaly.
+    We only count non-indented lines inside of main() or user-defined functions.
+    If the student wrote the function's opening brace on its own line, we exclude that line.
+
+    The Line Spacing anomaly is defined inside this function.
+
+    Args:
+        code (str): The student's code.
+
+    Returns:
+        Tuple[int, int]: A tuple containing the number of anomalies found and anomaly score for Line Spacing.
+    """
+
     anomaly_score = 0
     num_anomalies_found = 0
     left_brace_count = 0
@@ -193,21 +215,20 @@ def anomaly_score(code: str) -> Tuple[int, int]:
     num_anomalies_found = 0
     lines = code.splitlines()
 
-    for line in lines:
-        for a in style_anomalies:
+    for a in style_anomalies:
+        if a.name == 'Line Spacing':  # Line Spacing anomaly requires additional logic
+            line_spacing_num_found, line_spacing_score = get_line_spacing_score(lines, a)
+            num_anomalies_found += line_spacing_num_found
+            anomaly_score += line_spacing_score
+            continue
+
+        for line in lines:
             # If the anomaly is active and we find a match
             if a.is_active and a.regex.search(line):
                 if a.should_inc_score():  # Should we increment anomaly score? Based on current and max # instances
                     anomaly_score += a.weight  # Anomaly score reflects anomaly's max # of instances
                 a.num_instances += 1
                 num_anomalies_found += 1
-
-    # Line Spacing anomaly requires additional logic
-    style_anomalies_dict = {a.name: a for a in style_anomalies}
-    line_spacing_anomaly = style_anomalies_dict['Line Spacing']
-    line_spacing_num_found, line_spacing_score = get_line_spacing_score(lines, line_spacing_anomaly)
-    num_anomalies_found += line_spacing_num_found
-    anomaly_score += line_spacing_score
 
     return num_anomalies_found, anomaly_score
 
