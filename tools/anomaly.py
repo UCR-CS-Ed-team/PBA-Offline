@@ -73,7 +73,7 @@ ARRAY_ACCESSES_REGEX = r'(\w+\[.*\])'
 NAMESPACE_STD_REGEX = r'(std::)'
 ESCAPED_NEWLINE_REGEX = r'(\\n)'
 USER_DEFINED_FUNCTIONS_REGEX = (
-    r'(^(?:\s+)?(?:(?:unsigned|signed|long|short)\s)?(?:int|char|string|void|bool|float|double)\s\w+\(.*\))'
+    r'(^(?:\s+)?(?:(?:unsigned|signed|long|short)\s)?(?:int|char|string|void|bool|float|double)\s(?!main)\w+\(.*\))'
 )
 TERNARY_OPERATOR_REGEX = r'(.+\s\?\s.+\s\:\s.+)'
 COMMAND_LINE_ARGUMENTS_REGEX = r'(main\(\s?int argc,\s?(?:char\s?\*\s?argv\[\])|(?:char\s?\*\*\s?argv))\s?\)'
