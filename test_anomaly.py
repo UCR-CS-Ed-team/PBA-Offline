@@ -249,3 +249,52 @@ class TestArrayAccessesAnomaly:
         code = 'newVector.push_back(inputVector.at(i));'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestNamespaceStdAnomaly:
+    a = StyleAnomaly('Namespace Std', anomaly.NAMESPACE_STD_REGEX, True, 0.1, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'std::vector<int> vect;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match2(self):
+        code = ' std::cout << "Hello " << first_name << "!" << std::endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match3(self):
+        code = 'using std::cout;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            std::cin >> first_name;
+            using std::cout;
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.2)
+
+    def test_no_match1(self):
+        code = 'using namespace std;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'void A::fun()'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match3(self):
+        code = 'cout << "Value of static x is " << Test::x;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
