@@ -180,13 +180,14 @@ def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     return num_anomalies_found, round(anomaly_score, 1)
 
 
+# TODO: For Escaped Newline, differentiate between line ending and a student's \n
 style_anomalies = [
     StyleAnomaly('Pointers', POINTERS_REGEX, True, 0.9, -1),
     StyleAnomaly('Infinite Loop', INFINITE_LOOP_REGEX, True, 0.9, -1),
     StyleAnomaly('Atypical Includes', ATYPICAL_INCLUDE_REGEX, True, 0.1, -1),
     StyleAnomaly('Atypical Keywords', ATYPICAL_KEYWORD_REGEX, True, 0.3, -1, True),
     StyleAnomaly('Array Accesses', ARRAY_ACCESSES_REGEX, True, 0.9, -1),
-    StyleAnomaly('Namespace Std', NAMESPACE_STD_REGEX, True, 0.1, -1),
+    StyleAnomaly('Namespace Std', NAMESPACE_STD_REGEX, False, 0.1, -1),
     StyleAnomaly('Brace Styling', BRACE_STYLING_REGEX, True, 0.1, -1, True),
     StyleAnomaly('Escaped Newline', ESCAPED_NEWLINE_REGEX, True, 0.1, -1),
     StyleAnomaly('User-Defined Functions', USER_DEFINED_FUNCTIONS_REGEX, True, 0.8, -1),
@@ -234,7 +235,7 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     return num_anomalies_found, round(anomaly_score, 1)
 
 
-def get_total_anomaly_score(code: str) -> Tuple[float, int]:
+def get_total_anomaly_score(code: str) -> Tuple[int, float]:
     anomaly_score = 0
     num_anomalies_found = 0
 
@@ -831,7 +832,6 @@ def anomaly(data, selected_labs, auto=0):  # Function to calculate the anomaly s
         for user_id in data:
             if user_id not in output:
                 output[user_id] = {}
-
             if lab in data[user_id]:
                 max_score = 0
                 code = data[user_id][lab][-1].code  # Choose a default submission
@@ -839,7 +839,6 @@ def anomaly(data, selected_labs, auto=0):  # Function to calculate the anomaly s
                     if sub.max_score > max_score:
                         max_score = sub.max_score
                         code = sub.code
-
                 anomalies_found, anomaly_score = get_anomaly_score(code, auto)
                 output[user_id][lab] = [anomalies_found, anomaly_score, code]
     return output

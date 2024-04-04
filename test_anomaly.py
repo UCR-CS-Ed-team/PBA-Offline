@@ -369,3 +369,5 @@ class TestBraceStylingAnomaly:
         """
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
