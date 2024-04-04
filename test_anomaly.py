@@ -298,3 +298,74 @@ class TestNamespaceStdAnomaly:
         code = 'cout << "Value of static x is " << Test::x;'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestBraceStylingAnomaly:
+    a = StyleAnomaly('Brace Styling', anomaly.BRACE_STYLING_REGEX, True, 0.1, -1, True)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = '   {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match2(self):
+        code = 'cout << "Hello World!" << endl; }'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match3(self):
+        code = 'if (tempVar == -1) { break; }'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match4(self):
+        code = 'if (tempVar == -1) break; cout << endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            for (int i = 0; i < x; ++i) { break; }
+            for (int i = 0; i < x; ++i) break; cout << endl;
+            if (tempVar == -1) cout << endl;
+            } else {
+            else return 0;
+            else cout << x << endl;
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (6, 0.6)
+
+    def test_no_match1(self):
+        code = 'if (tempVar == -1) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'for (i = 0; i < x; ++i) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match3(self):
+        code = 'int main() {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_multi_not_match(self):
+        code = """
+        int main() {
+            else if {
+            else {
+            else
+            }
+               }
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
