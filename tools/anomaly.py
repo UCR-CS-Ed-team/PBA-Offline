@@ -13,6 +13,7 @@ from tools.utilities import (
 )
 
 use_standalone = False
+SCORE_PRECISION = 2
 
 
 class StyleAnomaly:
@@ -78,7 +79,7 @@ USER_DEFINED_FUNCTIONS_REGEX = (
 TERNARY_OPERATOR_REGEX = r'(.+\s\?\s.+\s\:\s.+)'
 COMMAND_LINE_ARGUMENTS_REGEX = r'(main\(\s?int argc,\s?(?:char\s?\*\s?argv\[\])|(?:char\s?\*\*\s?argv))\s?\)'
 NULLS_REGEX = r'(NULL|nullptr|\\0)'
-SCOPE_OPERATOR_REGEX = r'(\w+::\w+)'
+SCOPE_OPERATOR_REGEX = r'^(?!.*?(string::npos|std::)).*\b(\w+::\w+)\b'
 LINE_SPACING_REGEX = r'(^\S+)'
 MULTIPLE_DECLARATIONS_REGEX = r'((?:int|char|string|void|bool|float|double)\s+\w+[^\"\']+(?:\s+)?,(?:\s+)?\w+.*;)'
 MULTIPLE_CIN_SAME_LINE_REGEX = r'(cin(?:\s+)?>>(?:\s+)?\w+(?:\s+)?>>)'
@@ -213,7 +214,7 @@ def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
             a.num_instances += 1
             num_anomalies_found += 1
 
-    return num_anomalies_found, round(anomaly_score, 1)
+    return num_anomalies_found, round(anomaly_score, SCORE_PRECISION)
 
 
 def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
@@ -233,7 +234,7 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
                 a.num_instances += 1
                 num_anomalies_found += 1
 
-    return num_anomalies_found, round(anomaly_score, 1)
+    return num_anomalies_found, round(anomaly_score, SCORE_PRECISION)
 
 
 def get_total_anomaly_score(code: str) -> Tuple[int, float]:
