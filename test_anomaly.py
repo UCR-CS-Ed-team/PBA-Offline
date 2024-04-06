@@ -541,3 +541,42 @@ class TestNullsAnomaly:
         """
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (2, 0.8)
+
+
+class TestScopeOperatorAnomaly:
+    a = StyleAnomaly('Scope Operator', anomaly.SCOPE_OPERATOR_REGEX, True, 0.25, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'void A::fun()'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.25)
+
+    def test_match2(self):
+        code = 'cout << "Value of static x is " << Test::x;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.25)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            foo::foo()
+            x = cstdlib::atoi(y);
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.5)
+
+    def test_no_match1(self):
+        code = 'std::cout << "Hello" << std::endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'if (pos != string::npos) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
