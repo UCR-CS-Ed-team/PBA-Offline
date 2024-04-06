@@ -193,12 +193,10 @@ def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
 
         # Check if we're looking at the opening brace for a function on its own line
         # If we are, skip it. It's a Brace Styling anomaly, not a Line Spacing anomaly
-        if re.search(LEFT_BRACE_REGEX, line) and (
-            re.search(INT_MAIN_REGEX, lines[i - 1]) or re.search(USER_DEFINED_FUNCTIONS_REGEX, lines[i - 1])
-        ):
-            opening_brace = True
-        else:
-            opening_brace = False
+        opening_brace = bool(
+            re.search(LEFT_BRACE_REGEX, line)
+            and (re.search(INT_MAIN_REGEX, lines[i - 1]) or re.search(USER_DEFINED_FUNCTIONS_REGEX, lines[i - 1]))
+        )
 
         if (
             a.is_active
