@@ -1,3 +1,5 @@
+import textwrap
+
 from tools import anomaly
 from tools.anomaly import StyleAnomaly
 
@@ -580,3 +582,37 @@ class TestScopeOperatorAnomaly:
         code = 'if (pos != string::npos) {'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestLineSpacingAnomaly:
+    a = StyleAnomaly('Line Spacing', anomaly.LINE_SPACING_REGEX, True, 0.1, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_line_spacing_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_multi_match1(self):
+        # dedent() removes common leading space from each line
+        # In real student code, we this anomaly matches non-indented lines
+        code = textwrap.dedent("""
+        // Comment
+        int main() {
+        int x;      // Match 1
+        cin >> x;   // Match 2
+        }
+        """)
+        result = anomaly.get_line_spacing_score(code, self.a)
+        assert result == (2, 0.2)
+
+    def test_multi_match2(self):
+        code = textwrap.dedent("""
+        // Comment
+        int user_func() {
+            int x;
+        cout << y;      // Match 1
+        x = pow(1, 2);  // Match 2
+        }
+        """)
+        result = anomaly.get_line_spacing_score(code, self.a)
+        assert result == (2, 0.2)
