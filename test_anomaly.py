@@ -467,3 +467,48 @@ class TestTernaryOperatorAnomaly:
         code = 'cout << "This is a test ? " << "This is also a test:" << std::endl;  '
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestCommandLineArgumentsAnomaly:
+    a = StyleAnomaly('Command-Line Arguments', anomaly.COMMAND_LINE_ARGUMENTS_REGEX, True, 0.8, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'int main(int argc, char* argv[])'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.8)
+
+    def test_match2(self):
+        code = 'int main(int argc, char** argv)'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.8)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            int main(int argc, char *argv[]) {
+            int main(int argc,char * argv[])
+            int main(int argc, char **argv) {
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (3, 2.4)
+
+    def test_no_match1(self):
+        code = 'int main() {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'int max(int argc, char* argv[]) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match3(self):
+        code = 'cout << "int argc, char** argv" << endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
