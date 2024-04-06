@@ -419,3 +419,51 @@ class TestUserDefinedFunctionsAnomaly:
         code = 'int num = pow(2, 2);'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestTernaryOperatorAnomaly:
+    a = StyleAnomaly('Ternary Operator', anomaly.TERNARY_OPERATOR_REGEX, True, 0.2, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'variable = Expression1 ? Expression2 : Expression3'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.2)
+
+    def test_match2(self):
+        code = '(condition) ? (variable = Expression2) : (variable = Expression3)'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.2)
+
+    def test_match3(self):
+        code = 'cout << (test ? fvalue : 0) << endl;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.2)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            variable = (condition) ? Expression2 : Expression3
+            cout << "Second character " << (test ? 3 : '1') << endl;
+            cout << (test ? "A String" : 0) << endl;
+            int max = a > b ? a : b;
+            string result = (marks >= 40) ? "passed" : "failed";
+            result = (number > 0) ? "Positive Number!" : "Negative Number!";
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (6, 1.2)
+
+    def test_no_match1(self):
+        code = 'string testString = "How do you do? Consider this: this test should fail."'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'cout << "This is a test ? " << "This is also a test:" << std::endl;  '
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
