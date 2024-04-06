@@ -512,3 +512,32 @@ class TestCommandLineArgumentsAnomaly:
         code = 'cout << "int argc, char** argv" << endl;'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestNullsAnomaly:
+    a = StyleAnomaly('Nulls', anomaly.NULLS_REGEX, True, 0.4, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'int* ptr = nullptr;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.4)
+
+    def test_match2(self):
+        code = 'int* ptr = NULL;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.4)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            "x[0] = '\\0'"
+            if (NULL == nullptr) {
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.8)
