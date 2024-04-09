@@ -616,3 +616,14 @@ class TestLineSpacingAnomaly:
         """)
         result = anomaly.get_line_spacing_score(code, self.a)
         assert result == (2, 0.2)
+
+    def test_multi_no_match(self):
+        code = textwrap.dedent("""
+        // Comment
+        int user_func() 
+        {
+            return 0;
+        }
+        """)
+        result = anomaly.get_line_spacing_score(code, self.a)
+        assert result == (0, 0)
