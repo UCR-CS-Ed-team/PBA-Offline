@@ -925,3 +925,42 @@ class TestSpacelessOperatorAnomaly:
         """
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestControlStatementSpacingAnomaly:
+    a = StyleAnomaly('Control Statement Spacing', anomaly.CONTROL_STATEMENT_SPACING_REGEX, True, 0.1, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'for(int i = 0; i < n; i++){'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match2(self):
+        code = 'if(a[0] > a[1]) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            else if(a[i]<min2){
+            while(x>y) {
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.2)
+
+    def test_no_match1(self):
+        code = 'for (int i=0;i<n;i++) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'if (a[0] > a[1]) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
