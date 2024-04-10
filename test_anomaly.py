@@ -964,3 +964,22 @@ class TestControlStatementSpacingAnomaly:
         code = 'if (a[0] > a[1]) {'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestMainVoidAnomaly:
+    a = StyleAnomaly('Main Void', anomaly.MAIN_VOID_REGEX, True, 0.5, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'int main(void) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.5)
+
+    def test_no_match1(self):
+        code = 'int main() {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
