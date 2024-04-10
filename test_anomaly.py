@@ -841,3 +841,87 @@ class TestVectorNameSpacingAnomaly:
         code = 'vector<int> vect(n,10);'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestSpacelessOperatorAnomaly:
+    a = StyleAnomaly('Spaceless Operator', anomaly.SPACELESS_OPERATOR_REGEX, True, 0.1, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'for(i=0;i<n;i++){'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match2(self):
+        code = 'int n = (sizeof(A)/sizeof(A[0]));'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match3(self):
+        code = 'if (x&&y) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_multi_match1(self):
+        code = """
+        int main() {
+            if(A[i]<min){
+            else if ( a[i]<minx) {
+            while (i>=x) {
+            while (sizeof(x)>=sizeof(y)) {
+            if (x[i]||y[j]) {
+            if (myVec[i]%2==0) {
+            while (2!=0) {
+            cout<<x<<y<<endl;
+            cin>>x;
+            cout << a[0]*b[1] << endl;
+            varName-=1;
+            j+=2;
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (12, 1.2)
+
+    def test_multi_match2(self):
+        code = """
+        int main() {
+            cout << "Hello" << x-10 << "World!" << endl;
+            cout << "Hello World!" << 11-100 << endl;
+            cout << "Hello World!" << 11-100 << "Hello Again!" << endl;
+            cout << "Outputting " << a[i]-10 << " for testing." << endl;
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (4, 0.4)
+
+    def test_no_match1(self):
+        code = '#include <iostream>'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'vector<int> vec;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_multi_no_match(self):
+        code = """
+        int main() {
+            if(a[0] > a[1]) {
+            if(a[i] <= min) {
+            for ( int i = 0 ; i < x ; i++) {
+            while (i < 10) {
+            j += 2;
+            cin >> x;
+            cout << x << y << endl;
+            string str1 = "Input must be 11-100";
+            string str2 = "Input must be 11-100, please."
+            cout << "Outputting a[i]-10" << endl;
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
