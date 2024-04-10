@@ -1246,3 +1246,33 @@ class TestSwapFunctionAnomaly:
         code = 'swap(arr[0], arr[4]);'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (1, 0.6)
+
+
+class TestCinInsideWhileAnomaly:
+    a = StyleAnomaly('Cin Inside While', anomaly.CIN_INSIDE_WHILE_REGEX, True, 0.6, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = "while (std::cin >> input && input != 'q') {"
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.6)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            while (cin >> input && input != -1) {
+            while (input != -1 && cin>>input && input != 2) {
+            while ( cin >> input ) {
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (3, 1.8)
+
+    def test_no_match1(self):
+        code = 'while (VarWith_cin_InName == 1) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
