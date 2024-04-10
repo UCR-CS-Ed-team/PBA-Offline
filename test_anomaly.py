@@ -601,7 +601,7 @@ class TestLineSpacingAnomaly:
         int x;      // Match 1
         cin >> x;   // Match 2
         }
-        """)
+        """).splitlines()
         result = anomaly.get_line_spacing_score(code, self.a)
         assert result == (2, 0.2)
 
@@ -613,7 +613,7 @@ class TestLineSpacingAnomaly:
         cout << y;      // Match 1
         x = pow(1, 2);  // Match 2
         }
-        """)
+        """).splitlines()
         result = anomaly.get_line_spacing_score(code, self.a)
         assert result == (2, 0.2)
 
@@ -624,7 +624,7 @@ class TestLineSpacingAnomaly:
         {
             return 0;
         }
-        """)
+        """).splitlines()
         result = anomaly.get_line_spacing_score(code, self.a)
         assert result == (0, 0)
 
@@ -904,7 +904,7 @@ class TestSpacelessOperatorAnomaly:
         assert result == (0, 0)
 
     def test_no_match2(self):
-        code = 'vector<int> vec;'
+        code = '   vector<int> vec;'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
 
