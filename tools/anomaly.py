@@ -86,7 +86,13 @@ MULTIPLE_CIN_SAME_LINE_REGEX = r'(cin(?:\s+)?>>(?:\s+)?\w+(?:\s+)?>>)'
 AND_OR_REGEX = r'(if(?:\s+)?\([^\"\']+\s+(?:and|or)\s+[^\"\']+\))'
 LIST_INIT_REGEX = r'((?:int|char|string|void|bool|float|double)\s+\w+(?:\s+)?{.*};)'
 VECTOR_NAME_SPACING_REGEX = r'(vector<.+>\w+)'
-SPACELESS_OPERATOR_REGEX = r'^(?!#include|vector<).*([\w\]\)]+(?:>|>=|<|<=|=|==|!=|<<|>>|\+|-|\+=|-=|\*|/|%|&&|\|\|)[\w\[\(]+(?![^<<]*(?:\"|\')))'
+SPACELESS_OPERATOR_REGEX = r"""
+	^(?!\#include|vector<).* # Exclude `#include` and `vector<`
+	([\w\]\)]+
+	(?:>|>=|<|<=|=|==|!=|<<|>>|\+|-|\+=|-=|\*|/|%|&&|\|\|)
+	[\w\[\(]+
+	(?![^<<]*(?:\"|\'))) # Exclude string literals
+	"""
 CONTROL_STATEMENT_SPACING_REGEX = r'((?:if|for|while)\(.*\))'
 MAIN_VOID_REGEX = r'(int main\(void\))'
 ACCESS_AND_INCREMENT_REGEX = r"""
@@ -129,7 +135,7 @@ style_anomalies = [
     StyleAnomaly('and & or', AND_OR_REGEX, True, 0.1, -1),
     StyleAnomaly('List Initialization', LIST_INIT_REGEX, True, 0.8, -1),
     StyleAnomaly('Vector Name Spacing', VECTOR_NAME_SPACING_REGEX, True, 0.1, -1),
-    StyleAnomaly('Spaceless Operator', SPACELESS_OPERATOR_REGEX, True, 0.1, -1),
+    StyleAnomaly('Spaceless Operator', SPACELESS_OPERATOR_REGEX, True, 0.1, -1, True),
     StyleAnomaly('Control Statement Spacing', CONTROL_STATEMENT_SPACING_REGEX, True, 0.1, -1),
     StyleAnomaly('Main Void', MAIN_VOID_REGEX, True, 0.5, -1),
     StyleAnomaly('Access And Increment', ACCESS_AND_INCREMENT_REGEX, True, 0.2, -1, True),

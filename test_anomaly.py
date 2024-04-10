@@ -844,7 +844,7 @@ class TestVectorNameSpacingAnomaly:
 
 
 class TestSpacelessOperatorAnomaly:
-    a = StyleAnomaly('Spaceless Operator', anomaly.SPACELESS_OPERATOR_REGEX, True, 0.1, -1)
+    a = StyleAnomaly('Spaceless Operator', anomaly.SPACELESS_OPERATOR_REGEX, True, 0.1, -1, True)
 
     def test_empty(self):
         code = ''
