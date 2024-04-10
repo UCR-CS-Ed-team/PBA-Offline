@@ -1188,3 +1188,42 @@ class TestIteratorFunctionsAnomaly:
         code = 'std::vector<int>::iterator it'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestMaxMinMacrosAnomaly:
+    a = StyleAnomaly('Max Min Macros', anomaly.MAX_MIN_MACRO_REGEX, True, 0.3, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'if (num1 > INT_MAX - num2)'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_match2(self):
+        code = '   arr[i]=INT_MIN;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            int minValue = INT_MIN;
+            int maxValue = INT_MAX;
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.6)
+
+    def test_no_match1(self):
+        code = 'int_min'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'int_max'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
