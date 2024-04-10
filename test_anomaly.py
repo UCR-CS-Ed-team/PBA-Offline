@@ -594,7 +594,7 @@ class TestLineSpacingAnomaly:
 
     def test_multi_match1(self):
         # dedent() removes common leading space from each line
-        # In real student code, we this anomaly matches non-indented lines
+        # This makes the testcase code
         code = textwrap.dedent("""
         // Comment
         int main() {
@@ -626,4 +626,49 @@ class TestLineSpacingAnomaly:
         }
         """)
         result = anomaly.get_line_spacing_score(code, self.a)
+        assert result == (0, 0)
+
+
+class TestMultipleDeclarationsSameLineAnomaly:
+    a = StyleAnomaly('Multiple Declarations Same Line', anomaly.MULTIPLE_DECLARATIONS_REGEX, True, 0.3, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'int size,i,num,first,second;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_match2(self):
+        code = 'int a[x] , min, minx;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_match3(self):
+        code = 'int min = userNums[0], secondMin = userNums[1], temp;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            int a[n],min,min2;
+            int size, i, num, first, second;
+            int n = vecs[0], n1 = vecs[1], current , temp;
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (3, 0.9)
+
+    def test_no_match1(self):
+        code = 'int i = 0; int j = 1;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'string testStr = "testing, with commas";'
+        result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
