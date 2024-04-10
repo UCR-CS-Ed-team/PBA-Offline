@@ -983,3 +983,58 @@ class TestMainVoidAnomaly:
         code = 'int main() {'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestAccessAndIncrementAnomaly:
+    a = StyleAnomaly('Access And Increment', anomaly.ACCESS_AND_INCREMENT_REGEX, True, 0.2, -1, True)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'arr[i++]'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.2)
+
+    def test_match2(self):
+        code = 'vect.at(var++)'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.2)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            arr[++j]
+            arr[--i]
+            arr[i--]
+            vect.at(++var)
+            vect.at(var--)
+            vect.at(--var)
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (6, 1.2)
+
+    def test_no_match1(self):
+        code = 'arr[i]'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'vect.at(i)'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_multi_no_match(self):
+        code = """
+        int main() {
+            arr[j+1]
+            arr[1-j]
+            vect.at(i+1)
+            vect.at(1-var)
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
