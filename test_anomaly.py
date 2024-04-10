@@ -672,3 +672,32 @@ class TestMultipleDeclarationsSameLineAnomaly:
         code = 'string testStr = "testing, with commas";'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestMultipleCinSameLineAnomaly:
+    a = StyleAnomaly('Multiple Cin Same Line', anomaly.MULTIPLE_CIN_SAME_LINE_REGEX, True, 0.3, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'cin >> size >> min1 >> min2;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            cin >> size >> min1 >> min2;
+            cin >> smallest >> secSmallest >>x; 
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.6)
+
+    def test_no_match1(self):
+        code = 'cin >> var;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
