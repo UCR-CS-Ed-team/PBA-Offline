@@ -50,44 +50,42 @@ class StyleAnomaly:
 
 
 # Primary anomaly regular expressions
-POINTERS_REGEX = (
-    r'((?:\(+)?(?:int|char|string|void|bool|float|double)(?:\)+)?(?:\s+)?\*{1,2}(?:\s+)?\w+(?:\s+)?\=?.*\;$)'
-)
-INFINITE_LOOP_REGEX = r'((while(?:\s+)?\((?:true|1)\))|(for(?:\s+)?\(;;\)))'
-ATYPICAL_INCLUDE_REGEX = r'(#(?:\s+)?include(?:\s+)?<(?:iomanip|algorithm|utility|limits|stdio)>)'
+POINTERS_REGEX = r'((?:\(+)?(?:int|char|string|void|bool|float|double)(?:\)+)?\s*\*{1,2}\s*\w+\s*\=?.*\;$)'
+INFINITE_LOOP_REGEX = r'((while\s*\((?:true|1)\))|(for\s*\(;;\)))'
+ATYPICAL_INCLUDE_REGEX = r'(#\s*include\s*<(?:iomanip|algorithm|utility|limits|stdio)>)'
 ATYPICAL_KEYWORD_REGEX = r"""
-	((break(?:\s+)?;)
-	|(switch(?:\s+)?\(\w+\)(?:\s+)?{)
-	|(continue(?:\s+)?;)
+	((break\s*;)
+	|(switch\s*\(\w+\)\s*{)
+	|(continue\s*;)
 	|(sizeof\(\w+\))
-	|(case\s+\S+(?:\s+)?:)
-	|(\.erase(?:\s+)?\(.*\)))
+	|(case\s+\S+\s*:)
+	|(\.erase\s*\(.*\)))
 	"""
 BRACE_STYLING_REGEX = r"""
-	((?P<leftbrace>^(?:\s+)?{)
-	|(?P<rightbrace>\S+;(?:\s+)?})
-	|(?P<oneline>(?:if|for)(?:\s+)?\(.+\)(?:\s+)?\S+.*;)
-	|(?P<else1>}(?:\s+)?else)
+	((?P<leftbrace>^\s*{)
+	|(?P<rightbrace>\S+;\s*})
+	|(?P<oneline>(?:if|for)\s*\(.+\)\s*\S+.*;)
+	|(?P<else1>}\s*else)
 	|(?P<else2>else\s\S+.*;))
 	"""
 ARRAY_ACCESSES_REGEX = r'(\w+\[.*\])'
 NAMESPACE_STD_REGEX = r'(std::)'
 ESCAPED_NEWLINE_REGEX = r'(\\n)'
 USER_DEFINED_FUNCTIONS_REGEX = (
-    r'(^(?:\s+)?(?:(?:unsigned|signed|long|short)\s)?(?:int|char|string|void|bool|float|double)\s(?!main)\w+\(.*\))'
+    r'(^\s*(?:(?:unsigned|signed|long|short)\s)?(?:int|char|string|void|bool|float|double)\s(?!main)\w+\(.*\))'
 )
 TERNARY_OPERATOR_REGEX = r'(.+\s\?\s.+\s\:\s.+)'
 COMMAND_LINE_ARGUMENTS_REGEX = r'(main\(\s?int argc,\s?(?:char\s?\*\s?argv\[\])|(?:char\s?\*\*\s?argv))\s?\)'
 NULLS_REGEX = r'(NULL|nullptr|\\0)'
 SCOPE_OPERATOR_REGEX = r'^(?!.*?(string::npos|std::)).*\b(\w+::\w+)\b'
 LINE_SPACING_REGEX = r'(^\S+)'
-MULTIPLE_DECLARATIONS_REGEX = r'((?:int|char|string|void|bool|float|double)\s+\w+[^\"\']+(?:\s+)?,(?:\s+)?\w+.*;)'
-MULTIPLE_CIN_SAME_LINE_REGEX = r'(cin(?:\s+)?>>(?:\s+)?\w+(?:\s+)?>>)'
-AND_OR_REGEX = r'(if(?:\s+)?\([^\"\']+\s+(?:and|or)\s+[^\"\']+\))'
-LIST_INIT_REGEX = r'((?:int|char|string|void|bool|float|double)\s+\w+(?:\s+)?{.*};)'
+MULTIPLE_DECLARATIONS_REGEX = r'((?:int|char|string|void|bool|float|double)\s+\w+[^\"\']+\s*,\s*\w+.*;)'
+MULTIPLE_CIN_SAME_LINE_REGEX = r'(cin\s*>>\s*\w+\s*>>)'
+AND_OR_REGEX = r'(if\s*\([^\"\']+\s+(?:and|or)\s+[^\"\']+\))'
+LIST_INIT_REGEX = r'((?:int|char|string|void|bool|float|double)\s+\w+\s*{.*};)'
 VECTOR_NAME_SPACING_REGEX = r'(vector<.+>\w+)'
 SPACELESS_OPERATOR_REGEX = r"""
-	^(?!\#include|vector<).* # Exclude `#include` and `vector<`
+	^(?!\#include|\s*vector<).* # Exclude `#include` and `vector<`
 	([\w\]\)]+
 	(?:>|>=|<|<=|=|==|!=|<<|>>|\+|-|\+=|-=|\*|/|%|&&|\|\|)
 	[\w\[\(]+
@@ -100,7 +98,7 @@ ACCESS_AND_INCREMENT_REGEX = r"""
 	|(?P<vectors>\w+\.at\((?:\w+\+\+|\w+--|\+\+\w+|--\w+)\)))
 	"""
 AUTO_REGEX = r'(auto\s\w+)'
-SET_PRECISION_REGEX = r'cout(?:\s+)?<<(?:\s+)?setprecision\(.+\)(?:\s+)?<<(?:\s+)?fixed'
+SET_PRECISION_REGEX = r'cout\s*<<\s*setprecision\(.+\)\s*<<\s*fixed'
 RANGED_BASED_LOOP_REGEX = r'(for\s*\(\s*\w+\s+\w+\s+:\s+\w+\s*\))'
 ITERATOR_FUNCTIONS_REGEX = r'(\w+\.(?:begin|end)\(\))'
 MAX_MIN_MACRO_REGEX = r'(INT_MAX|INT_MIN)'
@@ -108,7 +106,7 @@ SWAP_FUNCTION_REGEX = r'(swap\(.*\))'
 CIN_INSIDE_WHILE_REGEX = r'(while\s*\(.*cin\s*>>\s*\w+.*\))'
 
 # Helper regular expressions
-INT_MAIN_REGEX = r'int main(?:\s+)?\(.*\)'
+INT_MAIN_REGEX = r'int main\s*\(.*\)'
 LEFT_BRACE_REGEX = r'({)'
 RIGHT_BRACE_REGEX = r'(})'
 FORWARD_DEC_REGEX = r'(^(?:(?:unsigned|signed|long|short)\s)?(?:int|char|string|void|bool|float|double)\s\w+\(.*\);)'
@@ -121,9 +119,9 @@ style_anomalies = [
     StyleAnomaly('Atypical Includes', ATYPICAL_INCLUDE_REGEX, True, 0.1, -1),
     StyleAnomaly('Atypical Keywords', ATYPICAL_KEYWORD_REGEX, True, 0.3, -1, True),
     StyleAnomaly('Array Accesses', ARRAY_ACCESSES_REGEX, True, 0.9, -1),
-    StyleAnomaly('Namespace Std', NAMESPACE_STD_REGEX, False, 0.1, -1),
+    StyleAnomaly('Namespace Std', NAMESPACE_STD_REGEX, True, 0.1, -1),
     StyleAnomaly('Brace Styling', BRACE_STYLING_REGEX, True, 0.1, -1, True),
-    StyleAnomaly('Escaped Newline', ESCAPED_NEWLINE_REGEX, True, 0.1, -1),
+    StyleAnomaly('Escaped Newline', ESCAPED_NEWLINE_REGEX, False, 0.1, -1),
     StyleAnomaly('User-Defined Functions', USER_DEFINED_FUNCTIONS_REGEX, True, 0.8, -1),
     StyleAnomaly('Ternary Operator', TERNARY_OPERATOR_REGEX, True, 0.2, -1),
     StyleAnomaly('Command-Line Arguments', COMMAND_LINE_ARGUMENTS_REGEX, True, 0.8, -1),
@@ -149,7 +147,8 @@ style_anomalies = [
 ]
 
 
-def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
+# TODO: change Tuple to tuple
+def get_line_spacing_score(lines: list[str], a: StyleAnomaly) -> Tuple[int, float]:
     """Computes number of anomalies and anomaly score for the Line Spacing anomaly.
 
     Line Spacing requires additional logic to determine where main() and user functions are.
@@ -160,7 +159,7 @@ def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     The Line Spacing anomaly is defined inside this function.
 
     Args:
-        code (str): The student's code.
+        lines (str): The student's code, split into lines with splitlines().
 
     Returns:
         Tuple[int, int]: A tuple containing the number of anomalies found and anomaly score for Line Spacing.
@@ -172,7 +171,6 @@ def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     right_brace_count = 0
     check_line_spacing = False  # Don't check for anomaly until we're in a function
     opening_brace = False  # Indicates if `line` is the opening brace for the function on its own line
-    lines = code.splitlines()
 
     for i, line in enumerate(lines):
         # "Line Spacing" should only check lines inside main() and user functions
@@ -219,6 +217,7 @@ def get_line_spacing_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     return num_anomalies_found, round(anomaly_score, SCORE_PRECISION)
 
 
+# TODO: Document this function
 def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     anomaly_score = 0
     num_anomalies_found = 0
@@ -239,6 +238,7 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
     return num_anomalies_found, round(anomaly_score, SCORE_PRECISION)
 
 
+# TODO: Document this function
 def get_total_anomaly_score(code: str) -> Tuple[int, float]:
     anomaly_score = 0
     num_anomalies_found = 0
@@ -251,6 +251,7 @@ def get_total_anomaly_score(code: str) -> Tuple[int, float]:
     return num_anomalies_found, anomaly_score
 
 
+# TODO: Make sure this gives same results as new functions
 def get_anomaly_score(code, auto=0):
     # Below is the format for the anomaly in question
     # [Count_instances, points/instance, anomaly on/off, regex, count of instances, instance cap (-1 for no cap)]
@@ -263,8 +264,8 @@ def get_anomaly_score(code, auto=0):
         'Array Accesses': {0: 1, 1: 0.9, 2: 1, 3: ARRAY_ACCESSES_REGEX, 4: 0, 5: -1},
         'Namespace Std': {0: 1, 1: 0.1, 2: 1, 3: NAMESPACE_STD_REGEX, 4: 0, 5: -1},
         'Brace Styling': {0: 1, 1: 0.1, 2: 1, 3: BRACE_STYLING_REGEX, 4: 0, 5: -1},
-        'Escaped Newline': {0: 1, 1: 0.1, 2: 1, 3: ESCAPED_NEWLINE_REGEX, 4: 0, 5: -1},
-        'User-Defined Functions': {0: 1, 1: 0.8, 2: 0, 3: USER_DEFINED_FUNCTIONS_REGEX, 4: 0, 5: -1},
+        'Escaped Newline': {0: 1, 1: 0.1, 2: 0, 3: ESCAPED_NEWLINE_REGEX, 4: 0, 5: -1},
+        'User-Defined Functions': {0: 1, 1: 0.8, 2: 1, 3: USER_DEFINED_FUNCTIONS_REGEX, 4: 0, 5: -1},
         'Ternary Operator': {0: 1, 1: 0.2, 2: 1, 3: TERNARY_OPERATOR_REGEX, 4: 0, 5: -1},
         'Command-Line Arguments': {0: 1, 1: 0.8, 2: 1, 3: COMMAND_LINE_ARGUMENTS_REGEX, 4: 0, 5: -1},
         'Nulls': {0: 1, 1: 0.4, 2: 1, 3: NULLS_REGEX, 4: 0, 5: -1},
@@ -830,12 +831,13 @@ def get_anomaly_score(code, auto=0):
     return anomalies_found, anomaly_score
 
 
-def anomaly(data, selected_labs, auto=0):  # Function to calculate the anomaly score
+def anomaly(data, selected_labs):  # Function to calculate the anomaly score
     output = {}
     for lab in selected_labs:
         for user_id in data:
             if user_id not in output:
                 output[user_id] = {}
+            # TODO: Replace this with max function
             if lab in data[user_id]:
                 max_score = 0
                 code = data[user_id][lab][-1].code  # Choose a default submission
@@ -843,7 +845,7 @@ def anomaly(data, selected_labs, auto=0):  # Function to calculate the anomaly s
                     if sub.max_score > max_score:
                         max_score = sub.max_score
                         code = sub.code
-                anomalies_found, anomaly_score = get_anomaly_score(code, auto)
+                anomalies_found, anomaly_score = get_total_anomaly_score(code)
                 output[user_id][lab] = [anomalies_found, anomaly_score, code]
     return output
 
