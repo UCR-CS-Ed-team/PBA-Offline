@@ -1122,3 +1122,40 @@ class TestZyBooksSetPrecisionAnomaly:
         code = 'cout << setprecision() << fixed;'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestRangedBasedForLoopAnomaly:
+    a = StyleAnomaly('Ranged-Based For Loop', anomaly.RANGED_BASED_LOOP_REGEX, True, 0.6, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'for (int i : myArray) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.6)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            for (char c : myString) {
+            for (float f : myList) {
+            for(string s : arr){
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (3, 1.8)
+
+    def test_multi_no_match(self):
+        code = """
+        int main() {
+            for (int i = 0; i < 10; i++) {
+            for (i = 5; i >= 0; --i) {
+            for (currC = -10; currC <= 40; currC += 5) {
+            for (i = 0; r = rand(); i < 5; ++i) {
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
