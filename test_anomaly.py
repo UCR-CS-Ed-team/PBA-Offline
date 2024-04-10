@@ -1227,3 +1227,22 @@ class TestMaxMinMacrosAnomaly:
         code = 'int_max'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestSwapFunctionAnomaly:
+    a = StyleAnomaly('Swap Function', anomaly.SWAP_FUNCTION_REGEX, True, 0.6, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'std::swap(a, b);'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.6)
+
+    def test_match2(self):
+        code = 'swap(arr[0], arr[4]);'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.6)
