@@ -701,3 +701,104 @@ class TestMultipleCinSameLineAnomaly:
         code = 'cin >> var;'
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestAndOrAnomaly:
+    a = StyleAnomaly('and & or', anomaly.AND_OR_REGEX, True, 0.1, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'if (x and y) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_match2(self):
+        code = 'if (x or y) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.1)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            if (x && y and z) {
+            if(arr[i]>=min and arr[i]<=max){
+            if(arr[i]>=min || arr[i]<=max and arr[i] == max || arr[i] != max){
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (3, 0.3)
+
+    def test_no_match1(self):
+        code = 'if ( x && y ) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'if (x || y) {'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_multi_no_match(self):
+        code = """
+        int main() {
+            if (string1 == "and" && string2 == "or") {
+            if (string1 == "x or y" && string2 == "x and y") {
+            if (string1 == "x and y" and string2 == "x or y") {
+            if (string1 == "x and y" or string2 == "x or y") {
+            if ("x and y" == string1 || "y or x" == string2) {
+            if (string1 == 'x' and string2 == 'y' and string3 == 'z') {
+            if (x && y && z || x && y && z) {
+            if (varNameIncludesandHere && var2 == true) {
+            if (var1and == true || orvar2 == false) {
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+
+class TestListInitializationAnomaly:
+    a = StyleAnomaly('List Initialization', anomaly.LIST_INIT_REGEX, True, 0.8, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'int numInput {};'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.8)
+
+    def test_match2(self):
+        code = 'bool var {0};'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.8)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            float numTarget{};
+            string var {"test"};
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 1.6)
+
+    def test_no_match1(self):
+        code = 'vector<int> v{ 1, 2, 3 };'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = "char charArray[size]={'a', 'b'};"
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match3(self):
+        code = 'int var = 0;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
