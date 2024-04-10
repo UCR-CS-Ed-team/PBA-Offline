@@ -1038,3 +1038,53 @@ class TestAccessAndIncrementAnomaly:
         """
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestAutoAnomaly:
+    a = StyleAnomaly('Auto', anomaly.AUTO_REGEX, True, 0.3, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'auto A = { 1, 2 };'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_match2(self):
+        code = 'auto C{ 4 };'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            auto myAuto = countRef;
+            auto numVec = myVec.begin();
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.6)
+
+    def test_no_match1(self):
+        code = 'int[] A = {1, 2};'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'double C = 4.0;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_multi_no_match(self):
+        code = """
+        int main() {
+            int varWithAutoInName = countRef;
+            int* autoPtr = myVec.begin();
+            int auto = myVec.begin();
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
