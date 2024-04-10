@@ -1088,3 +1088,37 @@ class TestAutoAnomaly:
         """
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestZyBooksSetPrecisionAnomaly:
+    a = StyleAnomaly('zyBooks Set Precision', anomaly.SET_PRECISION_REGEX, True, 0.2, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'cout << setprecision(x) << fixed;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.2)
+
+    def test_match2(self):
+        code = 'cout << setprecision(2) << fixed;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.2)
+
+    def test_multi_match(self):
+        code = """
+        int main() {
+            cout<<setprecision(12)<<fixed;
+            cout << setprecision(y)<<fixed
+        }
+        """
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (2, 0.4)
+
+    def test_no_match1(self):
+        code = 'cout << setprecision() << fixed;'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
