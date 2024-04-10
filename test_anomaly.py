@@ -1159,3 +1159,32 @@ class TestRangedBasedForLoopAnomaly:
         """
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
+
+
+class TestIteratorFunctionsAnomaly:
+    a = StyleAnomaly('Iterator Functions', anomaly.ITERATOR_FUNCTIONS_REGEX, True, 0.3, -1)
+
+    def test_empty(self):
+        code = ''
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_match1(self):
+        code = 'vect.begin()'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_match2(self):
+        code = 'vect.end()'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (1, 0.3)
+
+    def test_no_match1(self):
+        code = 'vect.at(i)'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
+    def test_no_match2(self):
+        code = 'std::vector<int>::iterator it'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
