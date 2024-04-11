@@ -152,7 +152,6 @@ def get_line_spacing_score(lines: list[str], a: StyleAnomaly) -> tuple[int, floa
     Returns:
         Tuple[int, int]: A tuple containing the number of anomalies found and anomaly score for Line Spacing.
     """
-
     anomaly_score = 0
     num_anomalies_found = 0
     left_brace_count = 0
@@ -215,7 +214,6 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> tuple[int, float]:
     Returns:
         tuple[int, float]: A tuple containing the number of anomalies found and the anomaly score.
     """
-
     anomaly_score = 0
     num_anomalies_found = 0
     a.num_instances = 0
@@ -245,7 +243,6 @@ def get_total_anomaly_score(code: str) -> tuple[int, float]:
     Returns:
         tuple[int, float]: A tuple containing the number of anomalies found and the anomaly score.
     """
-
     anomaly_score = 0
     num_anomalies_found = 0
 
@@ -281,7 +278,6 @@ def anomaly(data: dict, selected_labs: list[float]) -> dict:
                 ...
             }
     """
-
     output = {}
     for lab in selected_labs:
         for user_id in data:

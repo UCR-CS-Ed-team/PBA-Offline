@@ -13,15 +13,7 @@ VAR_NAME_IN_COMP_REGEX = r'(\w+)\s*==\s*(?:[\"\'][^\"\']*[\"\']|\d+)'
 
 
 def remove_quotes(s: str) -> str:
-    """Removes the surrounding quotes from a string if present.
-
-    Args:
-        s (str): The input string.
-
-    Returns:
-        str: The string with the surrounding quotes removed, if present.
-    """
-
+    """Removes the surrounding quotes from a string if present."""
     single_quotes = s.startswith("'") and s.endswith("'")
     double_quotes = s.startswith('"') and s.endswith('"')
     if single_quotes or double_quotes:
@@ -57,7 +49,6 @@ def get_literals_in_if_statement(line: str) -> list:
         list: A list of literal values found in the if statement.
               If the line doesn't have an `if` statement, returns an empty list.
     """
-
     literals_in_if = []
     if_statement_match = re.search(IF_STATEMENT_REGEX, line)
     if if_statement_match:
@@ -75,7 +66,6 @@ def get_lines_in_if_scope(code: list[str], start_index: int) -> list[str]:
         code (list[str]): A code submission split by newlines into a list of strings.
         start_index (int): The line index of the target `if` statement in the code submission.
     """
-
     if start_index < 0 or 'if' not in code[start_index]:
         return []
 
@@ -116,7 +106,6 @@ def get_cout_output_with_var(if_lines: list[str], var_assignments: list[tuple[st
     Returns:
         str: The output of the 'cout' statement.
     """
-
     for if_line in if_lines:
         cout_index = if_line.find('cout')
         if cout_index > -1:  # If line is a 'cout' statement
@@ -139,11 +128,9 @@ def get_cout_output_with_var(if_lines: list[str], var_assignments: list[tuple[st
 
 
 def has_if_with_literal_and_cout(code: str) -> int:
+    """Returns 1 if code has an if statement comparing to literals, followed by cout.
+    Used for case 3: no testcases or solution.
     """
-    Returns 1 if code has an if statement comparing to literals, followed by cout.
-    Used for case 3: no testcases or solution
-    """
-
     lines = code.splitlines()
     lines = [line for line in lines if line.strip() != '']  # Remove empty lines
 
@@ -172,7 +159,6 @@ def is_testcase_hardcoded(code: str, testcase: tuple) -> int:
     Returns:
         int: 1 indicates the testcase output was hardcoded, else 0
     """
-
     output = testcase[1]
 
     for line in code.splitlines():
@@ -204,7 +190,6 @@ def is_testcase_hardcoded_in_if(code: str, testcase: tuple) -> int:
     Returns:
         int: 1 indicates the testcase is hardcoded, 0 indicates no hardcoding
     """
-
     input = testcase[0]
     output = testcase[1]
 
@@ -249,7 +234,6 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
     Returns:
         int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding
     """
-
     is_hardcoded = False
     testcases_in_soln = set()
 
@@ -273,7 +257,7 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
 
 
 def hardcoding_analysis_1(data, selected_labs, testcases, solution_code):
-    """Case 1: testcases and solution is available"""
+    """Case 1: testcases and solution is available."""
     output = {}
     for lab in selected_labs:
         for user_id in data:
@@ -287,7 +271,7 @@ def hardcoding_analysis_1(data, selected_labs, testcases, solution_code):
 
 
 def hardcoding_analysis_2(data, selected_labs, testcases):
-    """Case 2: testcases are available, but no solution"""
+    """Case 2: testcases are available, but no solution."""
     output = {}
     testcase_use_counts = {testcase: 0 for testcase in testcases}
     testcase_use_threshold = 0.6
@@ -319,7 +303,7 @@ def hardcoding_analysis_2(data, selected_labs, testcases):
 
 
 def hardcoding_analysis_3(data, selected_labs):
-    """Case 3: no testcases or solution"""
+    """Case 3: no testcases or solution."""
     output = {}
     if_literal_use_count = 0
     if_literal_threshold = 0.6
