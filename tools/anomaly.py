@@ -7,6 +7,7 @@ import pandas as pd
 from tools.utilities import (
     create_data_structure,
     download_code,
+    get_code_with_max_score,
     get_selected_labs,
     write_output_to_csv,
 )
@@ -294,14 +295,8 @@ def anomaly(data: dict, selected_labs: list[float]) -> dict:
         for user_id in data:
             if user_id not in output:
                 output[user_id] = {}
-            # TODO: Replace this with max function
             if lab in data[user_id]:
-                max_score = 0
-                code = data[user_id][lab][-1].code  # Choose a default submission
-                for sub in data[user_id][lab]:
-                    if sub.max_score > max_score:
-                        max_score = sub.max_score
-                        code = sub.code
+                code = get_code_with_max_score(user_id, lab, data)
                 anomalies_found, anomaly_score = get_total_anomaly_score(code)
                 output[user_id][lab] = [anomalies_found, anomaly_score, code]
     return output
