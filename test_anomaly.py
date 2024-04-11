@@ -908,6 +908,11 @@ class TestSpacelessOperatorAnomaly:
         result = anomaly.get_single_anomaly_score(code, self.a)
         assert result == (0, 0)
 
+    def test_no_match3(self):
+        code = 'void smallestInt (const int& r, const vector<int>& v)'
+        result = anomaly.get_single_anomaly_score(code, self.a)
+        assert result == (0, 0)
+
     def test_multi_no_match(self):
         code = """
         int main() {
