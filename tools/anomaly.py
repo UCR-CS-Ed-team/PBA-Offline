@@ -1,7 +1,6 @@
 import os
 import re
 from tkinter import filedialog
-from typing import Tuple
 
 import pandas as pd
 
@@ -147,8 +146,7 @@ style_anomalies = [
 ]
 
 
-# TODO: change Tuple to tuple
-def get_line_spacing_score(lines: list[str], a: StyleAnomaly) -> Tuple[int, float]:
+def get_line_spacing_score(lines: list[str], a: StyleAnomaly) -> tuple[int, float]:
     """Computes number of anomalies and anomaly score for the Line Spacing anomaly.
 
     Line Spacing requires additional logic to determine where main() and user functions are.
@@ -216,7 +214,7 @@ def get_line_spacing_score(lines: list[str], a: StyleAnomaly) -> Tuple[int, floa
 
 
 # TODO: Document this function
-def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
+def get_single_anomaly_score(code: str, a: StyleAnomaly) -> tuple[int, float]:
     anomaly_score = 0
     num_anomalies_found = 0
     lines = code.splitlines()
@@ -237,7 +235,7 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> Tuple[int, float]:
 
 
 # TODO: Document this function
-def get_total_anomaly_score(code: str) -> Tuple[int, float]:
+def get_total_anomaly_score(code: str) -> tuple[int, float]:
     anomaly_score = 0
     num_anomalies_found = 0
 
