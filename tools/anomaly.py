@@ -85,7 +85,7 @@ AND_OR_REGEX = r'(if\s*\([^\"\']+\s+(?:and|or)\s+[^\"\']+\))'
 LIST_INIT_REGEX = r'((?:int|char|string|void|bool|float|double)\s+\w+\s*{.*};)'
 VECTOR_NAME_SPACING_REGEX = r'(vector<.+>\w+)'
 SPACELESS_OPERATOR_REGEX = r"""
-	^(?!\#include|\s*vector<).* # Exclude `#include` and `vector<`
+	^(?!.*(?:\#include|vector<)).* # Exclude lines with `#include` and `vector<`
 	([\w\]\)]+
 	(?:>|>=|<|<=|=|==|!=|<<|>>|\+|-|\+=|-=|\*|/|%|&&|\|\|)
 	[\w\[\(]+
@@ -155,8 +155,6 @@ def get_line_spacing_score(lines: list[str], a: StyleAnomaly) -> Tuple[int, floa
     Because of this, we use a separate function just for this anomaly.
     We only count non-indented lines inside of main() or user-defined functions.
     If the student wrote the function's opening brace on its own line, we exclude that line.
-
-    The Line Spacing anomaly is defined inside this function.
 
     Args:
         lines (str): The student's code, split into lines with splitlines().
