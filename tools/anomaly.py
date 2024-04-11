@@ -213,8 +213,17 @@ def get_line_spacing_score(lines: list[str], a: StyleAnomaly) -> tuple[int, floa
     return num_anomalies_found, round(anomaly_score, SCORE_PRECISION)
 
 
-# TODO: Document this function
 def get_single_anomaly_score(code: str, a: StyleAnomaly) -> tuple[int, float]:
+    """Finds number of anomalies and anomaly score for a given code snippet and style anomaly.
+
+    Args:
+        code (str): The student's code as a single string.
+        a (StyleAnomaly): The style anomaly to check for in the code.
+
+    Returns:
+        tuple[int, float]: A tuple containing the number of anomalies found and the anomaly score.
+    """
+
     anomaly_score = 0
     num_anomalies_found = 0
     lines = code.splitlines()
@@ -234,8 +243,16 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> tuple[int, float]:
     return num_anomalies_found, round(anomaly_score, SCORE_PRECISION)
 
 
-# TODO: Document this function
 def get_total_anomaly_score(code: str) -> tuple[int, float]:
+    """Finds total # of style anomalies and anomaly score for all anomalies for a code snippet.
+
+    Args:
+        code (str): The student's code as a single string.
+
+    Returns:
+        tuple[int, float]: A tuple containing the number of anomalies found and the anomaly score.
+    """
+
     anomaly_score = 0
     num_anomalies_found = 0
 
@@ -247,7 +264,31 @@ def get_total_anomaly_score(code: str) -> tuple[int, float]:
     return num_anomalies_found, anomaly_score
 
 
-def anomaly(data, selected_labs):  # Function to calculate the anomaly score
+def anomaly(data: dict, selected_labs: list[float]) -> dict:
+    """Finds style anomalies in the selected labs for each student.
+
+    Args:
+        data (dict): A dictionary of all lab submissions for each student.
+        selected_labs (list[float]): A list of lab IDs to look for style anomalies in.
+
+    Returns:
+        dict: A dictionary containing the anomalies found for each user and lab.
+            The structure of the dictionary is as follows:
+            {
+                user_id_1: {
+                    lab_id_1: [anomalies_found, anomaly_score, code],
+                    lab_id_2: [anomalies_found, anomaly_score, code],
+                    ...
+                },
+                user_id_2: {
+                    lab_id_1: [anomalies_found, anomaly_score, code],
+                    lab_id_2: [anomalies_found, anomaly_score, code],
+                    ...
+                },
+                ...
+            }
+    """
+
     output = {}
     for lab in selected_labs:
         for user_id in data:
