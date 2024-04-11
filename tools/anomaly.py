@@ -227,6 +227,7 @@ def get_single_anomaly_score(code: str, a: StyleAnomaly) -> tuple[int, float]:
 
     anomaly_score = 0
     num_anomalies_found = 0
+    a.num_instances = 0
     lines = code.splitlines()
 
     if a.name == 'Line Spacing':  # Line Spacing anomaly requires additional logic
