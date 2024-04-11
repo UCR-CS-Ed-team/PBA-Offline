@@ -661,7 +661,7 @@ def get_anomaly_score(code, auto=0):
                     anomalies_found += 1
 
         if style_anomalies['Spaceless Operator'][2] != 0:  # Check if the anomaly is turned on
-            match = re.search(style_anomalies['Spaceless Operator'][3], line)
+            match = re.search(style_anomalies['Spaceless Operator'][3], line, flags=re.X)
             if match and '#include' not in line and 'vector<' not in match.group():
                 if style_anomalies['Spaceless Operator'][0] == 1 or (
                     style_anomalies['Spaceless Operator'][0] == 0 and style_anomalies['Spaceless Operator'][4] == 0
