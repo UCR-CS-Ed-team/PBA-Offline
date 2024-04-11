@@ -1,12 +1,3 @@
-import pandas as pd
-
-from tools.utilities import (
-    create_data_structure,
-    download_code,
-    get_selected_labs,
-    write_output_to_csv,
-)
-
 use_standalone = True
 
 
@@ -55,9 +46,6 @@ def newtool(data, selected_labs):
     return newtool_output
 
 
-##############################
-#           Control          #
-##############################
 """
 Submission object structure (represents each column in the log file)
     Submission = (
@@ -128,37 +116,3 @@ summary_output structure to be sent to write_output_to_csv function
 
 
 """
-if use_standalone:
-    logfile_path = input('Enter path to the file including file name: ')
-    # logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile1.csv'
-    logfile = pd.read_csv(logfile_path)
-    logfile = logfile[logfile.role == 'Student']
-    selected_labs = get_selected_labs(logfile)
-    logfile = download_code(logfile)
-    data = create_data_structure(logfile)
-
-    # This will be sent to the write function
-    # (student roster contains keys are student_id, and keys will be columns in the csv)
-    student_roster = {}
-    newtool_output = newtool(data, selected_labs)
-    for student_id in newtool_output:
-        for lab in newtool_output[student_id]:
-            num_runs = newtool_output[student_id][lab][0]
-            num_develops = newtool_output[student_id][lab][1]
-            num_submits = newtool_output[student_id][lab][2]
-            if student_id in student_roster:
-                student_roster[student_id]['Lab ' + str(lab) + ' Num of Runs'] = num_runs
-                student_roster[student_id]['Lab ' + str(lab) + ' Num of Develops'] = num_develops
-                student_roster[student_id]['Lab ' + str(lab) + ' Num of Submits'] = num_submits
-            else:
-                student_roster[student_id] = {
-                    'User ID': student_id,
-                    'Last Name': data[student_id][lab][0].last_name[0],
-                    'First Name': data[student_id][lab][0].first_name[0],
-                    'Email': data[student_id][lab][0].email[0],
-                    'Role': 'Student',
-                    'Lab ' + str(lab) + ' Num of Runs': num_runs,
-                    'Lab ' + str(lab) + ' Num of Develops': num_develops,
-                    'Lab ' + str(lab) + ' Num of Submits': num_submits,
-                }
-    write_output_to_csv(student_roster)

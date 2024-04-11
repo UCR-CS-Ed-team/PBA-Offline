@@ -5,14 +5,8 @@ import pandas as pd
 
 from tools.submission import Submission
 from tools.utilities import (
-    create_data_structure,
-    download_code,
-    get_selected_labs,
     get_valid_datetime,
-    write_output_to_csv,
 )
-
-use_standalone = False
 
 
 def run(data):
@@ -511,43 +505,3 @@ def adjust_score(score):
         )
         data[row.user_id][row.content_section].append(sub)
     return data
-
-
-if use_standalone:
-    logfile_path = '/Users/abhinavreddy/Downloads/standalone_incdev_analysis/input/logfile.csv'
-    # filename = os.path.basename(logfile_path)
-    f = open(logfile_path, 'r')
-    logfile = pd.read_csv(logfile_path)
-    logfile = logfile[logfile.role == 'Student']
-    selected_labs = get_selected_labs(logfile)
-    logfile = download_code(logfile)
-    data = create_data_structure(logfile)
-    final_roster = {}
-    # Generate nested dict of IncDev results
-    incdev_output = run(data)
-    for user_id in incdev_output:
-        for lab_id in incdev_output[user_id]:
-            lid = str(lab_id)
-            score = incdev_output[user_id][lab_id]['incdev_score']
-            score_trail = incdev_output[user_id][lab_id]['incdev_score_trail']
-            loc_trail = incdev_output[user_id][lab_id]['loc_trail']
-            time_trail = incdev_output[user_id][lab_id]['time_trail']
-            if user_id in final_roster:
-                final_roster[user_id][lid + ' incdev_score'] = score
-                final_roster[user_id][lid + ' incdev_score_trail'] = score_trail
-                final_roster[user_id][lid + ' loc_trail'] = loc_trail
-                final_roster[user_id][lid + ' time_trail'] = time_trail
-            else:
-                final_roster[user_id] = {
-                    'User ID': user_id,
-                    'Last Name': data[user_id][lab_id][0].last_name[0],
-                    'First Name': data[user_id][lab_id][0].first_name[0],
-                    'Email': data[user_id][lab_id][0].email[0],
-                    'Role': 'Student',
-                    lid + ' incdev_score': score,
-                    lid + ' incdev_score_trail': score_trail,
-                    lid + ' loc_trail': loc_trail,
-                    lid + ' time_trail': time_trail,
-                }
-    write_output_to_csv(final_roster)
-    f.close()

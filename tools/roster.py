@@ -1,13 +1,7 @@
 import math
-import os
 from datetime import timedelta
-from tkinter import filedialog
 
-import pandas as pd
-
-from tools.utilities import get_selected_labs, get_valid_datetime, write_output_to_csv
-
-use_standalone = False
+from tools.utilities import get_valid_datetime
 
 
 def time_to_minutes_seconds(time_list):
@@ -225,18 +219,3 @@ def roster(dataframe, selected_labs):
         summary_roster[user_id]['Points per minute'] = round(avg_ppm, 2)
 
     return summary_roster
-
-
-##############################
-#           Control          #
-##############################
-if use_standalone:
-    file_path = filedialog.askopenfilename()
-    folder_path = os.path.split(file_path)[0]
-    file_name = os.path.basename(file_path).split('/')[-1]
-    logfile = pd.read_csv(file_path)
-    logfile = logfile[logfile.role == 'Student']
-
-    selected_labs = get_selected_labs(logfile)
-    final_roster = roster(logfile, selected_labs)
-    write_output_to_csv(final_roster)
