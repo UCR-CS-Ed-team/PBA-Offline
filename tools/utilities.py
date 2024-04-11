@@ -24,6 +24,29 @@ class Not200Error(Exception):
     pass
 
 
+def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
+    """Returns the first highest-scoring code submission for a student for a lab.
+
+    The "first" highest-scoring submission means the oldest submission with the highest score.
+
+    Args:
+        user_id (int): Find the highest-scoring submission for the student with this ID.
+        lab (float): Find the highest-scoring submission for this lab, e.g. lab 3.12.
+        submissions (dict): All of the student's submissions for this lab.
+
+    Returns:
+        code (str): The code for the first highest-scoring submission.
+    """
+
+    max_score = 0
+    code = submissions[user_id][lab][-1].code  # Choose a default submission
+    for sub in submissions[user_id][lab]:
+        if sub.max_score > max_score:
+            max_score = sub.max_score
+            code = sub.code
+    return code
+
+
 def standardize_columns(logfile: DataFrame) -> DataFrame:
     """
     Standardizes the column names in a logfile (Pandas DataFrame).

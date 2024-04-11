@@ -75,7 +75,7 @@ if __name__ == '__main__':
             # Anomalies for selected labs
             elif user_input == 3:
                 output_file_name = 'anomalies.csv'
-                anomaly_detection_output = anomaly(submissions, selected_labs, 0)
+                anomaly_detection_output = anomaly(submissions, selected_labs)
                 for user_id in anomaly_detection_output:
                     for lab in anomaly_detection_output[user_id]:
                         anomalies_found = anomaly_detection_output[user_id][lab][0]
