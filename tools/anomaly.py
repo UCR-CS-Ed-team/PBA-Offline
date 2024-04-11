@@ -1,18 +1,9 @@
-import os
 import re
-from tkinter import filedialog
-
-import pandas as pd
 
 from tools.utilities import (
-    create_data_structure,
-    download_code,
     get_code_with_max_score,
-    get_selected_labs,
-    write_output_to_csv,
 )
 
-use_standalone = False
 SCORE_PRECISION = 2
 
 
@@ -301,42 +292,3 @@ def anomaly(data: dict, selected_labs: list[float]) -> dict:
                 anomalies_found, anomaly_score = get_total_anomaly_score(code)
                 output[user_id][lab] = [anomalies_found, anomaly_score, code]
     return output
-
-
-##############################
-#           Control          #
-##############################
-if use_standalone:
-    file_path = filedialog.askopenfilename()
-    folder_path = os.path.split(file_path)[0]
-    file_name = os.path.basename(file_path).split('/')[-1]
-    logfile = pd.read_csv(file_path)
-    logfile = logfile[logfile.role == 'Student']
-
-    selected_labs = get_selected_labs(logfile)
-    print('Processing ' + file_name)
-    logfile = download_code(logfile)
-    data = create_data_structure(logfile)
-
-    final_roster = {}
-    anomaly_detection_output = anomaly(data, selected_labs)
-    for user_id in anomaly_detection_output:
-        for lab in anomaly_detection_output[user_id]:
-            anomalies_found = anomaly_detection_output[user_id][lab][0]
-            get_total_anomaly_score = anomaly_detection_output[user_id][lab][1]
-            if user_id in final_roster:
-                final_roster[user_id]['Lab ' + str(lab) + ' anomalies found'] = anomalies_found
-                final_roster[user_id]['Lab ' + str(lab) + ' anomaly score'] = get_total_anomaly_score
-                final_roster[user_id]['Lab ' + str(lab) + ' student code'] = anomaly_detection_output[user_id][lab][2]
-            else:
-                final_roster[user_id] = {
-                    'User ID': user_id,
-                    'Last Name': data[user_id][lab][0].last_name[0],
-                    'First Name': data[user_id][lab][0].first_name[0],
-                    'Email': data[user_id][lab][0].email[0],
-                    'Role': 'Student',
-                    'Lab ' + str(lab) + ' anomalies found': anomalies_found,
-                    'Lab ' + str(lab) + ' anomaly score': get_total_anomaly_score,
-                    'Lab ' + str(lab) + ' student code': anomaly_detection_output[user_id][lab][2],
-                }
-    write_output_to_csv(final_roster)
