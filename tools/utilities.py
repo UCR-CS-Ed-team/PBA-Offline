@@ -24,6 +24,28 @@ class Not200Error(Exception):
     pass
 
 
+def setup_logger(name: str, log_level=logging.DEBUG, log_format='%(name)s : %(message)s') -> Logger:
+    """Set up a logger with a given name, for debugging purposes.
+
+    This can be helpful for outputting messages during debugging
+    as an alternative to simple print statements.
+
+    Args:
+        name (str): The name of the logger.
+        log_level (int, optional): The log level for the logger. Defaults to logging.DEBUG.
+        log_format (str, optional): The log format for the logger. Defaults to '%(name)s : %(message)s'.
+
+    Returns:
+        Logger: The configured logger object.
+    """
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(log_format))
+    logger = logging.getLogger(name)
+    logger.setLevel(log_level)
+    logger.addHandler(handler)
+    return logger
+
+
 def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
     """Returns the first highest-scoring code submission for a student for a lab.
 
@@ -35,9 +57,8 @@ def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
         submissions (dict): All of the student's submissions for this lab.
 
     Returns:
-        code (str): The code for the first highest-scoring submission.
+        str: The code for the first highest-scoring submission.
     """
-
     max_score = 0
     code = submissions[user_id][lab][-1].code  # Choose a default submission
     for sub in submissions[user_id][lab]:
@@ -48,13 +69,18 @@ def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
 
 
 def standardize_columns(logfile: DataFrame) -> DataFrame:
-    """
-    Standardizes the column names in a logfile (Pandas DataFrame).
-    Returns the standardized DataFrame, edited in-place.
+    """Standardizes the column names in a zyBooks logfile (Pandas DataFrame).
 
+    Changes the following column names:
     - date_submitted(UTC) etc. -> date_submitted
     - submission -> is_submission
     - content_resource_id -> lab_id
+
+    Args:
+        logfile (DataFrame): The log of all student submissions.
+
+    Returns:
+        DataFrame: The DataFrame for the logfile, edited in-place.
     """
     for column in logfile.columns:
         if 'date_submitted' in column:
@@ -66,22 +92,19 @@ def standardize_columns(logfile: DataFrame) -> DataFrame:
     return logfile
 
 
-def setup_logger(name: str, log_level=logging.DEBUG, log_format='%(name)s : %(message)s') -> Logger:
-    """Set up a logger with a given name."""
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter(log_format))
-    logger = logging.getLogger(name)
-    logger.setLevel(log_level)
-    logger.addHandler(handler)
-    return logger
-
-
 def get_valid_datetime(timestamp: str) -> datetime:
-    """
-    Returns a datetime object for a submission timestamp.
+    """Returns a datetime object for a submission timestamp.
 
-    dateutil.parser handles many common datetime formats.
-    A ParserError is raised if the datetime cannot be parsed.
+    Uses the dateutil.parser module to handle many common datetime formats.
+
+    Args:
+        timestamp (str): A timestamp, e.g. 'YYYY-MM-DD HH:MM:SS'.
+
+    Returns:
+        datetime: A datetime object representing the given timestamp.
+
+    Raises:
+        ParserError: If the datetime format cannot be recognized.
     """
     try:
         return parser.parse(timestamp)
@@ -90,12 +113,18 @@ def get_valid_datetime(timestamp: str) -> datetime:
 
 
 def download_solution(logfile: DataFrame) -> str | None:
-    """Return solution code in a logfile, if present"""
+    """Return the solution code from a logfile, if present.
+
+    Args:
+        logfile (DataFrame): The logfile containing submissions.
+
+    Returns:
+        str | None: The solution code, or None if not found.
+    """
     for row in logfile.itertuples():
         if row.user_id == -1:
             solution = row
             break
-
     if solution and not pd.isnull(solution.zip_location):
         solution_code = download_code_helper(solution.zip_location)[1]
         return solution_code
@@ -103,10 +132,18 @@ def download_solution(logfile: DataFrame) -> str | None:
 
 
 def download_code_helper(url: str) -> tuple[str, str]:
+    """Downloads student code from a given URL and returns the code with the URL.
+
+    Args:
+        url (str): The URL from which to download the code.
+
+    Returns:
+        tuple[str, str]: A tuple containing the URL and the downloaded code.
+
+    Raises:
+        Not200Error: If the response status code is not 200 (no data received).
+        ConnectionError: If the maximum number of retries is reached and the code cannot be retrieved.
     """
-    Actual code which downloads the students code run using requests library
-    """
-    # Define our retry strategy for all HTTP requests
     retry_strategy = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
     adapter = requests.adapters.HTTPAdapter(max_retries=retry_strategy)
     session = requests.Session()
@@ -127,9 +164,9 @@ def download_code_helper(url: str) -> tuple[str, str]:
                 file.write(result)
             return (url, result)
         except Not200Error:
-            return (url, 'Successfully received a response, but not data was received')
+            return (url, 'Retrieved a response, but no data was received.')
         except ConnectionError:
-            return (url, 'Max retries met, cannot retrieve student code submission')
+            return (url, 'Max number of retries met while retrieving student code.')
     else:
         with open(path, 'r', errors='replace') as file:
             result = file.read()
@@ -137,11 +174,17 @@ def download_code_helper(url: str) -> tuple[str, str]:
 
 
 def download_code(logfile: DataFrame) -> DataFrame:
-    """
-    Iterates through the zybooks logfile dataframe, appends a new column "student_code" to the dataframe and returns it
+    """Downloads the code for each submission and appends a new column to a logfile for the code.
 
-    Note: This is the fastest way to download code submissions of all students at this time.
-    We tried AsyncIO but it turned out to be slower than multithreading
+    Args:
+        logfile (DataFrame): The log of all student submissions.
+
+    Returns:
+        DataFrame: The updated logfile with a new column for the downloaded code.
+
+    Note:
+        This is the fastest way to download code submissions that we found.
+        We tried AsyncIO but it turned out to be slower than multithreading.
     """
     urls = logfile.zip_location.to_list()
     threads = []
@@ -160,22 +203,27 @@ def download_code(logfile: DataFrame) -> DataFrame:
 
 # TODO: validate input, what if input is non-integer?
 def get_selected_labs(logfile: DataFrame) -> list[str]:
+    """Gets a list of labs specified by user input.
+
+    Args:
+        logfile (DataFrame): The log of all student submissions.
+
+    Returns:
+        list[str]: A list of selected lab IDs
     """
-    Function to get selected labs from the user entered input
-    """
-    lab_ids = logfile.content_section.unique()
-    # Select the labs you want a roster for
-    print('Select the indexes you want a roster for separated by a space: (Ex: 1 or 1 2 3 or 2 3)')
-    labs_list = []
     i = 0
-    print(i, '  select all labs')
+    labs_list = []
+    lab_ids = logfile.content_section.unique()
+    print('Select the labs to evaluate, separated by a space: (Ex: 1 or 1 2 3 or 2 3)')
+    print(f'{i})  Select all labs')
     i += 1
     for lab_id in lab_ids:
-        print(i, ' ', lab_id, logfile.query('content_section ==' + str(lab_id))['caption'].iloc[0])
+        lab_caption = logfile.query('content_section ==' + str(lab_id))['caption'].iloc[0]
+        print(f'{i})  Lab {lab_id}: {lab_caption}')
         labs_list.append(lab_id)
         i += 1
-    selected_options = input()
     selected_labs = []
+    selected_options = input()
     if selected_options.split()[0] == '0':
         for lab in labs_list:
             selected_labs.append(lab)
@@ -186,16 +234,21 @@ def get_selected_labs(logfile: DataFrame) -> list[str]:
     return selected_labs
 
 
-def write_output_to_csv(final_roster, file_name='roster.csv'):
+def write_output_to_csv(final_roster: dict, file_name: str = 'roster.csv') -> None:
+    """Saves the final roster (result) dictionary as a CSV file.
+
+    Args:
+        final_roster (dict): A dictionary containing the final roster data.
+        file_name (str): The name of the output CSV file. Default is 'roster.csv'.
+
+    Returns: None
+
+    Raises:
+        IOError: If there is an error while writing the CSV file.
     """
-    This function writes our dataframe into a csv output file
-    """
-    # # Writing the output to the csv file
-    # now = str(datetime.now())
     csv_columns = []
     for id in final_roster:
         for column in final_roster[id]:
-            # print(summary_roster[id])
             if column not in csv_columns:
                 csv_columns.append(column)
     try:
@@ -211,19 +264,26 @@ def write_output_to_csv(final_roster, file_name='roster.csv'):
 
 def create_data_structure(logfile: DataFrame) -> dict:
     """
-    Creates a data structure which stores all submission objects of each student
+    Returns a data structure which stores all Submission objects for each student.
 
-    data = {
-        user_id_1: {
-            lab_id_1 : [submission, submission, submission],
-            lab_id_2 : [submission, submission, submission]
+    Args:
+        logfile (DataFrame): The log of all student submissions.
+
+    Returns:
+        dict: A data structure that stores all Submission objects for each student.
+
+    Example:
+        data = {
+            user_id_1: {
+                lab_id_1 : [submission, submission, submission],
+                lab_id_2 : [submission, submission, submission]
+            }
+            user_id_2: {
+                lab_id_1 : [submission, submission, submission],
+                lab_id_2 : [submission, submission, submission]
+            }
+            ...
         }
-        user_id_2: {
-            lab_id_1 : [submission, submission, submission],
-            lab_id_2 : [submission, submission, submission]
-        }
-    ...
-    }
     """
     data = {}
     for row in logfile.itertuples():
@@ -254,8 +314,16 @@ def create_data_structure(logfile: DataFrame) -> dict:
 
 # TODO: verify this works correctly for hardcoding
 def get_testcases(logfile: DataFrame) -> set[tuple]:
-    # Pick first student submission in logfile
+    """Returns a set of test cases from a student submission logfile.
+
+    Args:
+        logfile (DataFrame): The student submission logfile.
+
+    Returns:
+        set[tuple]: A set of tuples, each representing the input/output of a test case.
+    """
     testcases = set()
+    # Pick first student submission in logfile
     submissions = logfile[logfile['is_submission'] == 1]
     for row in submissions.itertuples():
         if not pd.isnull(row.result):  # Check that 'results' column isn't empty
