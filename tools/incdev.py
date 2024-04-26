@@ -12,7 +12,7 @@ def run(data: dict) -> dict:
     """Returns a dictionary of IncDev scores and trails for each student in a logfile.
 
     Args:
-        data (Dict): The log of all student submissions.
+        data (dict): The log of all student submissions.
 
     Returns:
         dict: IncDev scores and trails for every student.
