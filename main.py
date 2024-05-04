@@ -206,7 +206,7 @@ if __name__ == '__main__':
                 output_file_name = 'hardcoding.csv'
 
                 # Tuple of testcases: (output, input)
-                testcases = get_testcases(logfile_with_code)
+                testcases = get_testcases(logfile_with_code, selected_labs)
 
                 try:
                     if testcases and solution_code:

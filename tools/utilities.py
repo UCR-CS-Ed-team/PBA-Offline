@@ -313,20 +313,38 @@ def create_data_structure(logfile: DataFrame) -> dict:
 
 
 # TODO: verify this works correctly for hardcoding
-def get_testcases(logfile: DataFrame) -> set[tuple]:
+def get_testcases(logfile: DataFrame, selected_labs: list[float]) -> dict[float, set[tuple]]:
     """Returns a set of test cases from a student submission logfile.
 
     Args:
         logfile (DataFrame): The student submission logfile.
+        selected_labs (list[float]): A list of lab IDs to extract testcases for.
 
     Returns:
-        set[tuple]: A set of tuples, each representing the input/output of a test case.
+        dict[float, set[tuple]]: A dictionary of a set of tuples. Each key is a lab ID, and each tuple is the 
+            (input, output) of a testcase for that lab ID. Tuple is [str, str].
+
+    Example:
+        testcases_per_lab = {
+            lab_id_1 : {
+                (input1, output1), 
+                (input2, output2)
+            }
+            lab_id_2 : {
+                (input1, output1), 
+                (input2, output2)
+            }
+        }
     """
-    testcases = set()
-    # Pick first student submission in logfile
+    testcases_per_lab = dict()
     submissions = logfile[logfile['is_submission'] == 1]
-    for row in submissions.itertuples():
-        if not pd.isnull(row.result):  # Check that 'results' column isn't empty
+
+    for lab_id in selected_labs:
+        testcases = set()
+        lab_submissions = submissions[submissions['content_section'] == lab_id]
+        for row in lab_submissions.itertuples():  # Pick first student submission in logfile
+            if pd.isnull(row.result):  # Check that 'results' column isn't empty
+                continue
             try:
                 result = json.loads(row.result)
             except json.JSONDecodeError:  # If `results` is malformed, try next submission
@@ -338,5 +356,6 @@ def get_testcases(logfile: DataFrame) -> set[tuple]:
                         input = test['options']['input'].strip()
                         output = test['options']['output'].strip()
                         testcases.add((input, output))
+            testcases_per_lab[lab_id] = testcases
             break
-    return testcases
+    return testcases_per_lab
