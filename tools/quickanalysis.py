@@ -6,8 +6,15 @@ import pandas as pd
 from tools.utilities import get_valid_datetime
 
 
-def write(summary):
-    # Writing to the output csv
+def write(summary: dict) -> None:
+    """Write the quick analysis summary dict to a CSV file.
+
+    Args:
+        summary (dict): A dictionary containing a quick analysis summary.
+
+    Returns:
+        None
+    """
     try:
         csv_file = 'output/quickanalysis.csv'
         csv_columns = [
@@ -25,24 +32,21 @@ def write(summary):
             writer = csv.DictWriter(f1, fieldnames=csv_columns)
             writer.writeheader()
             for lab_id in summary.keys():
-                # print(summary[lab_id])
                 writer.writerow(summary[lab_id])
-                # for value in summary[lab_id].keys():
-                #     print(summary[lab_id][value])
     except IOError:
         print('IO Error')
 
 
-def quick_analysis(dataframe):
-    """
-    Input:
-    ------
-        Accepts the logfile dataframe as an input
+def quick_analysis(dataframe: dict) -> None:
+    """Performs a quick analysis for every student and writes the result to a CSV.
 
-    Output:
-    -------
-        Returns a structure containing all the averages
+    Args:
+        dataframe (dict): The log of all student submissions.
 
+    Returns:
+        None
+
+    Example of quick analysis summary:
         summary = {
             'section': 1.2,
             'name': 'LAB: Input: Mad Lib',
@@ -54,7 +58,6 @@ def quick_analysis(dataframe):
             'num_of_submits': 2,
         }
     """
-
     df = dataframe
     summary = {}
     unique_lab_ids = set()
@@ -104,7 +107,6 @@ def quick_analysis(dataframe):
         avg_score = int(round(total_score / num_of_students) / 10 * 100)
         avg_num_of_submits = round(num_of_submits / len(unique_user_id))
         num_of_develops = num_of_runs - avg_num_of_submits
-        # print(name, num_of_students, num_of_runs, avg_score, avg_num_of_submits)
         summary[lab_id] = {
             'section': section,
             'name': name,

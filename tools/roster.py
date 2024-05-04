@@ -1,11 +1,21 @@
 import math
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from tools.utilities import get_valid_datetime
 
 
-def time_to_minutes_seconds(time_list):
-    # Converts time to minutes and seconds (ex: 1m 30s) ignores anything over the 10 minute interval
+def time_to_minutes_seconds(time_list: list[datetime]) -> str:
+    """Calculates time spent from a list of submission times and returns it as a string.
+
+    Args:
+        time_list (list[datetime]): A list of submission datetimes for a student for an assignment.
+
+    Returns:
+        str: A string representation of time spent in minutes and seconds (e.g., "1h 30m 0s").
+
+    Raises:
+        ValueError: If a negative time difference is found in the input list.
+    """
     time_spent_by_user = 0
     for i in range(len(time_list) - 1):
         d1 = time_list[i]
@@ -23,8 +33,21 @@ def time_to_minutes_seconds(time_list):
     return time_spent
 
 
-def add_total_time(total_time, lab_time):
-    # Adds time to calculate total time spent by the user
+# TODO: Can we simplify this by summing `datetime` objects?
+def add_total_time(total_time: str, lab_time: str) -> str:
+    """Adds the given lab time to the total time and returns the updated total time.
+
+    Args:
+        total_time (str): The current total time in the format 'Xh Ym Zs' or 'Ym Zs'.
+        lab_time (str): The lab time to be added in the format 'Xh Ym Zs' or 'Ym Zs'.
+
+    Returns:
+        str: The updated total time in the format 'Xh Ym Zs'.
+
+    Example:
+        >>> add_total_time('1h 30m 10s', '45m 20s')
+        '2h 15m 30s'
+    """
     total_time_split = total_time.split(' ')
     total_time_hours = 0
     if len(total_time_split) > 2:  # Check if time has hours
@@ -57,15 +80,15 @@ def add_total_time(total_time, lab_time):
     return total_time
 
 
-def get_ppm(time_spent, score):
-    """
-    Checks if a student scored too many points too quickly, Indicates suspicious activity (might have copied)
-    Input:
-    ------
-    Accepts time spent on that lab and the maximum number of points scored by the student as an input
-    Output:
-    -------
-    Returns a float points per minute
+def get_ppm(time_spent: str, score: float) -> float:
+    """Calculates points per minute (PPM) for a student based on time spent and max # of points scored.
+
+    Parameters:
+        time_spent (str): The time spent on the lab in the format "Xh Ym Zs".
+        score (float): The maximum score the student achieved on a lab.
+
+    Returns:
+        float: The points per minute (PPM) for a student on an assignment.
     """
     time = time_spent.split()
     hours = int(time[0].strip('h'))
@@ -78,47 +101,48 @@ def get_ppm(time_spent, score):
         return round((score / (total_seconds)), 2)
 
 
-def roster(dataframe, selected_labs):
-    """
-    Input:
-    ------
-            Accepts a logfile dataframe and selected labs as an input
+def roster(dataframe: dict, selected_labs: list[float]) -> dict:
+    """Calculates metrics for a roster for all students in a logfile.
 
-    Output:
-    -------
-            Calculates the total time spent across selected labs, total time spent, total develops, total submits,
-            and also details about time spent on each lab, number of submits in each lab, etc
+    Args:
+        dataframe (dict): The logfile containing submissions.
+        selected_labs (list[float]): A list of lab IDs to consider.
 
-    summary_roster = {
+    Returns:
+        dict: A dictionary containing roster metrics for every student.
+            Includes total time spent across selected labs, total time spent, total develops,
+            total submits, details about time spent on each lab...
+
+    Example:
+        summary_roster = {
             user_id_1: {
-                    'user_id': 121314141,
-                    'last_name': 'Doe',
-                    'first_name': 'John',
-                    'Email': 'jdoe009@ucr.edu',
-                    'Role': 'student',
-                    'points_per_minute': 0.0,
-                    'Time Spent(total)': '16m 00s',
-                    'Total Runs': 17,
-                    'Total Score': 10.0,
-                    'Total Develops': 8,
-                    'Total Submits': 9,
-                    'Total Pivots': 0,
-                    'Lab 1.2 Points per minute': 0.0,
-                    'Lab 1.2 Time spent': '16m 00s',
-                    'Lab 1.2 # of runs': 17,
-                    'Lab 1.2 % score': 10.0,
-                    'Lab 1.2 # of devs': 8,
-                    'Lab 1.2 # of subs': 9,
-                    ...
-                    ...
-                    ...
+                'user_id': 121314141,
+                'last_name': 'Doe',
+                'first_name': 'John',
+                'Email': 'jdoe009@ucr.edu',
+                'Role': 'student',
+                'points_per_minute': 0.0,
+                'Time Spent(total)': '16m 00s',
+                'Total Runs': 17,
+                'Total Score': 10.0,
+                'Total Develops': 8,
+                'Total Submits': 9,
+                'Total Pivots': 0,
+                'Lab 1.2 Points per minute': 0.0,
+                'Lab 1.2 Time spent': '16m 00s',
+                'Lab 1.2 # of runs': 17,
+                'Lab 1.2 % score': 10.0,
+                'Lab 1.2 # of devs': 8,
+                'Lab 1.2 # of subs': 9,
+                ...
+                ...
+                ...
             },
             ...
             ...
             ...
-    }
+        }
     """
-
     df = dataframe
 
     # Identify unique labs

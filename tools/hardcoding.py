@@ -256,8 +256,20 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
     return 0
 
 
-def hardcoding_analysis_1(data, selected_labs, testcases, solution_code):
-    """Case 1: testcases and solution is available."""
+# TODO: Make this work for multiple selected labs.
+def hardcoding_analysis_1(data: dict, selected_labs: list[float], testcases: set[tuple], solution_code: str) -> dict:
+    """Finds a hardcoding score for all students in a logfile (case 1).
+    Assumes case 1: testcases and solution is available.
+
+    Args:
+        data (dict): The log of all student submissions.
+        selected_labs (list[float]): A list of lab numbers to produce a score for.
+        testcases (set[tuple]): The set of testcases used in a lab, e.g. [('input', 'output')].
+        solution_code (str): The code for the lab's solution.
+
+    Returns:
+        dict: A dictionary which has a hardcoding score for each student, with the relevant code.
+    """
     output = {}
     for lab in selected_labs:
         for user_id in data:
@@ -270,8 +282,21 @@ def hardcoding_analysis_1(data, selected_labs, testcases, solution_code):
     return output
 
 
-def hardcoding_analysis_2(data, selected_labs, testcases):
-    """Case 2: testcases are available, but no solution."""
+def hardcoding_analysis_2(data: dict, selected_labs: list[float], testcases: set[tuple]) -> dict:
+    """Finds a hardcoding score for all students in a logfile (case 2).
+    Assumes case 2: testcases are available, but no solution.
+
+    If a testcase is hardcoded by at least `testcase_use_threshold` percentage
+    of students, we don't consider that testcase for hardcoding.
+
+    Args:
+        data (dict): The log of all student submissions.
+        selected_labs (list[float]): A list of lab numbers to produce a score for.
+        testcases (set[tuple]): The set of testcases used in a lab, e.g. [('input', 'output')].
+
+    Returns:
+        dict: A dictionary which has a hardcoding score for each student, with the relevant code.
+    """
     output = {}
     testcase_use_counts = {testcase: 0 for testcase in testcases}
     testcase_use_threshold = 0.6
@@ -302,8 +327,22 @@ def hardcoding_analysis_2(data, selected_labs, testcases):
     return output
 
 
-def hardcoding_analysis_3(data, selected_labs):
-    """Case 3: no testcases or solution."""
+def hardcoding_analysis_3(data: dict, selected_labs: list[float]) -> dict:
+    """Finds a hardcoding score for all students in a logfile (case 3).
+    Assumes case 3: no testcases or solution.
+
+    Checks for `if` statements that hardcode in the `if` condition and
+    also output a literal inside the `if` statement.
+    If at least `if_literal_threshold` percentage of students do this,
+    then we set the hardcoding score for every student to 0.
+
+    Args:
+        data (dict): The log of all student submissions.
+        selected_labs (list[float]): A list of lab numbers to produce a score for.
+
+    Returns:
+        dict: A dictionary which has a hardcoding score for each student, with the relevant code.
+    """
     output = {}
     if_literal_use_count = 0
     if_literal_threshold = 0.6
@@ -324,45 +363,3 @@ def hardcoding_analysis_3(data, selected_labs):
             if hardcoding_percentage > if_literal_threshold:
                 output[user_id][lab][0] = 0
     return output
-
-
-# TODO: check what this is used for, can we remove?
-def newtool(data, selected_labs):
-    """
-    Parameters
-    ----------
-    data: `dict` [`str`, `dict`]
-                    Nested dictionary containing all student submission objects
-                    Particular submission can be accessed with data[user_id][lab_id][n]
-
-    Returns
-    -------
-    newtool_output = {
-            'student_id(1)' : {
-                    'lab1' : [num_runs, num_develops, num_submits],
-                    'lab2' : [num_runs, num_develops, num_submits],
-                    .
-                    .
-                    'labn' : [num_runs, num_develops, num_submits]
-            }
-    }
-    newtool_output = `dict` [`str`][`dict`]
-
-    Nested dictionary of students containing student_id and labs and their results
-    """
-    newtool_output = {}
-    for lab in selected_labs:
-        for user_id in data:
-            if user_id not in newtool_output:
-                newtool_output[user_id] = {}
-            num_runs = 0
-            num_submits = 0
-            num_develops = 0
-            if lab in data[user_id]:
-                for submission in data[user_id][lab]:
-                    num_runs += 1
-                    if int(submission.submission[0]) == 1:
-                        num_submits += 1
-                num_develops = num_runs - num_submits
-            newtool_output[user_id][lab] = [num_runs, num_develops, num_submits]
-    return newtool_output

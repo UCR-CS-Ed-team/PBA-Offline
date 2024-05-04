@@ -1,31 +1,23 @@
-use_standalone = True
+def newtool(data: dict, selected_labs: list[float]) -> dict:
+    """Example function for a new tool.
 
+    Args:
+        data (dict): Nested dictionary containing a Submission object for every submission.
+            A particular submission can be accessed with data[user_id][lab_id][n].
 
-##############################
-#       User Functions       #
-##############################
-def newtool(data, selected_labs):
-    """
-    Parameters
-    ----------
-    data: `dict` [`str`, `dict`]
-            Nested dictionary containing all student submission objects
-            Particular submission can be accessed with data[user_id][lab_id][n]
+    Returns:
+        dict: Nested dictionary of students containing student_id and labs and their results.
 
-    Returns
-    -------
-    newtool_output = {
-                        'student_id(1)' : {
-                                            'lab1' : [num_runs, num_develops, num_submits],
-                                            'lab2' : [num_runs, num_develops, num_submits],
-                                            .
-                                            .
-                                            'labn' : [num_runs, num_develops, num_submits]
-                        }
-    }
-    newtool_output = `dict` [`str`][`dict`]
-            Nested dictionary of students containg student_id and labs and their results
-
+    Example:
+        newtool_output = {
+            'student_id(1)' : {
+                'lab1' : [num_runs, num_develops, num_submits],
+                'lab2' : [num_runs, num_develops, num_submits],
+                .
+                .
+                'labn' : [num_runs, num_develops, num_submits]
+            }
+        }
     """
     newtool_output = {}
     for lab in selected_labs:
@@ -38,7 +30,6 @@ def newtool(data, selected_labs):
             if lab in data[user_id]:
                 for submission_object in data[user_id][lab]:
                     num_runs += 1
-                    # print(int(subObj.submission[0]))
                     if int(submission_object.submission[0]) == 1:
                         num_submits += 1
                 num_develops = num_runs - num_submits
@@ -47,47 +38,28 @@ def newtool(data, selected_labs):
 
 
 """
-Submission object structure (represents each column in the log file)
-    Submission = (
-        student_id, 
-        crid, 
-        lab_id, 
-        submission_id, 
-        type, 
-        code, 
-        sub_time,
-        caption,
-        first_name,
-        last_name,
-        email,
-        zip_location,
-        submission,
-        max_score,
-        anomaly_dict=None
-    )
-
-Data from create_data_structure function
+Data from create_data_structure function:
     data = {
-                student_id_1: {
-                    'lab 1': [
-                        Submission(), Submission(),
-                        Submission(), Submission(),
-                        ...
-                    ],
-                    ....
-                    'lab n': [
-                        Submission(), Submission(),
-                        Submission(), Submission(),
-                        ...
-                    ],
-                },
+        student_id_1: {
+            'lab 1': [
+                Submission(), Submission(),
+                Submission(), Submission(),
                 ...
-                student_id_n: {
-                    ...
-                }
-            }
+            ],
+            ....
+            'lab n': [
+                Submission(), Submission(),
+                Submission(), Submission(),
+                ...
+            ],
+        },
+        ...
+        student_id_n: {
+            ...
+        }
+    }
 
-newtool_output from user defined function structure 
+newtool_output from user defined function structure:
     newtool_output = {
         student_id : {
             'Lab 1' : [num_runs, num_develops, num_submits],
@@ -99,7 +71,7 @@ newtool_output from user defined function structure
         }
     }
 
-summary_output structure to be sent to write_output_to_csv function 
+summary_output structure to be sent to write_output_to_csv function:
 -> final_roster[user_id] contains all the column names to be written in the output csv 
     final_roster = {
         student_id : {
@@ -112,7 +84,4 @@ summary_output structure to be sent to write_output_to_csv function
             'Lab 2 num of submits' : 2
         }
     }
-
-
-
 """
