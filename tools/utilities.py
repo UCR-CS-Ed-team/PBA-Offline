@@ -121,6 +121,7 @@ def download_solution(logfile: DataFrame) -> str | None:
     Returns:
         str | None: The solution code, or None if not found.
     """
+    solution = None
     for row in logfile.itertuples():
         if row.user_id == -1:
             solution = row
