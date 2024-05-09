@@ -256,7 +256,6 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
     return 0
 
 
-# TODO: Make this work for multiple selected labs.
 def hardcoding_analysis_1(
     data: dict, selected_labs: list[float], testcases: dict[float, set[tuple]], solution_code: str
 ) -> dict:
@@ -266,7 +265,7 @@ def hardcoding_analysis_1(
     Args:
         data (dict): The log of all student submissions.
         selected_labs (list[float]): A list of lab numbers to produce a score for.
-        testcases (dict[float, set[tuple]]): A dictionary of a set of tuples. Each key is a lab ID, 
+        testcases (dict[float, set[tuple]]): A dictionary of a set of tuples. Each key is a lab ID,
             and each tuple is the (input, output) of a testcase for that lab ID. Tuple is [str, str].
         solution_code (str): The code for the lab's solution.
 
@@ -295,7 +294,7 @@ def hardcoding_analysis_2(data: dict, selected_labs: list[float], testcases: dic
     Args:
         data (dict): The log of all student submissions.
         selected_labs (list[float]): A list of lab numbers to produce a score for.
-        testcases (dict[float, set[tuple]]): A dictionary of a set of tuples. Each key is a lab ID, 
+        testcases (dict[float, set[tuple]]): A dictionary of a set of tuples. Each key is a lab ID,
             and each tuple is the (input, output) of a testcase for that lab ID. Tuple is [str, str].
 
     Returns:

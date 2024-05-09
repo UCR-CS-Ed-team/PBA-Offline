@@ -313,7 +313,6 @@ def create_data_structure(logfile: DataFrame) -> dict:
     return data
 
 
-# TODO: verify this works correctly for hardcoding
 def get_testcases(logfile: DataFrame, selected_labs: list[float]) -> dict[float, set[tuple]]:
     """Returns a set of test cases from a student submission logfile.
 
@@ -322,17 +321,17 @@ def get_testcases(logfile: DataFrame, selected_labs: list[float]) -> dict[float,
         selected_labs (list[float]): A list of lab IDs to extract testcases for.
 
     Returns:
-        dict[float, set[tuple]]: A dictionary of a set of tuples. Each key is a lab ID, and each tuple is the 
+        dict[float, set[tuple]]: A dictionary of a set of tuples. Each key is a lab ID, and each tuple is the
             (input, output) of a testcase for that lab ID. Tuple is [str, str].
 
     Example:
         testcases_per_lab = {
             lab_id_1 : {
-                (input1, output1), 
+                (input1, output1),
                 (input2, output2)
             }
             lab_id_2 : {
-                (input1, output1), 
+                (input1, output1),
                 (input2, output2)
             }
         }
