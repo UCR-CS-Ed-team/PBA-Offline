@@ -257,14 +257,17 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
 
 
 # TODO: Make this work for multiple selected labs.
-def hardcoding_analysis_1(data: dict, selected_labs: list[float], testcases: set[tuple], solution_code: str) -> dict:
+def hardcoding_analysis_1(
+    data: dict, selected_labs: list[float], testcases: dict[float, set[tuple]], solution_code: str
+) -> dict:
     """Finds a hardcoding score for all students in a logfile (case 1).
     Assumes case 1: testcases and solution is available.
 
     Args:
         data (dict): The log of all student submissions.
         selected_labs (list[float]): A list of lab numbers to produce a score for.
-        testcases (set[tuple]): The set of testcases used in a lab, e.g. [('input', 'output')].
+        testcases (dict[float, set[tuple]]): A dictionary of a set of tuples. Each key is a lab ID, 
+            and each tuple is the (input, output) of a testcase for that lab ID. Tuple is [str, str].
         solution_code (str): The code for the lab's solution.
 
     Returns:
@@ -277,12 +280,12 @@ def hardcoding_analysis_1(data: dict, selected_labs: list[float], testcases: set
                 output[user_id] = {}
             if lab in data[user_id]:
                 code = get_code_with_max_score(user_id, lab, data)
-                hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
+                hardcode_score = get_hardcode_score_with_soln(code, testcases[lab], solution_code)
                 output[user_id][lab] = [hardcode_score, code]
     return output
 
 
-def hardcoding_analysis_2(data: dict, selected_labs: list[float], testcases: set[tuple]) -> dict:
+def hardcoding_analysis_2(data: dict, selected_labs: list[float], testcases: dict[float, set[tuple]]) -> dict:
     """Finds a hardcoding score for all students in a logfile (case 2).
     Assumes case 2: testcases are available, but no solution.
 
@@ -292,31 +295,38 @@ def hardcoding_analysis_2(data: dict, selected_labs: list[float], testcases: set
     Args:
         data (dict): The log of all student submissions.
         selected_labs (list[float]): A list of lab numbers to produce a score for.
-        testcases (set[tuple]): The set of testcases used in a lab, e.g. [('input', 'output')].
+        testcases (dict[float, set[tuple]]): A dictionary of a set of tuples. Each key is a lab ID, 
+            and each tuple is the (input, output) of a testcase for that lab ID. Tuple is [str, str].
 
     Returns:
         dict: A dictionary which has a hardcoding score for each student, with the relevant code.
     """
     output = {}
-    testcase_use_counts = {testcase: 0 for testcase in testcases}
     testcase_use_threshold = 0.6
     num_students = len(data)
 
     for lab in selected_labs:
+        testcase_use_counts = {testcase: 0 for testcase in testcases[lab]}
+
+        # Find the testcases that each student hardcodes
+        # Also find number of times each testcase is hardcoded
         for user_id in data:
             if user_id not in output:
                 output[user_id] = {}
             if lab in data[user_id]:
                 code = get_code_with_max_score(user_id, lab, data)
                 output[user_id][lab] = [0, code, set()]
-                for testcase in testcases:  # Track num times students hardcode testcases
+                for testcase in testcases[lab]:  # Track num times students hardcode testcases
                     hardcode_score = is_testcase_hardcoded_in_if(code, testcase)
                     output[user_id][lab][0] = hardcode_score
                     if hardcode_score > 0:
                         output[user_id][lab][2].add(testcase)
                         testcase_use_counts[testcase] += 1
+
+        # If any testcase was hardcoded by most of the class,
+        # then don't consider that testcase for hardcoding for anyone
         for user_id in data:
-            for testcase in testcases:
+            for testcase in testcases[lab]:
                 hardcoded_testcases = output[user_id][lab][2]
                 hardcoding_percentage = testcase_use_counts[testcase] / num_students
                 logger.debug(f'{testcase_use_counts[testcase]}/{num_students} hardcoded testcase {testcase}...')

@@ -205,8 +205,8 @@ if __name__ == '__main__':
             elif user_input == 7:
                 output_file_name = 'hardcoding.csv'
 
-                # Tuple of testcases: (output, input)
-                testcases = get_testcases(logfile_with_code)
+                # Dictionary of testcases, e.g. `lab_id : [('in1', 'out1'), ('in2', 'out2')]`
+                testcases = get_testcases(logfile_with_code, selected_labs)
 
                 try:
                     if testcases and solution_code:
