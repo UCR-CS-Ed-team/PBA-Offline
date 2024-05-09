@@ -2,7 +2,6 @@
 .DS_Store
 *.dSYM
 _MACOSX/
-output_testing
 
 # All files from the downloads folder except .gitkeep
 downloads/*
@@ -10,7 +9,7 @@ downloads/*
 
 # All files from the output folder except .gitkeep
 output/*
-output/.gitkeep
+!output/.gitkeep
 
 # VS Code config files
 .vscode
