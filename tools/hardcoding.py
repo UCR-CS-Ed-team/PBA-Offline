@@ -266,7 +266,8 @@ def hardcoding_analysis_1(
     Args:
         data (dict): The log of all student submissions.
         selected_labs (list[float]): A list of lab numbers to produce a score for.
-        testcases (set[tuple]): The set of testcases used in a lab, e.g. [('input', 'output')].
+        testcases (dict[float, set[tuple]]): A dictionary of a set of tuples. Each key is a lab ID, 
+            and each tuple is the (input, output) of a testcase for that lab ID. Tuple is [str, str].
         solution_code (str): The code for the lab's solution.
 
     Returns:
@@ -294,7 +295,8 @@ def hardcoding_analysis_2(data: dict, selected_labs: list[float], testcases: dic
     Args:
         data (dict): The log of all student submissions.
         selected_labs (list[float]): A list of lab numbers to produce a score for.
-        testcases (set[tuple]): The set of testcases used in a lab, e.g. [('input', 'output')].
+        testcases (dict[float, set[tuple]]): A dictionary of a set of tuples. Each key is a lab ID, 
+            and each tuple is the (input, output) of a testcase for that lab ID. Tuple is [str, str].
 
     Returns:
         dict: A dictionary which has a hardcoding score for each student, with the relevant code.
