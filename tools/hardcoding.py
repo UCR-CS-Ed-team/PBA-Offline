@@ -257,7 +257,9 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
 
 
 # TODO: Make this work for multiple selected labs.
-def hardcoding_analysis_1(data: dict, selected_labs: list[float], testcases: set[tuple], solution_code: str) -> dict:
+def hardcoding_analysis_1(
+    data: dict, selected_labs: list[float], testcases: dict[float, set[tuple]], solution_code: str
+) -> dict:
     """Finds a hardcoding score for all students in a logfile (case 1).
     Assumes case 1: testcases and solution is available.
 
@@ -277,7 +279,7 @@ def hardcoding_analysis_1(data: dict, selected_labs: list[float], testcases: set
                 output[user_id] = {}
             if lab in data[user_id]:
                 code = get_code_with_max_score(user_id, lab, data)
-                hardcode_score = get_hardcode_score_with_soln(code, testcases, solution_code)
+                hardcode_score = get_hardcode_score_with_soln(code, testcases[lab], solution_code)
                 output[user_id][lab] = [hardcode_score, code]
     return output
 
