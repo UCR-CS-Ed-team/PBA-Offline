@@ -24,7 +24,10 @@ if __name__ == '__main__':
     logger = setup_logger(__name__)  # DEBUGGING
 
     # Read logfile into a Pandas DataFrame
-    logfile_path = filedialog.askopenfilename()
+    logfile_path = filedialog.askopenfilename(filetypes=[('CSV files', '*.csv')])
+    if not logfile_path:
+        print('No file selected. Goodbye!')
+        exit(0)
     logfile = pd.read_csv(logfile_path)
     logfile = standardize_columns(logfile)
 
