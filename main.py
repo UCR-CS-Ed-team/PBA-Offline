@@ -2,8 +2,8 @@ from tkinter import filedialog
 
 import pandas as pd
 
+import tools.devtools.eval_hardcoding
 import tools.hardcoding
-import tools.hardcoding_test
 import tools.utilities as util
 from tools.anomaly import anomaly
 from tools.incdev import run
@@ -20,9 +20,9 @@ def main():
     if not logfile_path:
         print('No file selected. Goodbye!')
         exit(0)
+
     logfile = pd.read_csv(logfile_path)
     logfile = util.standardize_columns(logfile)
-
     solution_code = util.download_solution(logfile)
     selected_labs = util.get_selected_labs(logfile)
     logfile = logfile[logfile.role == 'Student']  # Filter by students only
@@ -32,12 +32,11 @@ def main():
     output_file_name = 'roster.csv'
     prompt = (
         '\n1. Quick Analysis (averages for all labs) \n'
-        '2. Basic statistics (roster for selected labs) \n'
-        '3. Anomalies (selected labs) \n'
-        '4. Coding Trails (all labs) \n'
-        '6. Automatic anomaly detection (selected labs) \n'
-        '7. Hardcoding detection (selected labs) \n'
-        '8. Manual hardcoding test \n'
+        '2. Basic Statistics (roster for selected labs) \n'
+        '3. Style Anomalies (selected labs) \n'
+        '4. Incremental Development Trails (all labs) \n'
+        '7. Hardcoding Detection (selected labs) \n'
+        '8. (Dev) Manually Evaluate Hardcoding \n'
         '9. Quit \n'
     )
 
@@ -152,12 +151,13 @@ def main():
                                 str(lab_id) + ' Student code': stylechecker_output[user_id][lab_id][2],
                             }
 
+            # TODO: Fix this to work with anomaly refactoring
             # Automatic anomaly detection for selected labs
             elif user_input == 6:
                 output_file_name = 'auto_anomaly.csv'
                 tool_result = {}  # TODO: reset roster, fix later
                 # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
-                anomaly_detection_output = anomaly(submissions, selected_labs, 1)
+                anomaly_detection_output = anomaly(submissions, selected_labs)
 
                 # Populate anomaly counts for every user, for each lab
                 for user_id in anomaly_detection_output:
@@ -249,8 +249,7 @@ def main():
 
             elif user_input == 8:
                 output_file_name = 'hardcoding-test.csv'
-                test_results = tools.hardcoding_test.manual_test(submissions, selected_labs)
-
+                test_results = tools.devtools.eval_hardcoding.manual_test(submissions, selected_labs)
                 for user_id in test_results:
                     for lab in test_results[user_id]:
                         hardcoding_score = test_results[user_id][lab][0]
@@ -270,6 +269,7 @@ def main():
                             }
 
             elif user_input == 9:
+                print('Goodbye!')
                 exit(0)
 
             else:
