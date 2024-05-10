@@ -199,17 +199,17 @@ def main():
 
                 try:
                     if testcases and solution_code:
-                        logger.debug('Case 1: testcases and solution')
+                        print('Case 1: testcases and solution')
                         hardcoding_results = tools.hardcoding.hardcoding_analysis_1(
                             submissions, selected_labs, testcases, solution_code
                         )
                     elif testcases and not solution_code:
-                        logger.debug('Case 2: testcases, no solution')
+                        print('Case 2: testcases, no solution')
                         hardcoding_results = tools.hardcoding.hardcoding_analysis_2(
                             submissions, selected_labs, testcases
                         )
                     elif not testcases and not solution_code:
-                        logger.debug('Case 3: no testcases or solution')
+                        print('Case 3: no testcases or solution')
                         hardcoding_results = tools.hardcoding.hardcoding_analysis_3(submissions, selected_labs)
                     else:
                         raise Exception('Unexpected input during hardcode analysis')

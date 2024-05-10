@@ -248,7 +248,6 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
         testcase_in_code = is_testcase_hardcoded_in_if(code, testcase) or is_testcase_hardcoded(code, testcase)
         testcase_in_soln = testcase in testcases_in_soln
         if testcase_in_code and not testcase_in_soln:
-            logger.debug(f'is_hardcoded is True for testcase {testcase}.')
             is_hardcoded = True  # TODO: return 1 here, True is for debugging
 
     if is_hardcoded:
@@ -328,7 +327,6 @@ def hardcoding_analysis_2(data: dict, selected_labs: list[float], testcases: dic
             for testcase in testcases[lab]:
                 hardcoded_testcases = output[user_id][lab][2]
                 hardcoding_percentage = testcase_use_counts[testcase] / num_students
-                logger.debug(f'{testcase_use_counts[testcase]}/{num_students} hardcoded testcase {testcase}...')
                 if (testcase in hardcoded_testcases) and (hardcoding_percentage >= testcase_use_threshold):
                     output[user_id][lab][2].remove(testcase)
                     if len(output[user_id][lab][2]) <= 0:
@@ -367,7 +365,6 @@ def hardcoding_analysis_3(data: dict, selected_labs: list[float]) -> dict:
                 output[user_id][lab] = [hardcode_score, code]
                 if_literal_use_count += hardcode_score
         hardcoding_percentage = if_literal_use_count / num_students
-        logger.debug(f'{if_literal_use_count}/{num_students} compared to literals in an if statement...')
         for user_id in data:
             if hardcoding_percentage > if_literal_threshold:
                 output[user_id][lab][0] = 0
