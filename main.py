@@ -20,7 +20,8 @@ from tools.utilities import (
     write_output_to_csv,
 )
 
-if __name__ == '__main__':
+
+def main():
     logger = setup_logger(__name__)  # DEBUGGING
 
     # Read logfile into a Pandas DataFrame
@@ -31,13 +32,9 @@ if __name__ == '__main__':
     logfile = pd.read_csv(logfile_path)
     logfile = standardize_columns(logfile)
 
-    # Locate solution in logfile and download its code
     solution_code = download_solution(logfile)
-
-    # Save student submission URLs and selected labs
-    logfile = logfile[logfile.role == 'Student']
-    urls = logfile.zip_location.to_list()
     selected_labs = get_selected_labs(logfile)
+    logfile = logfile[logfile.role == 'Student']  # Filter by students only
 
     submissions = {}
     tool_result = {}
@@ -289,3 +286,11 @@ if __name__ == '__main__':
 
         if len(tool_result) != 0:
             write_output_to_csv(tool_result, output_file_name)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Goodbye!')
+        exit(0)
