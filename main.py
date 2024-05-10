@@ -56,11 +56,21 @@ if __name__ == '__main__':
     while True:
         tool_result = {}
         print(prompt)
-        user_input = input()
-        input_list = user_input.split(' ')
+
+        while True:  # Validate user inputs
+            all_valid = True
+            input_list = input().split(' ')
+            for i in input_list:
+                if not (i.isdigit() and 1 <= int(i) <= 9):
+                    all_valid = False
+                    print('Inputs must all be digits 1-9, please try again.')
+                    break
+            if all_valid:
+                break
 
         for i in input_list:
             user_input = int(i)
+
             if user_input != 9 and submissions == {}:
                 logfile_with_code = download_code(logfile)
                 submissions = create_data_structure(logfile_with_code)
