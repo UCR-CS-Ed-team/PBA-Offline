@@ -234,7 +234,6 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
     Returns:
         int: The hardcoding score, where 1 indicates the presence of hardcoding and 0 indicates no hardcoding
     """
-    is_hardcoded = False
     testcases_in_soln = set()
 
     # Track which testcase outputs are used in the solution
@@ -248,10 +247,7 @@ def get_hardcode_score_with_soln(code: str, testcases: set[tuple], solution_code
         testcase_in_code = is_testcase_hardcoded_in_if(code, testcase) or is_testcase_hardcoded(code, testcase)
         testcase_in_soln = testcase in testcases_in_soln
         if testcase_in_code and not testcase_in_soln:
-            is_hardcoded = True  # TODO: return 1 here, True is for debugging
-
-    if is_hardcoded:
-        return 1
+            return 1
     return 0
 
 

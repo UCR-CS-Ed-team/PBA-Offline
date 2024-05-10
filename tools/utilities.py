@@ -240,7 +240,6 @@ def download_code(logfile: DataFrame) -> DataFrame:
     return logfile
 
 
-# TODO: validate input, what if input is non-integer?
 def get_selected_labs(logfile: DataFrame) -> list[str]:
     """Gets a list of labs specified by user input.
 
