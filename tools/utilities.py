@@ -223,14 +223,25 @@ def get_selected_labs(logfile: DataFrame) -> list[str]:
         print(f'{i}) {lab_id:.2f}: {lab_caption}')
         labs_list.append(lab_id)
         i += 1
+
+    # TODO: Make this a helper function
+    while True:  # Validate user inputs
+        all_options_valid = True
+        selected_options = [i.strip() for i in input().split()]
+        for option in selected_options:
+            if not (option.isdigit() and 0 <= int(option) <= i - 1):
+                all_options_valid = False
+                print(f'Inputs must all be digits 0-{i - 1}, please try again.')
+                break
+        if all_options_valid:
+            break
+
     selected_labs = []
-    selected_options = input()
-    if selected_options.split()[0] == '0':
+    if selected_options[0] == '0':
         for lab in labs_list:
             selected_labs.append(lab)
     else:
-        selected_lab_index = selected_options.split()
-        for selected_lab in selected_lab_index:
+        for selected_lab in selected_options:
             selected_labs.append(labs_list[int(selected_lab) - 1])
     return selected_labs
 
