@@ -80,6 +80,7 @@ def get_list_of_int_choices(min: int, max: int) -> list[int]:
                 break
         if all_valid:
             break
+    input_list = [int(i) for i in input_list]
     return input_list
 
 
@@ -260,28 +261,14 @@ def get_selected_labs(logfile: DataFrame) -> list[str]:
         print(f'{i}) {lab_id:.2f}: {lab_caption}')
         labs_list.append(lab_id)
         i += 1
-
-    
-
-    # TODO: Make this a helper function
-    while True:  # Validate user inputs
-        all_options_valid = True
-        selected_options = [i.strip() for i in input().split()]
-        for option in selected_options:
-            if not (option.isdigit() and 0 <= int(option) <= i - 1):
-                all_options_valid = False
-                print(f'Inputs must all be digits 0-{i - 1}, please try again.')
-                break
-        if all_options_valid:
-            break
-
+    selected_options = get_list_of_int_choices(min=0, max=i - 1)
     selected_labs = []
-    if selected_options[0] == '0':
+    if selected_options[0] == 0:
         for lab in labs_list:
             selected_labs.append(lab)
     else:
         for selected_lab in selected_options:
-            selected_labs.append(labs_list[int(selected_lab) - 1])
+            selected_labs.append(labs_list[selected_lab - 1])
     return selected_labs
 
 
