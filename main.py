@@ -30,19 +30,19 @@ def main():
     submissions = {}
     tool_result = {}
     output_file_name = 'roster.csv'
-    prompt = (
-        '\n1. Quick Analysis (averages for all labs) \n'
-        '2. Basic Statistics (roster for selected labs) \n'
-        '3. Style Anomalies (selected labs) \n'
-        '4. Incremental Development Trails (all labs) \n'
-        '7. Hardcoding Detection (selected labs) \n'
-        '8. (Dev) Manually Evaluate Hardcoding \n'
-        '9. Quit \n'
-    )
+    menu_options = [
+        'Quick Analysis (averages for all labs)',
+        'Basic Statistics (roster for selected labs)',
+        'Style Anomalies (selected labs)',
+        'Incremental Development Trails (all labs)',
+        'Hardcoding Detection (selected labs)',
+        '(Dev) Manually Evaluate Hardcoding',
+        'Quit',
+    ]
 
     while True:
         tool_result = {}
-        print(prompt)
+        util.print_menu(menu_options)
 
         while True:  # Validate user inputs
             all_valid = True
@@ -130,7 +130,7 @@ def main():
                             }
 
             # Style anomalies for selected labs using cpplint
-            elif user_input == 5:
+            elif user_input == 10:
                 output_file_name = 'cpp_style.csv'
                 stylechecker_output = stylechecker(submissions, selected_labs)
                 for user_id in stylechecker_output:
@@ -153,7 +153,7 @@ def main():
 
             # TODO: Fix this to work with anomaly refactoring
             # Automatic anomaly detection for selected labs
-            elif user_input == 6:
+            elif user_input == 11:
                 output_file_name = 'auto_anomaly.csv'
                 tool_result = {}  # TODO: reset roster, fix later
                 # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
@@ -203,7 +203,7 @@ def main():
                 util.write_output_to_csv(tool_result, 'anomaly_counts.csv')
 
             # Hardcode detection for selected labs
-            elif user_input == 7:
+            elif user_input == 5:
                 output_file_name = 'hardcoding.csv'
 
                 # Dictionary of testcases, e.g. `lab_id : [('in1', 'out1'), ('in2', 'out2')]`
@@ -247,7 +247,7 @@ def main():
                                 str(lab) + ' Student code': student_code,
                             }
 
-            elif user_input == 8:
+            elif user_input == 6:
                 output_file_name = 'hardcoding-test.csv'
                 test_results = tools.devtools.eval_hardcoding.manual_test(submissions, selected_labs)
                 for user_id in test_results:
@@ -268,7 +268,7 @@ def main():
                                 str(lab) + ' Student code': student_code,
                             }
 
-            elif user_input == 9:
+            elif user_input == 7:
                 print('Goodbye!')
                 exit(0)
 

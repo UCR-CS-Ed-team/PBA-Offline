@@ -46,6 +46,13 @@ def setup_logger(name: str, log_level=logging.DEBUG, log_format='%(name)s : %(me
     return logger
 
 
+def print_menu(options: list[str]) -> None:
+    """Prints a menu with the given options."""
+    for i, option in enumerate(options, start=1):
+        print(f'{i}) {option}')
+    print()
+
+
 def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
     """Returns the first highest-scoring code submission for a student for a lab.
 
