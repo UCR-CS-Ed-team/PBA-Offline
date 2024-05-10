@@ -220,7 +220,7 @@ def get_selected_labs(logfile: DataFrame) -> list[str]:
     i += 1
     for lab_id in lab_ids:
         lab_caption = logfile.query('content_section ==' + str(lab_id))['caption'].iloc[0]
-        print(f'{i}) {lab_id}: {lab_caption}')
+        print(f'{i}) {lab_id:.2f}: {lab_caption}')
         labs_list.append(lab_id)
         i += 1
     selected_labs = []
