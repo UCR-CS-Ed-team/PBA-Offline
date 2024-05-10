@@ -53,6 +53,36 @@ def print_menu(options: list[str]) -> None:
     print()
 
 
+def get_list_of_int_choices(min: int, max: int) -> list[int]:
+    """
+    Prompts the user to enter a list of integers within a specified range.
+    Performs input validation.
+
+    Args:
+        min (int): The minimum value allowed for the integers.
+        max (int): The maximum value allowed for the integers.
+
+    Returns:
+        list[int]: A list of integers entered by the user.
+
+    Example:
+        >>> get_list_of_int_choices(1, 10)
+        Enter a list of integers: 1 2 3 4 5
+        ['1', '2', '3', '4', '5']
+    """
+    while True:
+        all_valid = True
+        input_list = [i.strip() for i in input().split()]
+        for i in input_list:
+            if not (i.isdigit() and min <= int(i) <= max):
+                all_valid = False
+                print(f'Inputs must all be digits {min}-{max}, please try again.')
+                break
+        if all_valid:
+            break
+    return input_list
+
+
 def get_code_with_max_score(user_id: int, lab: float, submissions: dict) -> str:
     """Returns the first highest-scoring code submission for a student for a lab.
 
@@ -230,6 +260,8 @@ def get_selected_labs(logfile: DataFrame) -> list[str]:
         print(f'{i}) {lab_id:.2f}: {lab_caption}')
         labs_list.append(lab_id)
         i += 1
+
+    
 
     # TODO: Make this a helper function
     while True:  # Validate user inputs

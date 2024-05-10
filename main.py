@@ -43,37 +43,25 @@ def main():
     while True:
         tool_result = {}
         util.print_menu(menu_options)
-
-        while True:  # Validate user inputs
-            all_valid = True
-            input_list = [i.strip() for i in input().split()]
-            for i in input_list:
-                if not (i.isdigit() and 1 <= int(i) <= 9):
-                    all_valid = False
-                    print('Inputs must all be digits 1-9, please try again.')
-                    break
-            if all_valid:
-                break
+        input_list = util.get_list_of_int_choices(min=1, max=len(menu_options))
 
         for i in input_list:
-            user_input = int(i)
-
-            if user_input != 9 and submissions == {}:
+            if i != 9 and submissions == {}:
                 logfile_with_code = util.download_code(logfile)
                 submissions = util.create_data_structure(logfile_with_code)
 
             # Quick analysis for every lab
-            if user_input == 1:
+            if i == 1:
                 output_file_name = 'quick_analysis.csv'
                 quick_analysis(logfile_with_code)  # TODO: this should return something
 
             # Roster for selected labs
-            elif user_input == 2:
+            elif i == 2:
                 output_file_name = 'roster.csv'
                 tool_result = roster(logfile_with_code, selected_labs)
 
             # Anomalies for selected labs
-            elif user_input == 3:
+            elif i == 3:
                 output_file_name = 'anomalies.csv'
                 anomaly_detection_output = anomaly(submissions, selected_labs)
                 for user_id in anomaly_detection_output:
@@ -97,7 +85,7 @@ def main():
                             }
 
             # Inc. development coding trails for all labs
-            elif user_input == 4:
+            elif i == 4:
                 output_file_name = 'incdev.csv'
                 # Generate nested dict of IncDev results
                 incdev_output = run(submissions)
@@ -130,7 +118,7 @@ def main():
                             }
 
             # Style anomalies for selected labs using cpplint
-            elif user_input == 10:
+            elif i == 10:
                 output_file_name = 'cpp_style.csv'
                 stylechecker_output = stylechecker(submissions, selected_labs)
                 for user_id in stylechecker_output:
@@ -153,7 +141,7 @@ def main():
 
             # TODO: Fix this to work with anomaly refactoring
             # Automatic anomaly detection for selected labs
-            elif user_input == 11:
+            elif i == 11:
                 output_file_name = 'auto_anomaly.csv'
                 tool_result = {}  # TODO: reset roster, fix later
                 # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
@@ -203,7 +191,7 @@ def main():
                 util.write_output_to_csv(tool_result, 'anomaly_counts.csv')
 
             # Hardcode detection for selected labs
-            elif user_input == 5:
+            elif i == 5:
                 output_file_name = 'hardcoding.csv'
 
                 # Dictionary of testcases, e.g. `lab_id : [('in1', 'out1'), ('in2', 'out2')]`
@@ -247,7 +235,7 @@ def main():
                                 str(lab) + ' Student code': student_code,
                             }
 
-            elif user_input == 6:
+            elif i == 6:
                 output_file_name = 'hardcoding-test.csv'
                 test_results = tools.devtools.eval_hardcoding.manual_test(submissions, selected_labs)
                 for user_id in test_results:
@@ -268,7 +256,7 @@ def main():
                                 str(lab) + ' Student code': student_code,
                             }
 
-            elif user_input == 7:
+            elif i == 7:
                 print('Goodbye!')
                 exit(0)
 
