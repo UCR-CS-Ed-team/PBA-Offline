@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
         while True:  # Validate user inputs
             all_valid = True
-            input_list = input().split(' ')
+            input_list = [i.strip() for i in input().split()]
             for i in input_list:
                 if not (i.isdigit() and 1 <= int(i) <= 9):
                     all_valid = False
