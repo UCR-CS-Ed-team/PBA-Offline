@@ -4,25 +4,16 @@ import pandas as pd
 
 import tools.hardcoding
 import tools.hardcoding_test
-from tools import incdev
+import tools.utilities as util
 from tools.anomaly import anomaly
+from tools.incdev import run
 from tools.quickanalysis import quick_analysis
 from tools.roster import roster
 from tools.stylechecker import stylechecker
-from tools.utilities import (
-    create_data_structure,
-    download_code,
-    download_solution,
-    get_selected_labs,
-    get_testcases,
-    setup_logger,
-    standardize_columns,
-    write_output_to_csv,
-)
 
 
 def main():
-    logger = setup_logger(__name__)  # DEBUGGING
+    logger = util.setup_logger(__name__)  # DEBUGGING
 
     # Read logfile into a Pandas DataFrame
     logfile_path = filedialog.askopenfilename(filetypes=[('CSV files', '*.csv')])
@@ -30,10 +21,10 @@ def main():
         print('No file selected. Goodbye!')
         exit(0)
     logfile = pd.read_csv(logfile_path)
-    logfile = standardize_columns(logfile)
+    logfile = util.standardize_columns(logfile)
 
-    solution_code = download_solution(logfile)
-    selected_labs = get_selected_labs(logfile)
+    solution_code = util.download_solution(logfile)
+    selected_labs = util.get_selected_labs(logfile)
     logfile = logfile[logfile.role == 'Student']  # Filter by students only
 
     submissions = {}
@@ -69,8 +60,8 @@ def main():
             user_input = int(i)
 
             if user_input != 9 and submissions == {}:
-                logfile_with_code = download_code(logfile)
-                submissions = create_data_structure(logfile_with_code)
+                logfile_with_code = util.download_code(logfile)
+                submissions = util.create_data_structure(logfile_with_code)
 
             # Quick analysis for every lab
             if user_input == 1:
@@ -110,7 +101,7 @@ def main():
             elif user_input == 4:
                 output_file_name = 'incdev.csv'
                 # Generate nested dict of IncDev results
-                incdev_output = incdev.run(submissions)
+                incdev_output = run(submissions)
                 for user_id in incdev_output:
                     for lab_id in incdev_output[user_id]:
                         lid = str(lab_id)
@@ -209,14 +200,14 @@ def main():
                             tool_result['Status'][f'Lab {str(lab)} {found_anomaly}'] = 'Yes'
 
                 # Outputs to its own file for now
-                write_output_to_csv(tool_result, 'anomaly_counts.csv')
+                util.write_output_to_csv(tool_result, 'anomaly_counts.csv')
 
             # Hardcode detection for selected labs
             elif user_input == 7:
                 output_file_name = 'hardcoding.csv'
 
                 # Dictionary of testcases, e.g. `lab_id : [('in1', 'out1'), ('in2', 'out2')]`
-                testcases = get_testcases(logfile_with_code, selected_labs)
+                testcases = util.get_testcases(logfile_with_code, selected_labs)
 
                 try:
                     if testcases and solution_code:
@@ -285,7 +276,7 @@ def main():
                 print('Please select a valid option')
 
         if len(tool_result) != 0:
-            write_output_to_csv(tool_result, output_file_name)
+            util.write_output_to_csv(tool_result, output_file_name)
 
 
 if __name__ == '__main__':
