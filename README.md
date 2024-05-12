@@ -1,4 +1,6 @@
-# Programming Behavior Analysis (PBA)
+<div align="center">
+  <h1 align="center">Programming Behavior Analysis (PBA)</h1>
+</div>
 
 Programming Behavior Analysis (PBA) is a set of tools used to find students that are potentially cheating in CS courses without using code similarity. Instead, this project finds metrics which *complement* code similarity in finding cheating.
 
@@ -28,14 +30,11 @@ You need the following to use PBA:
 
 ### 0. Downloading zyBooks logfiles
 
-For PBA to analyze submissions for an assignment, you need a logfile of student submissions in `.csv` format for that assignment. To get this, follow the GIF below, or do the following:
-1. Go to the lab assignment in your zyBook
-2. Scroll down to "Class statistics", expand the section
-3. Click "Download log of all runs"
+For PBA to analyze submissions for an assignment, you need a logfile of student submissions in `.csv` format for that assignment. To get this, follow the GIF below:
 
 ![Downloading zyBooks logfile GIF](.github/zybooks-download-logfile.gif)
 
-To analyze multiple assignments at once, you can download a logfile for multiple assignments like so:
+To analyze multiple assignments, download a logfile like so:
 
 ![Downloading zyBooks logfile for multiple assignments GIF](.github/zybooks-multi-download-logfile.gif)
 
