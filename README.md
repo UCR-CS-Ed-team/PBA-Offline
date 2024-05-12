@@ -26,12 +26,18 @@ You need the following to use PBA:
 - A zyBooks C++ course
 - A `.csv` zyBooks logfile of student submissions for an assignment(s)
 
+### 0. Downloading zyBooks logfiles
+
 For PBA to analyze submissions for an assignment, you need a logfile of student submissions in `.csv` format for that assignment. To get this, follow the GIF below, or do the following:
 1. Go to the lab assignment in your zyBook
 2. Scroll down to "Class statistics", expand the section
 3. Click "Download log of all runs"
 
 ![Downloading zyBooks logfile GIF](.github/zybooks-download-logfile.gif)
+
+To analyze multiple assignments at once, you can download a logfile for multiple assignments like so:
+
+![Downloading zyBooks logfile for multiple assignments GIF](.github/zybooks-multi-download-logfile.gif)
 
 The logfile will be called `zylab_log_CourseNameHere_DateHere.csv` with contents like this:
 
