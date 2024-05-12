@@ -42,11 +42,11 @@ def main():
 
     while True:
         tool_result = {}
-        util.print_menu(menu_options)
+        util.print_menu(menu_options, selected_labs)
         input_list = util.get_list_of_int_choices(min=1, max=len(menu_options))
 
         for i in input_list:
-            if i != 9 and submissions == {}:
+            if i != 7 and submissions == {}:
                 logfile_with_code = util.download_code(logfile)
                 submissions = util.create_data_structure(logfile_with_code)
 
@@ -257,7 +257,7 @@ def main():
                             }
 
             elif i == 7:
-                print('Goodbye!')
+                print('\nGoodbye!')
                 exit(0)
 
             else:
@@ -271,5 +271,5 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print('Goodbye!')
+        print('\nGoodbye!')
         exit(0)

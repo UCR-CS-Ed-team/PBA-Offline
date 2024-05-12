@@ -46,8 +46,13 @@ def setup_logger(name: str, log_level=logging.DEBUG, log_format='%(name)s : %(me
     return logger
 
 
-def print_menu(options: list[str]) -> None:
-    """Prints a menu with the given options."""
+def print_menu(options: list[str], selected_labs: list[float]) -> None:
+    """Prints the selected labs, then a menu with the given options."""
+    choice_msg = 'Choose one or more options, separated by a space: (Ex: 1 or 1 2 3 or 2 3)'
+    print()
+    print(f'Selected labs: {selected_labs}')
+    print(choice_msg)
+    print('-' * len(choice_msg))
     for i, option in enumerate(options, start=1):
         print(f'{i}) {option}')
     print()
@@ -252,8 +257,11 @@ def get_selected_labs(logfile: DataFrame) -> list[str]:
     i = 0
     labs_list = []
     lab_ids = logfile.content_section.unique()
-    print('Select the labs to evaluate, separated by a space: (Ex: 1 or 1 2 3 or 2 3)')
-    print(f'{i})  Select all labs')
+    welcome_msg = 'Select the labs to evaluate, separated by a space: (Ex: 1 or 1 2 3 or 2 3)'
+    print()
+    print(welcome_msg)
+    print('-' * len(welcome_msg))
+    print(f'{i}) All labs')
     i += 1
     for lab_id in lab_ids:
         lab_caption = logfile.query('content_section ==' + str(lab_id))['caption'].iloc[0]
