@@ -33,14 +33,16 @@ For PBA to analyze submissions for an assignment, you need a logfile of student 
 
 ![Downloading zyBooks logfile GIF](.github/zybooks-download-logfile.gif)
 
-The contents of the logfile should look like this:
+The logfile will be called `zylab_log_CourseNameHere_DateHere.csv` with contents like this:
 
+```
 | zybook_code   |   lab_id |   content_section | caption         |   user_id | first_name   | last_name   | email            | class_section   | role    | date_submitted(UTC)   | zip_location   | is_submission   | score   | max_score   | result   | ip_address   |
 |:--------------|---------:|------------------:|:----------------|----------:|:-------------|:------------|:-----------------|:----------------|:--------|:----------------------|:---------------|:----------------|:--------|:------------|:---------|:-------------|
 | CS1Class      |      123 |               3.2 | How many digits |        -1 | Solution     | Solution    |                  |                 |         |                       | url1           |                 |         |             | …        |              |
 | CS1Class      |      123 |               3.2 | How many digits |       345 | Benjamin     | Denzler     | bdenz001@ucr.edu |                 | Student | 4/24/2023 3:47        | url2           | 1.0             | 0.0     | 10.0        | …        |              |
 | CS1Class      |      123 |               3.2 | How many digits |       345 | Benjamin     | Denzler     | bdenz001@ucr.edu |                 | Student | 4/24/2023 3:47        | url3           | 1.0             | 8.0     | 10.0        | …        |              |
 | CS1Class      |      123 |               3.2 | How many digits |       345 | Benjamin     | Denzler     | bdenz001@ucr.edu |                 | Student | 4/24/2023 3:47        | url4           | 1.0             | 10.0    | 10.0        | …        |              |
+```
 
 ### 1. Clone the repository
 
