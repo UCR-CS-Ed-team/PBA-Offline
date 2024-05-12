@@ -1,8 +1,11 @@
 <div align="center">
   <h1 align="center">Programming Behavior Analysis (PBA)</h1>
+  <h3 align="center">Find potential cheating without similarity.</h3>
 </div>
 
-Programming Behavior Analysis (PBA) is a set of tools used to find students that are potentially cheating in CS courses without using code similarity. Instead, this project finds metrics which *complement* code similarity in finding cheating.
+This project finds students that are potentially cheating in CS courses using metrics beyond code similarity. Instructors can prioritize their time when investigating cheating cases by looking at top students in these metrics.
+
+> **IMPORTANT**: Students flagged by this program are not necessarily cheating. Instructors should always thoroughly investigate flagged students before making a cheating determination.
 
 ## Features
 
@@ -30,7 +33,7 @@ You need the following to use PBA:
 
 ### 0. Downloading zyBooks logfiles
 
-For PBA to analyze submissions for an assignment, you need a logfile of student submissions in `.csv` format for that assignment. To get this, follow the GIF below:
+For PBA to generate metrics for an assignment, you need a logfile of student submissions in `.csv` format for that assignment. To get this, follow the GIF below:
 
 ![Downloading zyBooks logfile GIF](.github/zybooks-download-logfile.gif)
 
