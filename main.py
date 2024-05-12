@@ -265,6 +265,7 @@ def main():
 
         if len(tool_result) != 0:
             util.write_output_to_csv(tool_result, output_file_name)
+            print(f'\nDone! Wrote output to output/{output_file_name}')
 
 
 if __name__ == '__main__':
