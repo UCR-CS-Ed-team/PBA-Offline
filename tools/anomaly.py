@@ -21,7 +21,7 @@ class StyleAnomaly:
     """
 
     def __init__(
-        self, name: str, regex: str, is_active: bool, weight: float, max_instances: int, verbose: bool = False
+        self, name: str, regex: str, is_active: bool, weight: float, max_instances: int = -1, verbose: bool = False
     ) -> None:
         self.name = name
         self.regex = re.compile(regex, re.VERBOSE if verbose else 0)

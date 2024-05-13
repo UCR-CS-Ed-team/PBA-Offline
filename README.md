@@ -68,3 +68,76 @@ pip install -r requirements.txt
 ```
 python main.py
 ```
+
+A window will appear for you to select a zyBooks logfile to analyze. Choose the `.csv` file you downloaded, then follow the instructions to choose metrics to evaluate.
+
+The tool's output will be in the folder `output`. The tool tells you the output filename after it completes:
+
+```
+Done! Wrote output to output/{file}.csv
+```
+
+## PBA's Cheating Metrics
+
+PBA can generate these metrics for assignments:
+
+### Style Anomalies
+
+Style anomalies are unusual code styles that are not taught in a class.  For example:
+
+```cpp
+// Expected style taught in class
+int main() {
+    int x;
+    cin >> x;
+    while (x > 0) {
+        cout << x * x;
+        cin >> x;
+    }
+}
+```
+
+```cpp
+// Code with style anomalies
+int main() {
+    int x;
+    cin >> x;
+    while (true)    // Anomaly
+    {               // Anomaly; brace style
+cout << x * x;      // Anomaly; spacing
+        cin >> x;
+        if (x <= 0) {
+            break;  // Anomaly; untaught construct
+        }
+    }
+}
+```
+
+In our experience, an abundance of style anomalies suggests a student copied from ChatGPT, Chegg, etc.
+
+PBA comes with style anomalies specific to CS1 courses at UC Riverside. These are in `tools/anomaly.py` in the list `style_anomalies`. To add your own style anomalies, add a `StyleAnomaly` object to the list, providing the following:
+- Name of the style anomaly
+- A regular expression to find the anomaly in code; will search one line at a time
+- (`True/False`) Should the anomaly be enabled?
+- A weight to give the anomaly
+- A cap on the number of instances of this anomaly to find per-student, defaults to `-1` (no cap)
+
+Each style anomaly has its own weight. PBA will scan each line of a student's submission to find style anomalies. For each style anomaly found for a student, the anomaly's weight gets added to the student's Style Anomaly Score, and their Style Anomaly Count increases by 1. 
+
+Optionally, a style anomaly can be configured to only be counted up to `X` times for each student. This can prevent one style anomaly from being counted an excessive number of times. There is no cap initially, but it can be enabled by changing `-1` to `X` in the last parameter for an anomaly:
+
+```py
+style_anomalies = [                                 # --V-- change -1 to X
+    StyleAnomaly('Pointers', POINTERS_REGEX, True, 0.9, X),
+    StyleAnomaly('Infinite Loop', INFINITE_LOOP_REGEX, True, 0.9, -1),
+    ...
+]
+```
+
+The tool's output looks like:
+
+```
+|   User ID | Last Name   | First Name   | Email            | Role    |   Lab 2.24 anomalies found |   Lab 2.24 anomaly score | 2.24 Student code   |   Lab 2.25 anomalies found |   Lab 2.25 anomaly score | 2.25 Student code   |   Lab 2.26 anomalies found |   Lab 2.26 anomaly score | 2.26 Student code   |
+|----------:|:------------|:-------------|:-----------------|:--------|---------------------------:|-------------------------:|:--------------------|---------------------------:|-------------------------:|:--------------------|---------------------------:|-------------------------:|:--------------------|
+|    604387 | Benjamin    | Denzler      | bdenz001@ucr.edu | Student |                          1 |                      0.3 | {code here}         |                          3 |                      0.5 | {code here}         |                          6 |                      0.6 | {code here}         |
+```
