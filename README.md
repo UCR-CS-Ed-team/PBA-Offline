@@ -141,3 +141,74 @@ The tool's output looks like:
 |----------:|:------------|:-------------|:-----------------|:--------|---------------------------:|-------------------------:|:--------------------|---------------------------:|-------------------------:|:--------------------|---------------------------:|-------------------------:|:--------------------|
 |    604387 | Benjamin    | Denzler      | bdenz001@ucr.edu | Student |                          1 |                      0.3 | {code here}         |                          3 |                      0.5 | {code here}         |                          6 |                      0.6 | {code here}         |
 ```
+
+### Hardcoding Detection
+
+The Hardcoding tool finds students that have hardcoded outputs to get points on auto-graders without implementing a correct program. For example, if an autograder gives an input `123` and expects output `abc`, hardcoding looks like:
+
+```cpp
+int main() {
+    if (x == "123") {   // Input
+        cout << "abc";  // Output
+    }
+}
+```
+
+Even this might get points for that testcase:
+```cpp
+int main() {
+    cout << "123";  // Output only
+    return 0;
+}
+```
+
+The tool's output looks like:
+
+```
+|   User ID | Last Name   | First Name   | Email            | Role    |   Lab 2.24 hardcoding score | 2.24 Student code   |
+|----------:|:------------|:-------------|:-----------------|:--------|----------------------------:|:--------------------|
+|    604387 | Denzler     | Benjamin     | bdenz001@ucr.edu | Student |                           1 | {code here}         |
+```
+
+Hardcoding detection works best if an assignment has both a solution and testcases. The tool will work differently in three cases:
+
+#### With Solution and Testcases (Most Accurate)
+
+If a student hardcodes exactly the output of a testcase *and* the solution does not, flag the student for hardcoding. The tool assumes that if the solution hardcodes the same output, then it is a valid way to solve the assignment and shoudln't be flagged. The hardcoded output can look like any of the following:
+
+```cpp
+// Example 1
+cout << "Testcase output exactly" << endl;
+
+/* 
+  Example 2
+  Expected testcase input: "123"
+  Expected testcase output: "123 is the testcase input"
+*/
+if (x == "123") {
+    cout << x << " is the testcase input.";
+}
+
+// Example 3
+if (year == 1980) {
+    cout << "No championship" << endl;
+}
+```
+
+#### With Testcases, but No Solution (Less Accurate)
+
+Without a solution to reference, the tool uses other students' submissions to determine whether code that appears hardcoded is a valid solution. The tool first finds the same examples of hardcoding listed above. Then, if at least 60% of the class hardcoded the same testcase, that testcase isn't considered for hardcoding. The 60% threshold is configurable as `testcase_use_threshold` in function `hardcoding_analysis_2()`.
+
+#### No Testcases or Solution (Least Accurate)
+
+This is an unlikely use case considering students are unlikely to hardcode if there is no automated grading system. Still, we include this for flexibility.
+
+The tool will look for `if` statements that compare to literals in the condition, and then output a literal inside the body. The literals can be strings, ints, or floats. For example:
+
+```cpp
+if (x == 7) {         // Input
+    cout << "Prime";  // Output
+}
+```
+
+Students that do so are flagged for hardcoding, unless at least 60% of the class also does this. The 60% threshold is configurable as `if_literal_threshold` in function `hardcoding_analysis_3()`.
