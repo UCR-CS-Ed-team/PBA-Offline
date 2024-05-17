@@ -261,3 +261,24 @@ A visualization of the time in minutes between submissions for a student's devel
 ---0,1 / 0,8
 ```
 This student tested their code 3 times, submitted <1 minute later, then 1 minute later, took a break for over 30 minutes before submitting, submitted <1 minute later, then 8 minutes later.
+
+### Quick Analysis
+
+This tool gives the following metrics for each lab selected:
+- Number of students that submitted code
+- Average time spent working on the assignment
+- Average score on the assignment
+- Average number of code runs; either submissions for points, or to test their code
+- Average number of develop runs; tests that were not for points
+- Average number of submission runs; submissions for points
+
+### Roster
+
+This tool gives the following metrics for each student that submitted to the selected labs:
+- Total time spent across all selected labs
+- Total score across all selected labs
+- Average points earned per minute (PPM) across all selected labs
+- Total number of code runs; either submissions for points, or to test their code
+- Total number of develop runs; tests that were not for points
+- Total number of submission runs; submissions for points
+- All of the same metrics for *each* assignment (e.g. Lab 2 time spent, lab 3 time spent, ...)
