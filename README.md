@@ -282,3 +282,17 @@ This tool gives the following metrics for each student that submitted to the sel
 - Total number of develop runs; tests that were not for points
 - Total number of submission runs; submissions for points
 - All of the same metrics for *each* assignment (e.g. Lab 2 time spent, lab 3 time spent, ...)
+
+## Tips for Contributing
+
+PBA uses [Ruff](https://docs.astral.sh/ruff/) for formatting code, which is installed as a dependency when you set up the project. Before pushing code, please run `ruff format .` in the project directory to format the project files. This keeps code style consistent!
+
+You can install extensions to integrate Ruff into your IDE [here](https://docs.astral.sh/ruff/integrations/).
+
+## Contributors
+
+<a href="https://github.com/UCR-CS-Ed-team/PBA-Offline/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=UCR-CS-Ed-team/PBA-Offline" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
