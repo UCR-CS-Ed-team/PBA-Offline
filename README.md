@@ -212,3 +212,44 @@ if (x == 7) {         // Input
 ```
 
 Students that do so are flagged for hardcoding, unless at least 60% of the class also does this. The 60% threshold is configurable as `if_literal_threshold` in function `hardcoding_analysis_3()`.
+
+### Incremental Development
+
+> This tool was created by Lizbeth Areizaga from UC Riverside.
+
+Ideally, students would gradually make small, *incremental* changes to their code and test their changes before submitting a solution. This is especially true at UC Riverside, where students are required to do all development in the online zyBooks IDE.
+
+The Incremental Development tool measures how incrementally a student developed their code. It aims to find students that immediately submit large working solutions or suddenly edit a large part of their code; these students might be copying code.
+
+This tool provides several metrics:
+
+- **Incremental Development Score**: A float between 0 and 1 where 1 means the student developed very incrementally, and 0 means the student's code changed very quickly.
+
+- **Incremental Development Score Trail**: A visualization of the student's development history across all submissions. These are metrics about each submission separated by commas. Formatted as:
+
+```
+line count 1 (inc dev score 1), ^line count 2 (inc dev score 2), ...
+```
+A `^` before a line count means that more than 50% of lines in this submission were added, deleted, or modified since the last submission. An example:
+```
+7 (1), ^36 (0.64), ^7 (0.74)
+```
+This student first submitted 7 lines with an inc. dev score of 1, then submitted 36 lines (more than 50% were different from last submission) with an inc. dev score of 0.64, then submitted 7 lines (more than 50% were different again) with an inc. dev score of 0.74.
+
+- **Lines of Code Trail**: A visualization of the lines of code in each submission for a student's development history. Formatted as:
+
+```
+line count 1, line count 2 ... ^line count 3
+```
+A `^` before a line count again means that more than 50% of lines in this submission were added, deleted, or modified since the last submission. Uninteresting runs (few changes from the last) are shown as `.` for brevity. An example:
+```
+26,^24...^26
+```
+This student first submitted 26 lines, then 24 lines and changed more than 50% of the lines from the first, then submitted 3 very similar runs, then 26 lines and changed more than 50% of the lines from the last.
+
+- **Time Trail**: A visualization of the time in minutes between submissions for a student's development history. Submissions that were just to test the code (not for points) are denoted as `-`. Breaks (>30 min since last run) are denoted by `/`. For example:
+
+```
+---0,1 / 0,8
+```
+This student tested their code 3 times, submitted <1 minute later, then 1 minute later, took a break for over 30 minutes before submitting, submitted <1 minute later, then 8 minutes later.
