@@ -5,7 +5,7 @@
 
 This project finds students that are potentially cheating in CS courses using metrics beyond code similarity. Instructors can prioritize their time when investigating cheating cases by looking at top students in these metrics.
 
-> **IMPORTANT**: Students flagged by this program are not necessarily cheating. Instructors should always thoroughly investigate flagged students before making a cheating determination.
+> **IMPORTANT**: Students flagged by this program are not always cheating. A student might have prior experience with different code styles, or codes very quickly, etc. Instructors should always thoroughly investigate flagged students before making a cheating determination.
 
 ## Features
 
