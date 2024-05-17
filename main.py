@@ -6,6 +6,7 @@ import tools.devtools.eval_hardcoding
 import tools.hardcoding
 import tools.utilities as util
 from tools.anomaly import anomaly
+from tools.auto_anomaly import auto_anomaly
 from tools.incdev import run
 from tools.quickanalysis import quick_analysis
 from tools.roster import roster
@@ -34,6 +35,7 @@ def main():
         'Quick Analysis (averages for all labs)',
         'Basic Statistics (roster for selected labs)',
         'Style Anomalies (selected labs)',
+        'Automatic Anomaly Detection (selected labs)',
         'Incremental Development Trails (all labs)',
         'Hardcoding Detection (selected labs)',
         '(Dev) Manually Evaluate Hardcoding',
@@ -84,68 +86,13 @@ def main():
                                 str(lab) + ' Student code': anomaly_detection_output[user_id][lab][2],
                             }
 
-            # Inc. development coding trails for all labs
-            elif i == 4:
-                output_file_name = 'incdev.csv'
-                # Generate nested dict of IncDev results
-                incdev_output = run(submissions)
-                for user_id in incdev_output:
-                    for lab_id in incdev_output[user_id]:
-                        lid = str(lab_id)
-                        score = incdev_output[user_id][lab_id]['incdev_score']
-                        score_trail = incdev_output[user_id][lab_id]['incdev_score_trail']
-                        loc_trail = incdev_output[user_id][lab_id]['loc_trail']
-                        time_trail = incdev_output[user_id][lab_id]['time_trail']
-                        code = incdev_output[user_id][lab_id]['Highest_code']
-                        if user_id in tool_result:
-                            tool_result[user_id][lid + ' incdev_score'] = score
-                            tool_result[user_id][lid + ' incdev_score_trail'] = score_trail
-                            tool_result[user_id][lid + ' loc_trail'] = loc_trail
-                            tool_result[user_id][lid + ' time_trail'] = time_trail
-                            tool_result[user_id][str(lid) + ' Student code'] = code
-                        else:
-                            tool_result[user_id] = {
-                                'User ID': user_id,
-                                'Last Name': submissions[user_id][lab_id][0].last_name[0],
-                                'First Name': submissions[user_id][lab_id][0].first_name[0],
-                                'Email': submissions[user_id][lab_id][0].email[0],
-                                'Role': 'Student',
-                                lid + ' incdev_score': score,
-                                lid + ' incdev_score_trail': score_trail,
-                                lid + ' loc_trail': loc_trail,
-                                lid + ' time_trail': time_trail,
-                                str(lab_id) + ' Student code': code,
-                            }
-
-            # Style anomalies for selected labs using cpplint
-            elif i == 10:
-                output_file_name = 'cpp_style.csv'
-                stylechecker_output = stylechecker(submissions, selected_labs)
-                for user_id in stylechecker_output:
-                    for lab_id in stylechecker_output[user_id]:
-                        if user_id in tool_result:
-                            tool_result[user_id][f'{lab_id} Style score'] = stylechecker_output[user_id][lab_id][0]
-                            tool_result[user_id][f'{lab_id} Style output'] = stylechecker_output[user_id][lab_id][1]
-                            tool_result[user_id][f'{lab_id} Student code'] = stylechecker_output[user_id][lab_id][2]
-                        else:
-                            tool_result[user_id] = {
-                                'User ID': user_id,
-                                'Last Name': submissions[user_id][lab_id][0].last_name[0],
-                                'First Name': submissions[user_id][lab_id][0].first_name[0],
-                                'Email': submissions[user_id][lab_id][0].email[0],
-                                'Role': 'Student',
-                                str(lab_id) + '  Style score': stylechecker_output[user_id][lab_id][0],
-                                str(lab_id) + '  Style output': stylechecker_output[user_id][lab_id][1],
-                                str(lab_id) + ' Student code': stylechecker_output[user_id][lab_id][2],
-                            }
-
-            # TODO: Fix this to work with anomaly refactoring
+            # TODO: Clean this up, move to a module
             # Automatic anomaly detection for selected labs
-            elif i == 11:
+            elif i == 4:
                 output_file_name = 'auto_anomaly.csv'
                 tool_result = {}  # TODO: reset roster, fix later
                 # Count of anomaly instances per-user, per-lab, per-anomaly, @ index 0
-                anomaly_detection_output = anomaly(submissions, selected_labs)
+                anomaly_detection_output = auto_anomaly(submissions, selected_labs)
 
                 # Populate anomaly counts for every user, for each lab
                 for user_id in anomaly_detection_output:
@@ -190,8 +137,41 @@ def main():
                 # Outputs to its own file for now
                 util.write_output_to_csv(tool_result, 'anomaly_counts.csv')
 
-            # Hardcode detection for selected labs
+            # Inc. development coding trails for all labs
             elif i == 5:
+                output_file_name = 'incdev.csv'
+                # Generate nested dict of IncDev results
+                incdev_output = run(submissions)
+                for user_id in incdev_output:
+                    for lab_id in incdev_output[user_id]:
+                        lid = str(lab_id)
+                        score = incdev_output[user_id][lab_id]['incdev_score']
+                        score_trail = incdev_output[user_id][lab_id]['incdev_score_trail']
+                        loc_trail = incdev_output[user_id][lab_id]['loc_trail']
+                        time_trail = incdev_output[user_id][lab_id]['time_trail']
+                        code = incdev_output[user_id][lab_id]['Highest_code']
+                        if user_id in tool_result:
+                            tool_result[user_id][lid + ' incdev_score'] = score
+                            tool_result[user_id][lid + ' incdev_score_trail'] = score_trail
+                            tool_result[user_id][lid + ' loc_trail'] = loc_trail
+                            tool_result[user_id][lid + ' time_trail'] = time_trail
+                            tool_result[user_id][str(lid) + ' Student code'] = code
+                        else:
+                            tool_result[user_id] = {
+                                'User ID': user_id,
+                                'Last Name': submissions[user_id][lab_id][0].last_name[0],
+                                'First Name': submissions[user_id][lab_id][0].first_name[0],
+                                'Email': submissions[user_id][lab_id][0].email[0],
+                                'Role': 'Student',
+                                lid + ' incdev_score': score,
+                                lid + ' incdev_score_trail': score_trail,
+                                lid + ' loc_trail': loc_trail,
+                                lid + ' time_trail': time_trail,
+                                str(lab_id) + ' Student code': code,
+                            }
+
+            # Hardcode detection for selected labs
+            elif i == 6:
                 output_file_name = 'hardcoding.csv'
 
                 # Dictionary of testcases, e.g. `lab_id : [('in1', 'out1'), ('in2', 'out2')]`
@@ -235,7 +215,7 @@ def main():
                                 str(lab) + ' Student code': student_code,
                             }
 
-            elif i == 6:
+            elif i == 7:
                 output_file_name = 'hardcoding-test.csv'
                 test_results = tools.devtools.eval_hardcoding.manual_test(submissions, selected_labs)
                 for user_id in test_results:
@@ -256,9 +236,31 @@ def main():
                                 str(lab) + ' Student code': student_code,
                             }
 
-            elif i == 7:
+            elif i == 8:
                 print('\nGoodbye!')
                 exit(0)
+
+            # Style anomalies for selected labs using cpplint
+            elif i == 10:
+                output_file_name = 'cpp_style.csv'
+                stylechecker_output = stylechecker(submissions, selected_labs)
+                for user_id in stylechecker_output:
+                    for lab_id in stylechecker_output[user_id]:
+                        if user_id in tool_result:
+                            tool_result[user_id][f'{lab_id} Style score'] = stylechecker_output[user_id][lab_id][0]
+                            tool_result[user_id][f'{lab_id} Style output'] = stylechecker_output[user_id][lab_id][1]
+                            tool_result[user_id][f'{lab_id} Student code'] = stylechecker_output[user_id][lab_id][2]
+                        else:
+                            tool_result[user_id] = {
+                                'User ID': user_id,
+                                'Last Name': submissions[user_id][lab_id][0].last_name[0],
+                                'First Name': submissions[user_id][lab_id][0].first_name[0],
+                                'Email': submissions[user_id][lab_id][0].email[0],
+                                'Role': 'Student',
+                                str(lab_id) + '  Style score': stylechecker_output[user_id][lab_id][0],
+                                str(lab_id) + '  Style output': stylechecker_output[user_id][lab_id][1],
+                                str(lab_id) + ' Student code': stylechecker_output[user_id][lab_id][2],
+                            }
 
             else:
                 print('Please select a valid option')
