@@ -215,7 +215,7 @@ Students that do so are flagged for hardcoding, unless at least 60% of the class
 
 ### Incremental Development
 
-> This tool was created by Lizbeth Areizaga from UC Riverside.
+> This tool was created by Lizbeth Areizaga ([liz-areizaga](https://github.com/liz-areizaga)) from UC Riverside.
 
 Ideally, students would gradually make small, *incremental* changes to their code and test their changes before submitting a solution. This is especially true at UC Riverside, where students are required to do all development in the online zyBooks IDE.
 
@@ -294,5 +294,7 @@ You can install extensions to integrate Ruff into your IDE [here](https://docs.a
 <a href="https://github.com/UCR-CS-Ed-team/PBA-Offline/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=UCR-CS-Ed-team/PBA-Offline" />
 </a>
+
+The Incremental Development tool was made by Lizbeth Areizaga ([liz-areizaga](https://github.com/liz-areizaga)) from UC Riverside.
 
 Made with [contrib.rocks](https://contrib.rocks).
