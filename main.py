@@ -38,7 +38,6 @@ def main():
         'Automatic Anomaly Detection (selected labs)',
         'Incremental Development Trails (all labs)',
         'Hardcoding Detection (selected labs)',
-        '(Dev) Manually Evaluate Hardcoding',
         'Quit',
     ]
 
@@ -216,6 +215,10 @@ def main():
                             }
 
             elif i == 7:
+                print('\nGoodbye!')
+                exit(0)
+
+            elif i == 8:
                 output_file_name = 'hardcoding-test.csv'
                 test_results = tools.devtools.eval_hardcoding.manual_test(submissions, selected_labs)
                 for user_id in test_results:
@@ -236,12 +239,8 @@ def main():
                                 str(lab) + ' Student code': student_code,
                             }
 
-            elif i == 8:
-                print('\nGoodbye!')
-                exit(0)
-
             # Style anomalies for selected labs using cpplint
-            elif i == 10:
+            elif i == 9:
                 output_file_name = 'cpp_style.csv'
                 stylechecker_output = stylechecker(submissions, selected_labs)
                 for user_id in stylechecker_output:
