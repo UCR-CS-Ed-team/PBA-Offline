@@ -174,7 +174,7 @@ Hardcoding detection works best if an assignment has both a solution and testcas
 
 #### With Solution and Testcases (Most Accurate)
 
-If a student hardcodes exactly the output of a testcase *and* the solution does not, flag the student for hardcoding. The tool assumes that if the solution hardcodes the same output, then it is a valid way to solve the assignment and shoudln't be flagged. The hardcoded output can look like any of the following:
+If a student hardcodes exactly the output of a testcase *and* the solution does not, flag the student for hardcoding. The tool assumes that if the solution hardcodes the same output, then it is a valid way to solve the assignment and shouldn't be flagged. The hardcoded output can look like any of the following:
 
 ```cpp
 // Example 1
